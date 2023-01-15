@@ -18,6 +18,9 @@ event bool BlocksAbilityActivation()
 simulated state Executing
 {
 Begin:
+	UnitPawn.EnableRMA(true, true);
+	UnitPawn.EnableRMAInteractPhysics(true);
+
 	AnimParams.AnimName = 'HL_EvacStart';
 	AnimParams.PlayRate = -1.0f;	// play in reverse
 	AnimParams.BlendTime = 0;		// Prevent greamlin rubberbanding at the start of the animation

@@ -5,6 +5,20 @@
 
 class Help extends Object abstract;
 
+var privatewrite name DDEventName;
+
+static final function bool SquadStartsConcealed()
+{
+	local XComGameState_BattleData	BattleDataState;
+	local MissionSchedule			ActiveMissionSchedule;
+
+	`TACTICALMISSIONMGR.GetActiveMissionSchedule(ActiveMissionSchedule);
+	BattleDataState = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+
+	// set initial squad concealment
+	return ActiveMissionSchedule.XComSquadStartsConcealed && !BattleDataState.bForceNoSquadConcealment;
+}
+
 static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit UnitState)
 {
 	//local array<name> ExcludedTemplates;
@@ -528,4 +542,9 @@ static final function bool IsItemUniqueEquipInSlot(X2ItemTemplateManager ItemMgr
 	WeaponTemplate = X2WeaponTemplate(ItemTemplate);
 
 	return ItemMgr.ItemCategoryIsUniqueEquip(ItemTemplate.ItemCat) || WeaponTemplate != none && ItemMgr.ItemCategoryIsUniqueEquip(WeaponTemplate.WeaponCat);
+}
+
+defaultproperties
+{
+	DDEventName = "IRI_DynamicDeployment_Triggered_Event"
 }

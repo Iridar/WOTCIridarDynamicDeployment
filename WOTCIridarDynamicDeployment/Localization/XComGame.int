@@ -24,3 +24,8 @@ Summary = "If the soldier calling for Dynamic Deployment is concealed and if no 
 LocFriendlyName="\"Whisper\" Jets"
 LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
+[IRI_DDUnlock_SparkOverdrive X2AbilityTemplate]
+LocFriendlyName="Spark Overdrive"
+LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

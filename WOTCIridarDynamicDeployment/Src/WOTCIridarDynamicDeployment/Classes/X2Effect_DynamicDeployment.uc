@@ -6,6 +6,7 @@ var protected X2Condition_Visibility VisibilityCondition;
 // TODO: Resolve reveal AI issue
 // TODO: Replace matinee animations for soldiers
 // TODO: Some skyranger intros appear to be broken (only with SPARKs-only DD?)
+// TODO: SPARKs land feet halfway into the ground
 
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
@@ -105,54 +106,25 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		//`AMLOG("Triggering Lightning Strike");
 		//EventMgr.TriggerEvent('StartOfMatchConcealment', PlayerState, PlayerState, NewGameState);
 	}
+
+	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 }
 
-static private function bool AbilityHasStartOfMatchTrigger(const out XComGameState_Ability AbilityState)
-{
-	local X2AbilityTemplate					AbilityTemplate;
-	local X2AbilityTrigger_EventListener	EventTrigger;
-	local X2AbilityTrigger					Trigger;
 
-	AbilityTemplate = AbilityState.GetMyTemplate();
-	if (AbilityTemplate == none)
-		return false;
-
-	foreach AbilityTemplate.AbilityTriggers(Trigger)
-	{
-		EventTrigger = X2AbilityTrigger_EventListener(Trigger);
-		if (EventTrigger == none)
-			continue;
-
-		if (EventTrigger.ListenerData.EventID == 'StartOfMatchConcealment')
-			return true;
-	}
-	return false;
-}
-
-static private function bool SquadStartsConcealed()
-{
-	local XComGameState_BattleData	BattleDataState;
-	local MissionSchedule			ActiveMissionSchedule;
-
-	`TACTICALMISSIONMGR.GetActiveMissionSchedule(ActiveMissionSchedule);
-	BattleDataState = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-
-	// set initial squad concealment
-	return ActiveMissionSchedule.XComSquadStartsConcealed && !BattleDataState.bForceNoSquadConcealment;
-}
 /*
 static private function bool NoEnemySeesUnit(const out XComGameState_Unit UnitState)
 {
 	return default.VisibilityCondition.MeetsCondition(UnitState) == 'AA_Success';
 }*/
 
-static private function GetSpawnLocations(const vector DesiredLocation, const int NumLocations, out array<vector> SpawnLocations)
+static private function GetSpawnLocations(const vector DesiredLocation, float NumUnitsDeploying, out array<vector> SpawnLocations)
 {
 	local array<TTile>	TilePossibilities;
 	local vector		SpawnLocation;
 	local TTile			SpawnTile;
 	local XComWorldData	World;
 	local int			MaxZ;
+	local int			Width;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -160,13 +132,29 @@ static private function GetSpawnLocations(const vector DesiredLocation, const in
 
 	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
 
+	`AMLOG("Center tile:" @ SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
+
 	`AMLOG("Desired location:" @ DesiredLocation);
 
-	World.GetSpawnTilePossibilities(SpawnTile, NumLocations, NumLocations, 1, TilePossibilities);
+	Width = Max(5, FCeil(Sqrt(NumUnitsDeploying))); // TODO: Replace this with configured value
+
+	// GetSpawnTilePossibilities treats the given tile as upper left corner, not as center. Apply offset equal to half width.
+	SpawnTile.X -= FFloor(float(Width) / 2.0f);
+	SpawnTile.Y -= FFloor(float(Width) / 2.0f);
+
+	`AMLOG(`ShowVar(NumUnitsDeploying) @ "Calculated width:" @ FCeil(Sqrt(NumUnitsDeploying)) @ "Final width:" @ Width);
+
+	World.GetSpawnTilePossibilities(SpawnTile, Width, Width, 1, TilePossibilities);
 
 	`AMLOG("Got this many tile possibilities:" @ TilePossibilities.Length);
+	`AMLOG("Offset tile:" @ SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
+	foreach TilePossibilities(SpawnTile)
+	{
+		`AMLOG(SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
+	}
 
-	while (SpawnLocations.Length < NumLocations && TilePossibilities.Length > 0)
+	TilePossibilities.RandomizeOrder();
+	while (SpawnLocations.Length < NumUnitsDeploying && TilePossibilities.Length > 0)
 	{
 		SpawnTile = TilePossibilities[0];
 		TilePossibilities.Remove(0, 1);
@@ -183,7 +171,7 @@ static private function GetSpawnLocations(const vector DesiredLocation, const in
 	`AMLOG("Got this many spawn locations:" @ SpawnLocations.Length);
 
 	// Failsafe
-	while (SpawnLocations.Length < NumLocations)
+	while (SpawnLocations.Length < NumUnitsDeploying)
 	{
 		SpawnLocations.AddItem(DesiredLocation);
 	}
