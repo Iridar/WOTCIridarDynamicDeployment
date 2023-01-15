@@ -1,0 +1,12 @@
+[Help]
+IRI_DynamicDeployment_ArmoryLabel_Robotic = "Jet Pack Upgrades"
+IRI_DynamicDeployment_ArmoryLabel = "Jet Pack Training"
+IRI_DynamicDeployment_UnlockLabel = "UNLOCK"
+
+IRI_DynamicDeployment_UnlockedLabel_Robotic = "UPGRADE INSTALLED"
+IRI_DynamicDeployment_UnlockedLabel = "UNLOCKED"
+IRI_DynamicDeployment_NotEnoughAP = "Not enough Ability Points."
+
+IRI_DynamicDeployment_MutuallyExclusiveUnlock = "Mutually exclusive with:"
+
+IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"

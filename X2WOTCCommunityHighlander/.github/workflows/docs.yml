@@ -1,0 +1,110 @@
+name: docs
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.6'
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test docs script
+      run: |
+        cd test/docs
+        ! python ../../.scripts/make_docs.py ./test_src --outdir ./test_output --docsdir ./test_tags --dumpelt ./test_output/CHL_Event_Compiletest.uc > ./test_output/stdout.log
+        git diff --exit-code
+
+  check-event-templates:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.6'
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+    - name: Find generated event templates
+      id: make-diff
+      shell: bash {0}
+      env:
+        PR_NUMBER: ${{ github.event.number }}
+      run: |
+        # Build base docs (master)
+        git checkout ${{ github.base_ref }}
+        mkdir target
+        python ./.scripts/make_docs.py --indirsfile ./docs_directories.txt --docsdir ./docs_src --dumpelt ./target/CHL_Event_Compiletest.uc
+        if [ $? -ne 0 ]
+        then
+          echo "master docs build broken?"
+          exit 1
+        fi
+        git add -f ./target/CHL_Event_Compiletest.uc
+
+        # Build PR merge docs
+        git checkout ${{ github.sha }}
+        python ./.scripts/make_docs.py --indirsfile ./docs_directories.txt --docsdir ./docs_src --dumpelt ./target/CHL_Event_Compiletest.uc
+        if [ $? -ne 0 ]
+        then
+          echo "PR docs fail -- should be caught by build job"
+          exit 1
+        fi
+
+        # Generate diff between master and PR merge
+        mkdir tmp_art
+        git diff --exit-code > tmp_art/new_contents.diff
+        if [ $? -eq 1 ]
+        then
+          echo "Difference found"
+          cat tmp_art/new_contents.diff
+          echo "::set-output name=has-diff::true"
+          echo $PR_NUMBER > tmp_art/pr_number.txt
+        fi
+    - name: Upload the diff
+      if: ${{ steps.make-diff.outputs.has-diff }}
+      uses: actions/upload-artifact@v1
+      with:
+        name: new_contents.diff
+        path: tmp_art/
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.6'
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build Docs
+      run: |
+        python ./.scripts/make_docs.py --indirsfile ./docs_directories.txt --outdir ./mkdocs --docsdir ./docs_src
+        pip install mkdocs
+        cd mkdocs
+        mkdocs build -d ../target
+    - name: Upload the built docs
+      uses: actions/upload-artifact@v1
+      with:
+        name: docs-html
+        path: target
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+    - name: Get the built docs
+      uses: actions/download-artifact@v1
+      with:
+        name: docs-html
+        path: target
+    - name: Deploy
+      uses: crazy-max/ghaction-github-pages@v2
+      with:
+        target_branch: gh-pages
+        build_dir: target # The folder the action should deploy.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

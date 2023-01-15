@@ -1,0 +1,39 @@
+[X2WOTCCH_Components]
+VersionFormat="v%MAJOR.%MINOR.%PATCH"
+
+RequiredNotFound="NOT LOADED - REQUIRED"
+
+VersionMismatches="- Version Mismatches"
+WarningsLabel="- Warnings"
+ErrorsLabel="- ERRORS - CHECK LOG"
+
+[X2WOTCCH_ModDependencies]
+ModRequiredPopupTitle="missing REQUIRED mods"
+ModRequired="Please ACTIVATE the following mods and restart or %s will not work properly:"
+ModIncompatiblePopupTitle="detected INCOMPATIBLE mods"
+ModIncompatible="Please DEACTIVATE the following mods and restart or %s will not work properly:"
+DisablePopup="DO NOT SHOW ME THIS AGAIN"
+
+;    Issue #909
+ModRequiresNewerHighlanderVersionTitle = "MOD REQUIRES NEWER HIGHLANDER VERSION"
+ModRequiresNewerHighlanderVersionText = "Mod requires newer Highlander version:"
+CurrentHighlanderVersionTitle = "Installed Version:"
+RequiredHighlanderVersionTitle = "Required Version: "
+ModRequiresNewerHighlanderVersionExtraText = "Please update X2WOTCCommunityHighlander to the required version. Otherwise you may experience crashes and other malfunctions."
+
+[X2WOTCCH_UIScreenListener_ShellPopup]
+ErrorTitle="Mod Configuration Error"
+
+AdviceText="The following mods have incorrect configuration: %BLAME. Show the error report to the respective authors to help them fix it."
+
+HardErrorText="You can continue playing but mods will behave unpredictably. Proceed at your own risk."
+PotentialErrorText="You can continue playing and mods will behave predictably, but potentially not in the way their authors intended."
+
+CycleErrorText="Mods specified a cyclic run order:\n\n%FACTS\n...completing the cycle. Until this is corrected, run order will be undefined."
+GroupErrorText="Mods specified conflicting run order information:\n\n%FACTS\nThis behavior is specified, but may indicate a configuration error."
+
+BlameText="The following DLCIdentifiers provided config in XComGame.ini that lead to this problem: %BLAME."
+
+[X2WOTCCH_UIScreenListener_Shell_DLCIntro]
+strDLC2HLIntroduction_Title="Alien Hunters Community Highlander"
+strDLC2HLIntroduction_Body="Starting with X2WOTCCommunityHighlander v1.22.0 we are introducing a highlander for the Alien Hunters DLC.<br><br>Please install it to<br><Bullet/> Ensure correct behaviour of mods that depend on X2WOTCCommunityHighlander<br><Bullet/> Benefit from the bugfixes<br><br>You can find it on workshop under the \"Alien Hunters Community Highlander\" name (or just follow a link in X2WOTCCommunityHighlander's description)"

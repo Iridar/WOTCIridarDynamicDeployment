@@ -1,0 +1,26 @@
+
+[IRI_DynamicDeployment_Select X2AbilityTemplate]
+LocFriendlyName="Dynamic Select"
+LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
+LocFlyOverText="Holo Targeting"
+
+[IRI_DynamicDeployment_Deploy X2AbilityTemplate]
+LocFriendlyName="Dynamic Deploy"
+LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
+LocFlyOverText="Holo Targeting"
+
+[IRI_DynamicDeployment_GTS_Unlock X2SoldierAbilityUnlockTemplate]
+DisplayName = "Dynamic Deployment"
+Summary = "Allows soldiers to Dynamic Deployment."
+
+[IRI_DynamicDeployment_GTS_Unlock_BlackOps X2SoldierUnlockTemplate]
+DisplayName = "Black Ops Deployment"
+Summary = "If the soldier calling for Dynamic Deployment is concealed and if no enemy unit sees any of the dynamically deployed soldiers, then the deployed soldiers will enter concealment."
+
+
+[IRI_DDUnlock_SparkRetainConcealment X2AbilityTemplate]
+LocFriendlyName="\"Whisper\" Jets"
+LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
