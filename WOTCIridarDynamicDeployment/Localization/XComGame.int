@@ -29,3 +29,8 @@ LocHelpText="This unit will no longer break concealment when Dynamically Deploye
 LocFriendlyName="Spark Overdrive"
 LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
+[IRI_DDUnlock_PrecisionDrop X2AbilityTemplate]
+LocFriendlyName="Precision Drop"
+LocLongDescription="Select precise location for this unit's Dynamic Deployment."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

@@ -54,7 +54,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	`AMLOG("Units to deploy:" @ UnitStates.Length);
 
 	EventMgr = `XEVENTMGR;
-	GetSpawnLocations(ApplyEffectParameters.AbilityInputContext.TargetLocations[0], UnitStates.Length, SpawnLocations);
+	DDObject.GetSpawnLocations(ApplyEffectParameters.AbilityInputContext.TargetLocations[0], UnitStates, SpawnLocations);
 
 	foreach UnitStates(UnitState, iNumUnit)
 	{
@@ -117,65 +117,6 @@ static private function bool NoEnemySeesUnit(const out XComGameState_Unit UnitSt
 	return default.VisibilityCondition.MeetsCondition(UnitState) == 'AA_Success';
 }*/
 
-static private function GetSpawnLocations(const vector DesiredLocation, float NumUnitsDeploying, out array<vector> SpawnLocations)
-{
-	local array<TTile>	TilePossibilities;
-	local vector		SpawnLocation;
-	local TTile			SpawnTile;
-	local XComWorldData	World;
-	local int			MaxZ;
-	local int			Width;
-
-	World = `XWORLD;
-	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
-	SpawnLocation = DesiredLocation;
-
-	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
-
-	`AMLOG("Center tile:" @ SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
-
-	`AMLOG("Desired location:" @ DesiredLocation);
-
-	Width = Max(5, FCeil(Sqrt(NumUnitsDeploying))); // TODO: Replace this with configured value
-
-	// GetSpawnTilePossibilities treats the given tile as upper left corner, not as center. Apply offset equal to half width.
-	SpawnTile.X -= FFloor(float(Width) / 2.0f);
-	SpawnTile.Y -= FFloor(float(Width) / 2.0f);
-
-	`AMLOG(`ShowVar(NumUnitsDeploying) @ "Calculated width:" @ FCeil(Sqrt(NumUnitsDeploying)) @ "Final width:" @ Width);
-
-	World.GetSpawnTilePossibilities(SpawnTile, Width, Width, 1, TilePossibilities);
-
-	`AMLOG("Got this many tile possibilities:" @ TilePossibilities.Length);
-	`AMLOG("Offset tile:" @ SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
-	foreach TilePossibilities(SpawnTile)
-	{
-		`AMLOG(SpawnTile.X @ SpawnTile.Y @ SpawnTile.Z);
-	}
-
-	TilePossibilities.RandomizeOrder();
-	while (SpawnLocations.Length < NumUnitsDeploying && TilePossibilities.Length > 0)
-	{
-		SpawnTile = TilePossibilities[0];
-		TilePossibilities.Remove(0, 1);
-
-		SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
-		`AMLOG("Testing location:" @ SpawnLocation);
-		if (World.HasOverheadClearance(SpawnLocation, MaxZ))
-		{
-			`AMLOG("It has overhead clearance, adding");
-			SpawnLocations.AddItem(SpawnLocation);
-		}
-	}
-
-	`AMLOG("Got this many spawn locations:" @ SpawnLocations.Length);
-
-	// Failsafe
-	while (SpawnLocations.Length < NumUnitsDeploying)
-	{
-		SpawnLocations.AddItem(DesiredLocation);
-	}
-}
 
 //	Used in Step 5 to spawn the specified unit into tactical mission
 static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState, Vector SpawnLocation)

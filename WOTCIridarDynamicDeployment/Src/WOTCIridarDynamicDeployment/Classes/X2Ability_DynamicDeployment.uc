@@ -10,6 +10,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', ""));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', ""));
+	
 	Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
 
 	

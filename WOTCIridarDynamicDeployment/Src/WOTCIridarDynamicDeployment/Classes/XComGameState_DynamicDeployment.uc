@@ -1,7 +1,15 @@
 class XComGameState_DynamicDeployment extends XComGameState_BaseObject;
 
+struct PrecisionDropTileStorageStruct
+{
+	var int		UnitObjectID;
+	var TTile	DropTile;
+};
+
 var private array<int> SelectedUnitIDs;	// Holds the ID of the unit selected for deployment.
 var bool bPendingDeployment;	// If true, a unit was selected for deployment, but was not deployed yet.	
+
+var privatewrite array<PrecisionDropTileStorageStruct> PrecisionDropTileStorages;
 
 final function bool IsUnitSelected(const int UnitObjectID)
 {
@@ -14,6 +22,7 @@ final function ToggleUnitSelection(const int UnitObjectID)
 	if (!bPendingDeployment)
 	{
 		SelectedUnitIDs.Length = 0;
+		PrecisionDropTileStorages.Length = 0;
 	}
 	if (IsUnitSelected(UnitObjectID))
 	{
@@ -42,6 +51,7 @@ final function bool IsAnyUnitSelected()
 final function DeselectAllUnits()
 {
 	SelectedUnitIDs.Length = 0;
+	PrecisionDropTileStorages.Length = 0;
 	bPendingDeployment = false;
 }
 
@@ -130,6 +140,124 @@ final function array<XComGameState_Unit> GetUnitsToDeploy(optional XComGameState
 	}
 
 	return UnitStates;
+}
+
+final function array<XComGameState_Unit> GetPrecisionDropUnits()
+{
+	local array<XComGameState_Unit>	UnitStates;
+	local array<XComGameState_Unit> PrecisionDropUnits;
+	local XComGameState_Unit		UnitState;
+
+	UnitStates = GetUnitsToDeploy();
+
+	foreach UnitStates(UnitState)
+	{
+		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_PrecisionDrop'))
+		{
+			PrecisionDropUnits.AddItem(UnitState);
+		}
+	}
+	return PrecisionDropUnits;
+}
+
+static final function IsUnitPrecisionDrop(const XComGameState_Unit UnitState)
+{
+}
+
+static final function SavePrecisionDropTiles_SubmitGameState(const out array<XComGameState_Unit> PrecisionDropUnits, const out array<TTile> NewTiles)
+{
+	local XComGameState						NewGameState;
+	local XComGameState_DynamicDeployment	DDObject;
+	local PrecisionDropTileStorageStruct	PrecisionDropTileStorage;
+	local XComGameState_Unit				PrecisionDropUnit;
+	local int								Index;
+
+	DDObject = GetOrCreate();
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("SavePrecisionDropTiles:" @ NewTiles.Length);
+	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
+
+	foreach PrecisionDropUnits(PrecisionDropUnit, Index)
+	{
+		PrecisionDropTileStorage.UnitObjectID = PrecisionDropUnit.ObjectID;
+		PrecisionDropTileStorage.DropTile = NewTiles[Index];
+		DDObject.PrecisionDropTileStorages.AddItem(PrecisionDropTileStorage);
+	}
+
+	`GAMERULES.SubmitGameState(NewGameState);
+}
+
+
+final function GetSpawnLocations(const vector DesiredLocation, const out array<XComGameState_Unit> DeployingUnits, out array<vector> SpawnLocations)
+{
+	local array<TTile>	TilePossibilities;
+	local array<TTile>	TilePossibilitiesClearedMaxZ;
+	local vector		SpawnLocation;
+	local TTile			SpawnTile;
+	local XComWorldData	World;
+	local int			MaxZ;
+	local int			Width;
+	local float			NumUnitsDeploying;
+	local XComGameState_Unit DeployingUnit;
+	local int			Index;
+	local PrecisionDropTileStorageStruct PrecisionDropTileStorage;
+
+	`AMLOG("Desired location:" @ DesiredLocation);
+
+	World = `XWORLD;
+	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
+	SpawnLocation = DesiredLocation;
+	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+	NumUnitsDeploying = DeployingUnits.Length;
+	Width = Max(5, FCeil(Sqrt(NumUnitsDeploying))); // TODO: Replace 5 with configured value
+	SpawnTile.X -= FFloor(float(Width) / 2.0f); // GetSpawnTilePossibilities treats the given tile as upper left corner, not as center. Apply offset equal to half width.
+	SpawnTile.Y -= FFloor(float(Width) / 2.0f);
+
+	`AMLOG(`ShowVar(NumUnitsDeploying) @ "Calculated width:" @ FCeil(Sqrt(NumUnitsDeploying)) @ "Final width:" @ Width);
+
+	World.GetSpawnTilePossibilities(SpawnTile, Width, Width, 1, TilePossibilities);
+	`AMLOG("Got this many tile possibilities:" @ TilePossibilities.Length);
+	foreach TilePossibilities(SpawnTile)
+	{
+		SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+		if (World.HasOverheadClearance(SpawnLocation, MaxZ))
+		{
+			TilePossibilitiesClearedMaxZ.AddItem(SpawnTile);
+		}
+	}
+	TilePossibilities = TilePossibilitiesClearedMaxZ;
+	TilePossibilities.RandomizeOrder();
+
+	foreach DeployingUnits(DeployingUnit)
+	{
+		Index = PrecisionDropTileStorages.Find('UnitObjectID', DeployingUnit.ObjectID);
+		if (Index != INDEX_NONE)
+		{
+			PrecisionDropTileStorage = PrecisionDropTileStorages[Index];
+			SpawnTile = PrecisionDropTileStorage.DropTile;
+			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+			SpawnLocations.AddItem(SpawnLocation);
+			TilePossibilities.RemoveItem(SpawnTile);
+		}
+		else if (TilePossibilities.Length > 0)
+		{
+			SpawnTile = TilePossibilities[0];
+			TilePossibilities.Remove(0, 1);
+			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+			SpawnLocations.AddItem(SpawnLocation);
+		}
+		else
+		{
+			`AMLOG("WARNING :: Ran out of Tile Possibilities!");
+		}
+	}
+
+	`AMLOG("Got this many spawn locations:" @ SpawnLocations.Length);
+
+	// Failsafe
+	while (SpawnLocations.Length < NumUnitsDeploying)
+	{
+		SpawnLocations.AddItem(DesiredLocation);
+	}
 }
 
 static final function XComGameState_DynamicDeployment GetOrCreate()
