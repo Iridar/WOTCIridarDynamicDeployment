@@ -11,12 +11,14 @@ var private int								iNumSpawnedUnits;
 var private bool							bAreaLocked;
 var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
+var private int								MaxZ;
 
 // Parallel arrays
 var private array<XComGameState_Unit>		PrecisionDropUnitStates;
 var private array<XComUnitPawn>				PrecisionDropPawns;
 var private array<TTile>					PrecisionDropTiles;
 var private transient array<XComEmitter>	BeamEmitters;
+
 
 function Init(AvailableAction InAction, int NewTargetIndex)
 {
@@ -25,6 +27,8 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
 		return;
+
+	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
 
 	PrecisionDropUnitStates = DDObject.GetPrecisionDropUnits();
 	if (PrecisionDropUnitStates.Length > 0)
@@ -124,11 +128,12 @@ function Update(float DeltaTime)
 		}
 		else
 		{
-			// Move the pawn with the cursor, but keep it within bounds of the selected tile area
+			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
+			// And not on top of previously selected tiles for other units
 			SelectedTile = World.GetTileCoordinatesFromPosition(NewTargetLocation);
-			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE)
+			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE &&
+				class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) == INDEX_NONE)
 			{
-				PrecisionDropTiles[iNumSpawnedUnits - 1] = SelectedTile;
 				NewTargetLocation.Z += World.WORLD_FloorHeight;
 				MoveLastSpawnedPawn(NewTargetLocation);
 			}
@@ -142,7 +147,13 @@ function Update(float DeltaTime)
 
 function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallback> fnCallback)
 {
+	local vector	SpawnLocation;
+	local TTile		SpawnTile;
+
 	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
+
+	if (PrecisionDropUnitStates.Length == 0)
+		return true;
 
 	if (!bAreaLocked)
 	{
@@ -150,15 +161,77 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 		bAreaLocked = true;
 	}
 
+	// Lock the targeted tile for the current spawn.
+	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
+	SpawnLocation.Z -= World.WORLD_FloorHeight;
+	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+	PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
+
+	// Then see if we need to spawn more units.
 	if (iNumSpawnedUnits < PrecisionDropUnitStates.Length)
 	{
 		`AMLOG("Area locked, spawning new pawn");
-		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], CachedTargetLocation);
+		SpawnLocation = CachedTargetLocation;
+		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+
+		// If the player clicked outside the designated area, spawn the pawn on the closest tile in the area.
+		if (class'Helpers'.static.FindTileInList(SpawnTile, AreaTiles) == INDEX_NONE ||
+			class'Helpers'.static.FindTileInList(SpawnTile, PrecisionDropTiles) != INDEX_NONE)
+		{
+			SpawnTile = FindClosestTileInArea(SpawnTile);
+			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+		}
+		
+		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], SpawnLocation);
+		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
+
 		return false;
 	}
 
 	`AMLOG("All pawns are spawned, final commit.");
 	return true;
+}
+
+private function TTile FindClosestTileInArea(const TTile InputTile)
+{
+	local TTile TestTile;
+	local TTile ClosestTile;
+	local float Distance;
+	local float ShortestDistance;
+	local vector TargetLocation;
+
+	ShortestDistance = MaxInt;
+	foreach AreaTiles(TestTile)
+	{
+		TargetLocation = World.GetPositionFromTileCoordinates(TestTile);
+		if (!IsTargetLocationValid(TargetLocation))
+			continue;
+
+		Distance = GetTileDistanceBetweenTiles(InputTile, TestTile);
+		if (Distance < ShortestDistance)
+		{
+			ShortestDistance = Distance;
+			ClosestTile = TestTile;
+		}
+	}
+
+	return ClosestTile;
+}
+
+private function float GetTileDistanceBetweenTiles(const TTile TileA, const TTile TileB) 
+{
+	local vector	LocA;
+	local vector	LocB; 
+	local float		Dist; 
+	local float		TileDistance;
+
+	LocA = World.GetPositionFromTileCoordinates(TileA);
+	LocB = World.GetPositionFromTileCoordinates(TileB);
+
+	Dist = VSize(LocA - LocB);
+	TileDistance = Dist / World.WORLD_StepSize;
+
+	return TileDistance;
 }
 
 // Returns true if we handled the right click and there's no need to kill the targeting method yet.
@@ -212,6 +285,10 @@ private function ReleaseLastSpawnedPawn()
 
 	BeamEmitter = BeamEmitters[iNumSpawnedUnits - 1];
 	BeamEmitter.Destroy();
+
+	PrecisionDropTiles[iNumSpawnedUnits - 1].X = 0;
+	PrecisionDropTiles[iNumSpawnedUnits - 1].Y = 0;
+	PrecisionDropTiles[iNumSpawnedUnits - 1].Z = 0;
 	
 	iNumSpawnedUnits--;
 
@@ -243,18 +320,46 @@ private function ReleaseAllPawns()
 function name ValidateTargetLocations(const array<Vector> TargetLocations)
 {
 	local name AbilityAvailability;
-	local int MaxZ;
-	
 	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
 	if (AbilityAvailability == 'AA_Success')
 	{
-		MaxZ = class'XComWorldData'.const.WORLD_FloorHeightsPerLevel * class'XComWorldData'.const.WORLD_TotalLevels * class'XComWorldData'.const.WORLD_FloorHeight;
-		if (!World.HasOverheadClearance(TargetLocations[0], MaxZ))
+		if (!IsTargetLocationValid(TargetLocations[0]))
 		{
 			AbilityAvailability = 'AA_TileIsBlocked';
 		}
 	}
 	return AbilityAvailability;
+}
+
+private function bool IsTargetLocationValid(const vector SelectedLocation)
+{
+	local TTile	SelectedTile;
+	
+	// Only tiles with clearance to MaxZ are valid.
+	if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
+	{
+		return false;
+	}
+
+	if (!World.IsFloorTileAndValidDestination(SelectedTile))
+	{
+		return false;
+	}
+		
+	// Only tiles within the bounds of designated area are valid.
+	SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
+	if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
+	{
+		return false;
+	}
+
+	// Only tiles that were not previously selected for other units are valid.
+	if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
+	{
+		return false;
+	}
+
+	return true;
 }
 // Teleport
 /*
