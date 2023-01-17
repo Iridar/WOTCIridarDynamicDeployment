@@ -1,7 +1,7 @@
 class UIChooseUnits extends UIPersonnel;
 
-var private config(DynamicDeployment) StrategyCost	FlatCost;
-var private config(DynamicDeployment) StrategyCost	PerUnitCost;
+var private config(StrategyTuning) StrategyCost	FlatCost;
+var private config(StrategyTuning) StrategyCost	PerUnitCost;
 
 var private StrategyCost					TotalCost;
 var private array<StrategyCostScalar>		DummyArray;

@@ -40,13 +40,13 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 		return;
 	}
 
+	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
 
 	PrecisionDropUnitStates = DDObject.GetPrecisionDropUnits();
 	if (PrecisionDropUnitStates.Length > 0)
 	{
 		PrecisionDropTiles.Length = PrecisionDropUnitStates.Length;
-		World = `XWORLD;
 		PawnMgr = `PRESBASE.GetUIPawnMgr();
 		HoloMITV = MaterialInstanceTimeVarying(`CONTENT.RequestGameArchetype("FX_Mimic_Beacon_Hologram.M_Mimic_Activate_MITV"));
 		BeamEmitterPS = ParticleSystem(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.PS_BeamEmitter"));
@@ -76,7 +76,10 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 	}
 
 	// Following clicks will lock the last spawned pawn
-	LockLastSpawnedPawn();
+	if (iNumSpawnedUnits > 0)
+	{
+		LockLastSpawnedPawn();
+	}
 	
 	// Then see if we need to spawn more units.
 	if (iNumSpawnedUnits < PrecisionDropUnitStates.Length)
@@ -91,8 +94,8 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 
 private function LockLastSpawnedPawn()
 {
-	local vector	SpawnLocation;
-	local TTile		SpawnTile;
+	local vector SpawnLocation;
+	local TTile	 SpawnTile;
 
 	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
 	SpawnLocation.Z -= World.WORLD_FloorHeight;
@@ -201,13 +204,17 @@ private function bool StagedCancel()
 {
 	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
 
-	if (iNumSpawnedUnits != 0)
+	if (iNumSpawnedUnits > 1)
 	{
 		ReleaseLastSpawnedPawn();	// This will nuke the pawn the player is currently placing
 		ReleaseLastSpawnedPawn();	// This will nuke the pawn whose position was locked previously
 		SpawnNextPawn();			// This will respawn the last nuked pawn.
-		return true; // The "if" condition above means that when right clicking with just one pawn in place, 
-					 // you still have to click one additional time to unlock the area.
+		return true;
+	}
+	else if (iNumSpawnedUnits == 1)
+	{
+		ReleaseLastSpawnedPawn();
+		return true; // after deleting the last pawn you still have to cancel one additional time to unlock the area.
 	}
 	
 	if (bAreaLocked)
@@ -284,22 +291,20 @@ private function ValidateAreaTiles()
 
 private function bool IsTileValid(const TTile TestTile)
 {
-	local TTile		SelectedTile;
-	local vector	SelectedLocation;
+	local vector TestLocation;
 	
-	// Only tiles with clearance to MaxZ are valid.
-	SelectedLocation = World.GetPositionFromTileCoordinates(TestTile);
-	if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
+	TestLocation = World.GetPositionFromTileCoordinates(TestTile);
+	if (!World.HasOverheadClearance(TestLocation, MaxZ))
 	{
 		return false;
 	}
 
-	if (!World.IsFloorTileAndValidDestination(SelectedTile))
+	if (!World.IsFloorTileAndValidDestination(TestTile))
 	{
 		return false;
 	}
 
-	if (!World.CanUnitsEnterTile(SelectedTile))
+	if (!World.CanUnitsEnterTile(TestTile))
 	{
 		return false;
 	}

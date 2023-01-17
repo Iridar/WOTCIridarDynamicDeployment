@@ -36,5 +36,6 @@ Precision drop: first click places 5x5 tile grid, other clicks pick unit positio
 
 - Unit gains Overdrive effect upon deployment.
 
-
-Test: 
+Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
+Extraction Team: After the objective is completed, XCOM may deploy up to two additional soldiers near the evac zone. (Appears on fixed evac missions)
+All In: XCOM can drop reinforcements to replace lost soldiers until they have no units remaining. (Appears on Leviathan and Chosen Avenger Defence)
