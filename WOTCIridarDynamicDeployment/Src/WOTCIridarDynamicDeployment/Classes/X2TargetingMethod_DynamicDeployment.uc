@@ -61,49 +61,27 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 // Hijack left click or other ways to confirm ability activation if there are any precision drop units.
 // Consecutive clicks will lock the location of the last spawned pawn, and spawn a new one,
 // if there are any remaining.
-// If 
 function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallback> fnCallback)
 {
-	local vector	SpawnLocation;
-	local TTile		SpawnTile;
-	
 	if (PrecisionDropUnitStates.Length == 0)
 		return true;
 
 	// First click locks the targeted area.
 	if (!bAreaLocked)
 	{
+		// And spawns a pawn that will move with the cursor.
+		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], CachedTargetLocation);
 		bAreaLocked = true;
+		return false;
 	}
 
-	// TODO: Continue polishing from here.
-	// Lock the targeted tile for last spawned pawn.
-	if (iNumSpawnedUnits > 0)
-	{
-		SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
-		SpawnLocation.Z -= World.WORLD_FloorHeight;
-		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
-		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
-	}
-
+	// Following clicks will lock the last spawned pawn
+	LockLastSpawnedPawn();
+	
 	// Then see if we need to spawn more units.
 	if (iNumSpawnedUnits < PrecisionDropUnitStates.Length)
 	{
-		`AMLOG("Area locked, spawning new pawn");
-		SpawnLocation = CachedTargetLocation;
-		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
-
-		// If the player clicked outside the designated area, spawn the pawn on the closest tile in the area.
-		if (class'Helpers'.static.FindTileInList(SpawnTile, AreaTiles) == INDEX_NONE ||
-			class'Helpers'.static.FindTileInList(SpawnTile, PrecisionDropTiles) != INDEX_NONE)
-		{
-			SpawnTile = FindClosestTileInArea(SpawnTile);
-			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
-		}
-		
-		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], SpawnLocation);
-		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
-
+		SpawnNextPawn();
 		return false;
 	}
 
@@ -111,76 +89,28 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 	return true;
 }
 
-// Hijack right click and other "cancel targeting" keys to use our own staged cancel function instead,
-// which removes the last placed precision drop pawn.
-// When there are no more pawns, the targeting area is unlocked and can be moved.
-// If it's alreay unlocked, the normal logic is allowed to take place, cancelling the targeting.
-simulated protected function bool OnTacticalHUDInput(UIScreen Screen, int iInput, int ActionMask)
+private function LockLastSpawnedPawn()
 {
-    if (!Screen.CheckInputIsReleaseOrDirectionRepeat(iInput, ActionMask))
-    {
-		`AMLOG("Blah blah early exit");
-        return false;
-    }
+	local vector	SpawnLocation;
+	local TTile		SpawnTile;
 
-    switch (iInput)
-    {
-	case class'UIUtilities_Input'.const.FXS_R_MOUSE_DOWN:
-	case class'UIUtilities_Input'.const.FXS_KEY_ESCAPE:
-	
-	// washing_hands.jpg
-    case class'UIUtilities_Input'.static.GetBackButtonInputCode():
-	case (class'UIUtilities_Input'.const.FXS_BUTTON_START):
-	case class'UIUtilities_Input'.const.FXS_BUTTON_B:
-	case class'UIUtilities_Input'.const.FXS_BUTTON_RTRIGGER:
-        return StagedCancel();
-        break;
-    }
-
-    return false;
+	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
+	SpawnLocation.Z -= World.WORLD_FloorHeight;
+	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+	PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
 }
 
-function Update(float DeltaTime)
+private function SpawnNextPawn()
 {
-	local array<Actor>	CurrentlyMarkedTargets;
-	local vector		NewTargetLocation;
-	local TTile			SelectedTile;
+	local vector	SpawnLocation;
+	local TTile		SpawnTile;
 
-	NewTargetLocation = GetSplashRadiusCenter();
-
-	if (NewTargetLocation != CachedTargetLocation)
-	{			
-		if (!bAreaLocked)
-		{
-			AreaTiles.Length = 0;
-			GetTargetedActors(NewTargetLocation, CurrentlyMarkedTargets, AreaTiles);
-			ValidateAreaTiles();
-			//CheckForFriendlyUnit(CurrentlyMarkedTargets);	
-			//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None );
-			DrawAOETiles(AreaTiles);
-		}
-		else
-		{
-			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
-			// And not on top of previously selected tiles for other units
-			SelectedTile = World.GetTileCoordinatesFromPosition(NewTargetLocation);
-			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE &&
-				class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) == INDEX_NONE)
-			{
-				NewTargetLocation.Z += World.WORLD_FloorHeight;
-				MoveLastSpawnedPawn(NewTargetLocation);
-			}
-		}
-	}
-	//DrawSplashRadius( );
-
-	super(X2TargetingMethod).Update(DeltaTime);
+	`AMLOG("Area locked, spawning new pawn");
+	SpawnTile = World.GetTileCoordinatesFromPosition(CachedTargetLocation);
+	SpawnTile = FindClosestTileInArea(SpawnTile);
+	SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+	SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], SpawnLocation);
 }
-
-
-
-
-
 
 private function SpawnPawnForUnit(const XComGameState_Unit SpawnUnit, vector PawnLocation)
 {
@@ -214,6 +144,127 @@ private function SpawnPawnForUnit(const XComGameState_Unit SpawnUnit, vector Paw
 	iNumSpawnedUnits++;
 }
 
+private function ReleaseLastSpawnedPawn()
+{
+	local XComGameState_Unit	SpawnUnit;
+	local XComEmitter			BeamEmitter;
+
+	if (iNumSpawnedUnits > 0)
+	{
+		PrecisionDropPawns.Remove(iNumSpawnedUnits - 1, 1);
+
+		SpawnUnit = PrecisionDropUnitStates[iNumSpawnedUnits - 1];
+		PawnMgr.ReleaseCinematicPawn(FiringUnit, SpawnUnit.ObjectID, true);
+
+		BeamEmitter = BeamEmitters[iNumSpawnedUnits - 1];
+		BeamEmitter.Destroy();
+
+		PrecisionDropTiles[iNumSpawnedUnits - 1].X = 0;
+		PrecisionDropTiles[iNumSpawnedUnits - 1].Y = 0;
+		PrecisionDropTiles[iNumSpawnedUnits - 1].Z = 0;
+	
+		iNumSpawnedUnits--;
+
+		`AMLOG("Released pawn for:" @ SpawnUnit.GetFullName());
+	}
+}
+
+// Hijack right click and other "cancel targeting" keys to use our own staged cancel function instead,
+// which removes the last placed precision drop pawn.
+// When there are no more pawns, the targeting area is unlocked and can be moved.
+// If it's alreay unlocked, the normal logic is allowed to take place, cancelling the targeting.
+simulated protected function bool OnTacticalHUDInput(UIScreen Screen, int iInput, int ActionMask)
+{
+    if (!Screen.CheckInputIsReleaseOrDirectionRepeat(iInput, ActionMask))
+    {
+        return false;
+    }
+
+    switch (iInput)
+    {
+	case class'UIUtilities_Input'.const.FXS_R_MOUSE_DOWN:
+	case class'UIUtilities_Input'.const.FXS_KEY_ESCAPE:
+	
+	// washing_hands.jpg
+    case class'UIUtilities_Input'.static.GetBackButtonInputCode():
+	case class'UIUtilities_Input'.const.FXS_BUTTON_START:
+	case class'UIUtilities_Input'.const.FXS_BUTTON_B:
+	case class'UIUtilities_Input'.const.FXS_BUTTON_RTRIGGER:
+        return StagedCancel();
+        break;
+    }
+
+    return false;
+}
+// Returns true if we handled the right click and there's no need to kill the targeting method yet.
+private function bool StagedCancel()
+{
+	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
+
+	if (iNumSpawnedUnits != 0)
+	{
+		ReleaseLastSpawnedPawn();	// This will nuke the pawn the player is currently placing
+		ReleaseLastSpawnedPawn();	// This will nuke the pawn whose position was locked previously
+		SpawnNextPawn();			// This will respawn the last nuked pawn.
+		return true; // The "if" condition above means that when right clicking with just one pawn in place, 
+					 // you still have to click one additional time to unlock the area.
+	}
+	
+	if (bAreaLocked)
+	{
+		`AMLOG("There are no pawns left, unlocking area");
+		PrecisionDropTiles.Length = 0; // Reset tile array so that we don't trip on it when placing pawns in a newly locked area later.
+		PrecisionDropTiles.Length = PrecisionDropUnitStates.Length;
+		bAreaLocked = false;
+		return true;
+	}
+
+	`AMLOG("There are no pawns left, area unlocked, final cancel.");
+	return false;
+}
+
+
+function Update(float DeltaTime)
+{
+	local array<Actor>	CurrentlyMarkedTargets;
+	local vector		NewTargetLocation;
+	local TTile			SelectedTile;
+
+	NewTargetLocation = GetSplashRadiusCenter();
+
+	if (NewTargetLocation != CachedTargetLocation)
+	{			
+		if (!bAreaLocked)
+		{
+			AreaTiles.Length = 0;
+			GetTargetedActors(NewTargetLocation, CurrentlyMarkedTargets, AreaTiles); // This fills the AreaTiles, presumably
+			ValidateAreaTiles();
+			//CheckForFriendlyUnit(CurrentlyMarkedTargets);	
+			//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None );
+			DrawAOETiles(AreaTiles);
+		}
+		else
+		{
+			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
+			// And not on top of previously selected tiles for other units
+			SelectedTile = World.GetTileCoordinatesFromPosition(NewTargetLocation);
+			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE &&
+				class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) == INDEX_NONE)
+			{
+				NewTargetLocation.Z += World.WORLD_FloorHeight;
+				MoveLastSpawnedPawn(NewTargetLocation);
+			}
+		}
+	}
+	//DrawSplashRadius( );
+
+	super(X2TargetingMethod).Update(DeltaTime);
+}
+private function MoveLastSpawnedPawn(const vector MoveLocation)
+{
+	PrecisionDropPawns[iNumSpawnedUnits - 1].SetLocationNoCollisionCheck(MoveLocation);
+	BeamEmitters[iNumSpawnedUnits - 1].SetLocation(MoveLocation);
+}
 
 private function ValidateAreaTiles()
 {
@@ -255,8 +306,6 @@ private function bool IsTileValid(const TTile TestTile)
 
 	return true;
 }
-
-
 private function TTile FindClosestTileInArea(const TTile InputTile)
 {
 	local TTile TestTile;
@@ -280,7 +329,6 @@ private function TTile FindClosestTileInArea(const TTile InputTile)
 
 	return ClosestTile;
 }
-
 private function float GetTileDistanceBetweenTiles(const TTile TileA, const TTile TileB) 
 {
 	local vector	LocA;
@@ -297,33 +345,13 @@ private function float GetTileDistanceBetweenTiles(const TTile TileA, const TTil
 	return TileDistance;
 }
 
-// Returns true if we handled the right click and there's no need to kill the targeting method yet.
-private function bool StagedCancel()
-{
-	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
-	if (iNumSpawnedUnits != 0)
-	{
-		`AMLOG("There are still pawns, releasing last one");
-		ReleaseLastSpawnedPawn();
-		return true;
-	}
-	
-	if (bAreaLocked)
-	{
-		`AMLOG("There are no pawns left, unlocking area");
-		bAreaLocked = false;
-		return true;
-	}
 
-	`AMLOG("There are no pawns left, area unlocked, final cancel.");
-	return false;
-}
 // Called by Comitted() too.
 function Canceled()
 {
 	AreaTiles.Length = 0;
 	DrawAOETiles(AreaTiles);
-	ReleaseAllPawns();
+	ReleaseAllPawns(); // In case some hotkey isn't caught by StagedCancel(), such as switching to another ability or something.
 	Pres.m_kTacticalHUD.Movie.Stack.UnsubscribeFromOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
 	super.Canceled();
 }
@@ -333,35 +361,6 @@ function Committed()
 	// Save selected tiles to be used later by the deployment effect
 	class'XComGameState_DynamicDeployment'.static.SavePrecisionDropTiles_SubmitGameState(PrecisionDropUnitStates, PrecisionDropTiles);
 	super.Committed();
-}
-
-
-private function ReleaseLastSpawnedPawn()
-{
-	local XComGameState_Unit	SpawnUnit;
-	local XComEmitter			BeamEmitter;
-
-	PrecisionDropPawns.Remove(iNumSpawnedUnits - 1, 1);
-
-	SpawnUnit = PrecisionDropUnitStates[iNumSpawnedUnits - 1];
-	PawnMgr.ReleaseCinematicPawn(FiringUnit, SpawnUnit.ObjectID, true);
-
-	BeamEmitter = BeamEmitters[iNumSpawnedUnits - 1];
-	BeamEmitter.Destroy();
-
-	PrecisionDropTiles[iNumSpawnedUnits - 1].X = 0;
-	PrecisionDropTiles[iNumSpawnedUnits - 1].Y = 0;
-	PrecisionDropTiles[iNumSpawnedUnits - 1].Z = 0;
-	
-	iNumSpawnedUnits--;
-
-	`AMLOG("Released pawn for:" @ SpawnUnit.GetFullName());
-}
-
-private function MoveLastSpawnedPawn(const vector MoveLocation)
-{
-	PrecisionDropPawns[iNumSpawnedUnits - 1].SetLocationNoCollisionCheck(MoveLocation);
-	BeamEmitters[iNumSpawnedUnits - 1].SetLocation(MoveLocation);
 }
 
 private function ReleaseAllPawns()
@@ -379,10 +378,6 @@ private function ReleaseAllPawns()
 	}
 }
 
-// Icarus Jump
-
-
-// Icarus Jump
 function name ValidateTargetLocations(const array<Vector> TargetLocations)
 {
 	local TTile		SelectedTile;
@@ -394,22 +389,25 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 	{
 		// Only tiles with clearance to MaxZ are valid.
 		SelectedLocation = TargetLocations[0];
-		//if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
-		//{
-		//	AbilityAvailability = 'AA_TileIsBlocked';
-		//}
-		
-		// Only tiles within the bounds of designated area are valid.
-		SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
-		if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
+		if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
 		{
 			AbilityAvailability = 'AA_TileIsBlocked';
 		}
-
-		// Only tiles that were not previously selected for other units are valid.
-		if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
+		
+		if (bAreaLocked) // If area is locked, then it means we're clicking to place a pawn.
 		{
-			AbilityAvailability = 'AA_TileIsBlocked';
+			// Only tiles within the bounds of designated area are valid.
+			SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
+			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
+			{
+				AbilityAvailability = 'AA_TileIsBlocked';
+			}
+
+			// Only tiles that were not previously selected for other units are valid.
+			if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
+			{
+				AbilityAvailability = 'AA_TileIsBlocked';
+			}
 		}
 	}
 	return AbilityAvailability;
