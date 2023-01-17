@@ -55,6 +55,11 @@ final function DeselectAllUnits()
 	bPendingDeployment = false;
 }
 
+final function int GetNumSelectedUnits()
+{
+	return SelectedUnitIDs.Length;
+}
+
 // Not sure this even does anything though
 final function PreloadAssets()
 {

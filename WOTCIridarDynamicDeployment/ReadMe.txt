@@ -8,7 +8,7 @@ Created with Enhanced Mod Project Template v1.0
  
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
-asd
+
 
 
 // TODO: Localization
@@ -35,3 +35,8 @@ Precision drop: first click places 5x5 tile grid, other clicks pick unit positio
 
 
 - Unit gains Overdrive effect upon deployment.
+
+
+Test: 
+
+- Sergeant rank requirement.

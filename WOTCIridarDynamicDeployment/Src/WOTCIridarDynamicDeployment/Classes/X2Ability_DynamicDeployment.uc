@@ -142,6 +142,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	local X2AbilityTemplate             Template;
 //	local X2AbilityCooldown_Global      GlobalCooldown;
 	local X2AbilityCost_ActionPoints    ActionPointCost;
+	local X2Condition_SoldierRank		SoldierRank;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');
 
@@ -171,6 +172,10 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	//Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkFall');
 	Template.AddShooterEffectExclusions();
+
+	SoldierRank = new class'X2Condition_SoldierRank';
+	SoldierRank.MinRank = `GetConfigInt("DynamicDeploymentMinRank");
+	Template.AbilityShooterConditions.AddItem(SoldierRank);
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -221,6 +226,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	local X2AbilityCost_ActionPoints    ActionPointCost;
 	local X2AbilityTarget_Cursor        CursorTarget;
 	local X2AbilityMultiTarget_Radius   RadiusMultiTarget;
+	local X2Condition_SoldierRank		SoldierRank;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Deploy');
 
@@ -250,6 +256,10 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	//Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkFall');
 	Template.AddShooterEffectExclusions();
+
+	SoldierRank = new class'X2Condition_SoldierRank';
+	SoldierRank.MinRank = `GetConfigInt("DynamicDeploymentMinRank");
+	Template.AbilityShooterConditions.AddItem(SoldierRank);
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;

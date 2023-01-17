@@ -1,5 +1,11 @@
 class UIChooseUnits extends UIPersonnel;
 
+var config(DynamicDeployment) StrategyCost	FlatCost;
+var config(DynamicDeployment) StrategyCost	PerUnitCost;
+var private StrategyCost					TotalCost;
+var private array<StrategyCostScalar>		DummyArray;
+var private XComGameState_HeadquartersXCom	XComHQ;
+
 // Thanks to RustyDios for the idea to use UIPersonnel.
 
 var int SourcePlayerID;
@@ -20,6 +26,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 
 	SwitchTab(m_eListType);
 	CreateConfirmButton();
+	XComHQ = `XCOMHQ;
 }
 
 simulated function UpdateData()
@@ -77,10 +84,6 @@ simulated function OnCancel()
 	CloseScreen();
 }
 
-simulated function UpdateNavHelp() {} 
-simulated function SpawnNavHelpIcons() {} // No nav help in tactical
-
-
 function CreateConfirmButton()
 {
 	local int iconYOffset;
@@ -137,11 +140,97 @@ function UpdateConfirmButtonVisibility()
 
 
 private function OnConfirmButtonClicked(UIButton Button)
-{
-	DDObject.PreloadAssets();
-	CloseScreen();
+{	
+	local StrategyCost EmptyCost;	
+
+	CalculateTotalCost();
+
+	if (TotalCost != EmptyCost)
+	{
+		if (XComHQ.CanAffordAllStrategyCosts(TotalCost, DummyArray))
+		{
+			RaiseConfirmPayCostDialog();
+		}
+		else
+		{	
+			RaiseCannotAffordCostDialog();
+		}
+	}
+	else
+	{
+		//DDObject.PreloadAssets();
+		CloseScreen();
+	}
 }
 
+private function CalculateTotalCost()
+{	
+	local int UnitCostMultiplier;
+
+	UnitCostMultiplier = -100 * DDObject.GetNumSelectedUnits();
+
+	TotalCost = XComHQ.GetScaledStrategyCost(FlatCost, DummyArray, UnitCostMultiplier);
+
+	class'X2StrategyGameRulesetDataStructures'.static.AddCosts(FlatCost, TotalCost);
+}
+
+private function RaiseCannotAffordCostDialog()
+{
+	local TDialogueBoxData	kDialogData;
+	local string			strText;
+
+	strText = "Deploying selected units will cost:\n\n";
+	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
+	strText $= "\n\nYou cannot afford this deployment.";
+
+	kDialogData.strTitle = "Cannot afford deployment cost";
+	kDialogData.strText = strText;
+	kDialogData.eType = eDialog_Alert;
+	kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericOK;
+
+	`PRESBASE.UIRaiseDialog(kDialogData);
+}
+ 
+private function RaiseConfirmPayCostDialog()
+{
+	local TDialogueBoxData kDialogData;
+	local string			strText;
+
+	strText = "Deploying selected units will cost:\n\n";
+	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
+	strText $= "\n\n.The cost will paid immediately. Do you accept?";
+	
+	kDialogData.strTitle = "Confirm deployment cost";
+	kDialogData.strText = strText;
+	kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericConfirm;
+	kDialogData.strCancel = class'UISimpleScreen'.default.m_strCancel;
+	kDialogData.fnCallback = OnConfirmPayCostDialogCallback;
+	kDialogData.eType = eDialog_Normal;
+	`PRESBASE.UIRaiseDialog(kDialogData);
+}
+
+
+private function OnConfirmPayCostDialogCallback(Name eAction)
+{
+	local XComGameState NewGameState;
+
+	// `XTACTICALSOUNDMGR.PlaySoundEvent("Play_MenuClickNegative");
+
+	if (eAction == 'eUIAction_Accept')
+	{
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Pay dynamic deployment cost");
+		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(XComHQ.Class, XComHQ.ObjectID));
+		XComHQ.PayStrategyCost(NewGameState, TotalCost, DummyArray);
+		`GAMERULES.SubmitGameState(NewGameState);
+
+		CloseScreen();
+	}
+}
+
+
+
+simulated function UpdateNavHelp() {} 
+simulated function SpawnNavHelpIcons() {} // No nav help in tactical
 
 defaultproperties
 {
