@@ -8,7 +8,7 @@ Created with Enhanced Mod Project Template v1.0
  
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
-
+asd
 
 
 // TODO: Localization
