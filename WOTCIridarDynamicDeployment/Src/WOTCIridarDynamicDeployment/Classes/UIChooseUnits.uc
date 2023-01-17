@@ -180,11 +180,10 @@ private function RaiseCannotAffordCostDialog()
 	local TDialogueBoxData	kDialogData;
 	local string			strText;
 
-	strText = "Deploying selected units will cost:\n\n";
-	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
-	strText $= "\n\nYou cannot afford this deployment.";
+	strText = `GetLocalizedString("IRI_DynamicDeployment_CannotAffordDeployment");
+	strText = Repl(strText, "%Cost%", class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
 
-	kDialogData.strTitle = "Cannot afford deployment cost";
+	kDialogData.strTitle = `GetLocalizedString("IRI_DynamicDeployment_CannotAffordDeployment_Title");
 	kDialogData.strText = strText;
 	kDialogData.eType = eDialog_Alert;
 	kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericOK;
@@ -197,11 +196,10 @@ private function RaiseConfirmPayCostDialog()
 	local TDialogueBoxData kDialogData;
 	local string			strText;
 
-	strText = "Deploying selected units will cost:\n\n";
-	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
-	strText $= "\n\nThe cost will be paid immediately. Do you accept?";
-	
-	kDialogData.strTitle = "Confirm deployment cost";
+	strText = `GetLocalizedString("IRI_DynamicDeployment_ConfirmDeploymentCost");
+	strText = Repl(strText, "%Cost%", class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
+
+	kDialogData.strTitle = `GetLocalizedString("IRI_DynamicDeployment_ConfirmDeploymentCost_Title");
 	kDialogData.strText = strText;
 	kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericConfirm;
 	kDialogData.strCancel = class'UISimpleScreen'.default.m_strCancel;

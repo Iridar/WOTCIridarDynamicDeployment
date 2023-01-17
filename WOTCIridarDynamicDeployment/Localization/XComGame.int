@@ -15,11 +15,6 @@ LocFlyOverText="Holo Targeting"
 DisplayName = "Dynamic Deployment"
 Summary = "Allows soldiers to Dynamic Deployment."
 
-[IRI_DynamicDeployment_GTS_Unlock_BlackOps X2SoldierUnlockTemplate]
-DisplayName = "Black Ops Deployment"
-Summary = "If the soldier calling for Dynamic Deployment is concealed and if no enemy unit sees any of the dynamically deployed soldiers, then the deployed soldiers will enter concealment."
-
-
 [IRI_DDUnlock_SparkRetainConcealment X2AbilityTemplate]
 LocFriendlyName="\"Whisper\" Jets"
 LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
@@ -33,4 +28,9 @@ LocHelpText="This unit will no longer break concealment when Dynamically Deploye
 [IRI_DDUnlock_PrecisionDrop X2AbilityTemplate]
 LocFriendlyName="Precision Drop"
 LocLongDescription="Select precise location for this unit's Dynamic Deployment."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
+[IRI_DDUnlock_ShadowDeployment X2AbilityTemplate]
+LocFriendlyName="Phantom Deployment"
+LocLongDescription="If this unit is not visible to any enemies after deployment, they will automatically enter concealment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

@@ -97,12 +97,6 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	// If we spawned at least one unit
 	if (NewUnitState != none)
 	{
-		if (XComHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock_BlackOps'))
-		{
-				
-			`AMLOG("Triggering Black Ops");
-		}
-
 		//`AMLOG("Triggering Lightning Strike");
 		//EventMgr.TriggerEvent('StartOfMatchConcealment', PlayerState, PlayerState, NewGameState);
 	}

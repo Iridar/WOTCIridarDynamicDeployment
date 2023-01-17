@@ -62,7 +62,6 @@ exec function SetMatineeName(string MatineeName)
 static event OnPostTemplatesCreated()
 {
 	AddGTSUnlock('IRI_DynamicDeployment_GTS_Unlock');
-	AddGTSUnlock('IRI_DynamicDeployment_GTS_Unlock_BlackOps');
 	PatchCharTemplates();
 }
 

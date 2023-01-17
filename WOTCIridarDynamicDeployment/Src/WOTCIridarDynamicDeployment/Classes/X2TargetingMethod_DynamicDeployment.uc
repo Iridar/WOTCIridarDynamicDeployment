@@ -97,6 +97,8 @@ private function LockLastSpawnedPawn()
 	local vector SpawnLocation;
 	local TTile	 SpawnTile;
 
+	// TODO: Recolor pawn when locking it
+
 	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
 	SpawnLocation.Z -= World.WORLD_FloorHeight;
 	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
