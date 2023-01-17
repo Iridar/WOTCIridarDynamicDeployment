@@ -38,5 +38,3 @@ Precision drop: first click places 5x5 tile grid, other clicks pick unit positio
 
 
 Test: 
-
-- Sergeant rank requirement.

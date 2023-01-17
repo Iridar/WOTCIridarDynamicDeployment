@@ -1,7 +1,8 @@
 class UIChooseUnits extends UIPersonnel;
 
-var config(DynamicDeployment) StrategyCost	FlatCost;
-var config(DynamicDeployment) StrategyCost	PerUnitCost;
+var private config(DynamicDeployment) StrategyCost	FlatCost;
+var private config(DynamicDeployment) StrategyCost	PerUnitCost;
+
 var private StrategyCost					TotalCost;
 var private array<StrategyCostScalar>		DummyArray;
 var private XComGameState_HeadquartersXCom	XComHQ;
@@ -169,7 +170,7 @@ private function CalculateTotalCost()
 
 	UnitCostMultiplier = -100 * DDObject.GetNumSelectedUnits();
 
-	TotalCost = XComHQ.GetScaledStrategyCost(FlatCost, DummyArray, UnitCostMultiplier);
+	TotalCost = XComHQ.GetScaledStrategyCost(PerUnitCost, DummyArray, UnitCostMultiplier);
 
 	class'X2StrategyGameRulesetDataStructures'.static.AddCosts(FlatCost, TotalCost);
 }
@@ -198,7 +199,7 @@ private function RaiseConfirmPayCostDialog()
 
 	strText = "Deploying selected units will cost:\n\n";
 	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
-	strText $= "\n\n.The cost will paid immediately. Do you accept?";
+	strText $= "\n\nThe cost will be paid immediately. Do you accept?";
 	
 	kDialogData.strTitle = "Confirm deployment cost";
 	kDialogData.strText = strText;
