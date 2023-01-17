@@ -1,5 +1,15 @@
 class X2TargetingMethod_DynamicDeployment extends X2TargetingMethod_VoidRift;
 
+// A lot of magic in this class. Accomplishes two goals:
+// 1. Allows clicking only on tiles that have clearanace to Max Z.
+// 2. Handles selection of deployment locations for units with Precision Drop upgrade.
+// When targeting method is activated, the player selects the deployment area.
+// Array of marked tiles (AreaTiles) is constantly validated to display only tiles
+// that have clearance to Max Z and are valid things for units to stand on.
+// First click locks the targeted area. 
+// Consecutive clicks pick deployment destinations for precision dropped units.
+// Picking the location for the final precision drop unit activates the ability.
+
 //var private X2Actor_InvalidTarget InvalidTileActor;
 //var private XComActionIconManager IconManager;
 
@@ -19,14 +29,16 @@ var private array<XComUnitPawn>				PrecisionDropPawns;
 var private array<TTile>					PrecisionDropTiles;
 var private transient array<XComEmitter>	BeamEmitters;
 
-
 function Init(AvailableAction InAction, int NewTargetIndex)
 {
 	local XComGameState_DynamicDeployment DDObject;
 
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
+	{
+		super.Init(InAction, NewTargetIndex);
 		return;
+	}
 
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
 
@@ -46,13 +58,65 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	super.Init(InAction, NewTargetIndex);
 }
 
+// Hijack left click or other ways to confirm ability activation if there are any precision drop units.
+// Consecutive clicks will lock the location of the last spawned pawn, and spawn a new one,
+// if there are any remaining.
+// If 
+function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallback> fnCallback)
+{
+	local vector	SpawnLocation;
+	local TTile		SpawnTile;
+	
+	if (PrecisionDropUnitStates.Length == 0)
+		return true;
+
+	// First click locks the targeted area.
+	if (!bAreaLocked)
+	{
+		bAreaLocked = true;
+	}
+
+	// TODO: Continue polishing from here.
+	// Lock the targeted tile for last spawned pawn.
+	if (iNumSpawnedUnits > 0)
+	{
+		SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
+		SpawnLocation.Z -= World.WORLD_FloorHeight;
+		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
+	}
+
+	// Then see if we need to spawn more units.
+	if (iNumSpawnedUnits < PrecisionDropUnitStates.Length)
+	{
+		`AMLOG("Area locked, spawning new pawn");
+		SpawnLocation = CachedTargetLocation;
+		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
+
+		// If the player clicked outside the designated area, spawn the pawn on the closest tile in the area.
+		if (class'Helpers'.static.FindTileInList(SpawnTile, AreaTiles) == INDEX_NONE ||
+			class'Helpers'.static.FindTileInList(SpawnTile, PrecisionDropTiles) != INDEX_NONE)
+		{
+			SpawnTile = FindClosestTileInArea(SpawnTile);
+			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+		}
+		
+		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], SpawnLocation);
+		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
+
+		return false;
+	}
+
+	`AMLOG("All pawns are spawned, final commit.");
+	return true;
+}
+
 // Hijack right click and other "cancel targeting" keys to use our own staged cancel function instead,
-// which cancels targeting only when there are no more units to remove.
-// Otherwise it will remove the last added unit.
+// which removes the last placed precision drop pawn.
+// When there are no more pawns, the targeting area is unlocked and can be moved.
+// If it's alreay unlocked, the normal logic is allowed to take place, cancelling the targeting.
 simulated protected function bool OnTacticalHUDInput(UIScreen Screen, int iInput, int ActionMask)
 {
-	`AMLOG("Running:" @ `ShowVar(iInput) @ `ShowVar(ActionMask));
-
     if (!Screen.CheckInputIsReleaseOrDirectionRepeat(iInput, ActionMask))
     {
 		`AMLOG("Blah blah early exit");
@@ -75,6 +139,48 @@ simulated protected function bool OnTacticalHUDInput(UIScreen Screen, int iInput
 
     return false;
 }
+
+function Update(float DeltaTime)
+{
+	local array<Actor>	CurrentlyMarkedTargets;
+	local vector		NewTargetLocation;
+	local TTile			SelectedTile;
+
+	NewTargetLocation = GetSplashRadiusCenter();
+
+	if (NewTargetLocation != CachedTargetLocation)
+	{			
+		if (!bAreaLocked)
+		{
+			AreaTiles.Length = 0;
+			GetTargetedActors(NewTargetLocation, CurrentlyMarkedTargets, AreaTiles);
+			ValidateAreaTiles();
+			//CheckForFriendlyUnit(CurrentlyMarkedTargets);	
+			//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None );
+			DrawAOETiles(AreaTiles);
+		}
+		else
+		{
+			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
+			// And not on top of previously selected tiles for other units
+			SelectedTile = World.GetTileCoordinatesFromPosition(NewTargetLocation);
+			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE &&
+				class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) == INDEX_NONE)
+			{
+				NewTargetLocation.Z += World.WORLD_FloorHeight;
+				MoveLastSpawnedPawn(NewTargetLocation);
+			}
+		}
+	}
+	//DrawSplashRadius( );
+
+	super(X2TargetingMethod).Update(DeltaTime);
+}
+
+
+
+
+
 
 private function SpawnPawnForUnit(const XComGameState_Unit SpawnUnit, vector PawnLocation)
 {
@@ -108,89 +214,48 @@ private function SpawnPawnForUnit(const XComGameState_Unit SpawnUnit, vector Paw
 	iNumSpawnedUnits++;
 }
 
-function Update(float DeltaTime)
+
+private function ValidateAreaTiles()
 {
-	local array<Actor>	CurrentlyMarkedTargets;
-	local vector		NewTargetLocation;
-	local TTile			SelectedTile;
+	local TTile TestTile;
+	local int i;
 
-	NewTargetLocation = GetSplashRadiusCenter();
-
-	if (NewTargetLocation != CachedTargetLocation)
-	{			
-		if (!bAreaLocked)
+	for (i = AreaTiles.Length - 1; i >= 0; i--)
+	{
+		TestTile = AreaTiles[i];
+		if (!IsTileValid(TestTile))
 		{
-			AreaTiles.Length = 0;
-			GetTargetedActors(NewTargetLocation, CurrentlyMarkedTargets, AreaTiles);
-			//CheckForFriendlyUnit(CurrentlyMarkedTargets);	
-			//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None );
-			DrawAOETiles(AreaTiles);
-		}
-		else
-		{
-			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
-			// And not on top of previously selected tiles for other units
-			SelectedTile = World.GetTileCoordinatesFromPosition(NewTargetLocation);
-			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) != INDEX_NONE &&
-				class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) == INDEX_NONE)
-			{
-				NewTargetLocation.Z += World.WORLD_FloorHeight;
-				MoveLastSpawnedPawn(NewTargetLocation);
-			}
+			AreaTiles.Remove(i, 1);
 		}
 	}
-	//DrawSplashRadius( );
-
-	super(X2TargetingMethod).Update(DeltaTime);
 }
 
 
-function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallback> fnCallback)
+private function bool IsTileValid(const TTile TestTile)
 {
-	local vector	SpawnLocation;
-	local TTile		SpawnTile;
-
-	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
-
-	if (PrecisionDropUnitStates.Length == 0)
-		return true;
-
-	if (!bAreaLocked)
+	local TTile		SelectedTile;
+	local vector	SelectedLocation;
+	
+	// Only tiles with clearance to MaxZ are valid.
+	SelectedLocation = World.GetPositionFromTileCoordinates(TestTile);
+	if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
 	{
-		`AMLOG("No pawns yet, area is unlocked. Locking.");
-		bAreaLocked = true;
-	}
-
-	// Lock the targeted tile for the current spawn.
-	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
-	SpawnLocation.Z -= World.WORLD_FloorHeight;
-	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
-	PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
-
-	// Then see if we need to spawn more units.
-	if (iNumSpawnedUnits < PrecisionDropUnitStates.Length)
-	{
-		`AMLOG("Area locked, spawning new pawn");
-		SpawnLocation = CachedTargetLocation;
-		SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
-
-		// If the player clicked outside the designated area, spawn the pawn on the closest tile in the area.
-		if (class'Helpers'.static.FindTileInList(SpawnTile, AreaTiles) == INDEX_NONE ||
-			class'Helpers'.static.FindTileInList(SpawnTile, PrecisionDropTiles) != INDEX_NONE)
-		{
-			SpawnTile = FindClosestTileInArea(SpawnTile);
-			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
-		}
-		
-		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], SpawnLocation);
-		PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
-
 		return false;
 	}
 
-	`AMLOG("All pawns are spawned, final commit.");
+	if (!World.IsFloorTileAndValidDestination(SelectedTile))
+	{
+		return false;
+	}
+
+	if (!World.CanUnitsEnterTile(SelectedTile))
+	{
+		return false;
+	}
+
 	return true;
 }
+
 
 private function TTile FindClosestTileInArea(const TTile InputTile)
 {
@@ -198,13 +263,11 @@ private function TTile FindClosestTileInArea(const TTile InputTile)
 	local TTile ClosestTile;
 	local float Distance;
 	local float ShortestDistance;
-	local vector TargetLocation;
 
 	ShortestDistance = MaxInt;
 	foreach AreaTiles(TestTile)
 	{
-		TargetLocation = World.GetPositionFromTileCoordinates(TestTile);
-		if (!IsTargetLocationValid(TargetLocation))
+		if (class'Helpers'.static.FindTileInList(TestTile, PrecisionDropTiles) != INDEX_NONE)
 			continue;
 
 		Distance = GetTileDistanceBetweenTiles(InputTile, TestTile);
@@ -317,13 +380,34 @@ private function ReleaseAllPawns()
 }
 
 // Icarus Jump
+
+
+// Icarus Jump
 function name ValidateTargetLocations(const array<Vector> TargetLocations)
 {
-	local name AbilityAvailability;
+	local TTile		SelectedTile;
+	local vector	SelectedLocation;
+	local name		AbilityAvailability;
+	
 	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
 	if (AbilityAvailability == 'AA_Success')
 	{
-		if (!IsTargetLocationValid(TargetLocations[0]))
+		// Only tiles with clearance to MaxZ are valid.
+		SelectedLocation = TargetLocations[0];
+		//if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
+		//{
+		//	AbilityAvailability = 'AA_TileIsBlocked';
+		//}
+		
+		// Only tiles within the bounds of designated area are valid.
+		SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
+		if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
+		{
+			AbilityAvailability = 'AA_TileIsBlocked';
+		}
+
+		// Only tiles that were not previously selected for other units are valid.
+		if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
 		{
 			AbilityAvailability = 'AA_TileIsBlocked';
 		}
@@ -331,36 +415,6 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 	return AbilityAvailability;
 }
 
-private function bool IsTargetLocationValid(const vector SelectedLocation)
-{
-	local TTile	SelectedTile;
-	
-	// Only tiles with clearance to MaxZ are valid.
-	if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
-	{
-		return false;
-	}
-
-	if (!World.IsFloorTileAndValidDestination(SelectedTile))
-	{
-		return false;
-	}
-		
-	// Only tiles within the bounds of designated area are valid.
-	SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
-	if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
-	{
-		return false;
-	}
-
-	// Only tiles that were not previously selected for other units are valid.
-	if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
-	{
-		return false;
-	}
-
-	return true;
-}
 // Teleport
 /*
 function Init(AvailableAction InAction, int NewTargetIndex)
