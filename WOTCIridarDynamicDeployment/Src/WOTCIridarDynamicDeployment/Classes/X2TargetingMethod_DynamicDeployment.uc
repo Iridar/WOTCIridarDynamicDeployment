@@ -16,6 +16,7 @@ class X2TargetingMethod_DynamicDeployment extends X2TargetingMethod_VoidRift;
 var private UIPawnMgr						PawnMgr;
 var private XComWorldData					World;
 var private MaterialInstanceTimeVarying		HoloMITV;
+var private MaterialInstanceTimeVarying		YeloMITV;
 var private ParticleSystem					BeamEmitterPS;
 var private int								iNumSpawnedUnits;
 var private bool							bAreaLocked;
@@ -49,6 +50,7 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 		PrecisionDropTiles.Length = PrecisionDropUnitStates.Length;
 		PawnMgr = `PRESBASE.GetUIPawnMgr();
 		HoloMITV = MaterialInstanceTimeVarying(`CONTENT.RequestGameArchetype("FX_Mimic_Beacon_Hologram.M_Mimic_Activate_MITV"));
+		YeloMITV = MaterialInstanceTimeVarying(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.Materials.PlacingTarget_MITV"));
 		BeamEmitterPS = ParticleSystem(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.PS_BeamEmitter"));
 
 		`AMLOG("Got this many unit states:" @ PrecisionDropUnitStates.Length @ "HoloMITV loaded:" @ HoloMITV != none @ "BeamEmitterPS loaded:" @ BeamEmitterPS != none);
@@ -96,10 +98,18 @@ private function LockLastSpawnedPawn()
 {
 	local vector SpawnLocation;
 	local TTile	 SpawnTile;
+	local XComUnitPawn LastPawn;
+	local XComEmitter BeamEmitter;
 
-	// TODO: Recolor pawn when locking it
+	LastPawn = PrecisionDropPawns[iNumSpawnedUnits - 1];
+	LastPawn.CleanUpMITV();
+	LastPawn.ApplyMITV(HoloMITV);
 
-	SpawnLocation = PrecisionDropPawns[iNumSpawnedUnits - 1].Location;
+	// Activate the beam for this pawn.
+	BeamEmitter = BeamEmitters[iNumSpawnedUnits - 1];
+	BeamEmitter.ParticleSystemComponent.ActivateSystem();	
+
+	SpawnLocation = LastPawn.Location;
 	SpawnLocation.Z -= World.WORLD_FloorHeight;
 	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
 	PrecisionDropTiles[iNumSpawnedUnits - 1] = SpawnTile;
@@ -128,22 +138,20 @@ private function SpawnPawnForUnit(const XComGameState_Unit SpawnUnit, vector Paw
 
 	UnitPawn = PawnMgr.RequestCinematicPawn(FiringUnit, SpawnUnit.ObjectID, PawnLocation, PawnRotation);
 	UnitPawn.CreateVisualInventoryAttachments(PawnMgr, SpawnUnit);
-	UnitPawn.ApplyMITV(HoloMITV);
+	UnitPawn.ApplyMITV(YeloMITV);
 	
 	UnitPawn.HQIdleAnim = "NO_IdleGunUp";
 	UnitPawn.GotoState('Onscreen');			// This will play HQIdleAnim
 	UnitPawn.Mesh.GlobalAnimRateScale = 0;	// Freeze the pawn at the first frame of the animation.
 	PrecisionDropPawns.AddItem(UnitPawn);
-
+	
+	// For the sake of simplicity, the number of pawns and beams is always the same
 	BeamEmitter = `BATTLE.spawn(class'XComEmitter');
 	BeamEmitter.SetTemplate(BeamEmitterPS);
 	BeamEmitter.LifeSpan = 60 * 60 * 24 * 7; // never die (or at least take a week to do so)
 	BeamEmitter.SetDrawScale(1);
 	BeamEmitter.SetRotation( rot(0,0,1) );
-	if (!BeamEmitter.ParticleSystemComponent.bIsActive)
-	{
-		BeamEmitter.ParticleSystemComponent.ActivateSystem();			
-	}
+	BeamEmitter.ParticleSystemComponent.DeactivateSystem(); // But the beam is deactivated after creation, so it's not visible initially.
 	BeamEmitters.AddItem(BeamEmitter);
 
 	iNumSpawnedUnits++;
@@ -162,6 +170,7 @@ private function ReleaseLastSpawnedPawn()
 		PawnMgr.ReleaseCinematicPawn(FiringUnit, SpawnUnit.ObjectID, true);
 
 		BeamEmitter = BeamEmitters[iNumSpawnedUnits - 1];
+		BeamEmitters.Remove(iNumSpawnedUnits - 1, 1);
 		BeamEmitter.Destroy();
 
 		PrecisionDropTiles[iNumSpawnedUnits - 1].X = 0;

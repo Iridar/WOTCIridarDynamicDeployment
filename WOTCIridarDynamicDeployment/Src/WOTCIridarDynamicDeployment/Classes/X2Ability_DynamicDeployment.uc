@@ -95,17 +95,18 @@ static function X2AbilityTemplate IRI_DDUnlock_SparkOverdrive()
 	WallbreakEffect.TargetConditions.AddItem(AbilityCondition);
 	Template.AddTargetEffect(WallbreakEffect);
 
-	Template.CustomFireAnim = 'FF_Overdrive';
-	Template.bShowActivation = true;
+	Template.CustomFireAnim = 'IRI_DD_Overdrive'; // Purely for perk activation
+	Template.bShowActivation = false;
 	Template.bSkipFireAction = false;
 	Template.bSkipExitCoverWhenFiring = true;
 
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.FrameAbilityCameraType = eCameraFraming_Never; 
 
 	Template.PostActivationEvents.AddItem('OverdriveActivated');
 
-	//Template.AssociatedPlayTiming = SPT_BeforeSequential;
+	Template.AssociatedPlayTiming = SPT_BeforeSequential;
 	
 	return Template;
 }

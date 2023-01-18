@@ -1,6 +1,7 @@
 {
     "sfStandalone": [
 		"IRIDynamicDeployment",
+		"IRIDynamicDeployment_Perks",
 		"IRIDynamicDeployment_UI"
     ]
 }

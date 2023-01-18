@@ -24,23 +24,14 @@ Potentially replace it with a psi gate on the water world.
 Add a delay to DD equal to number of soldiers selected.
 TODO: Call for evac should put DD on cooldown. Compatibility with Request Evac here. Just let it slide on missions with fixed evac? 
 
-
+Figure out why SPARKs land with their feet halfway into the ground.
 TODO: Disable DD in Jet Packs mod if this mod is present.
-
-## Potential passive unlocks:
-- Precision Drop - unit will land closer to the center of the targeted area.
-
-Make individual.
-- Black Ops - if none of the deployed are visible to any enemy unit after Dynamic Deployment, all deployed units enter concealment.
 
 # Universal:
 
+Hit the ground running - gain a Move action after deployment.
 - Smoke Screen - apply a cloud of smoke around the deployment area upon deployment.
 - Enter Overwatch upon landing.
-- Guns Blazing - attacks do not end turn during the deployment turn.
-
-
-- Unit gains Overdrive effect upon deployment.
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

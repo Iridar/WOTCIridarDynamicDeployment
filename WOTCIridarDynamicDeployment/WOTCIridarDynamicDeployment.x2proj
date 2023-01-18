@@ -20,6 +20,9 @@
     <Folder Include="Src\WOTCIridarDynamicDeployment\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Base\XComGameData.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComDynamicDeployment.ini">
       <SubType>Content</SubType>
     </Content>
@@ -27,6 +30,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="ContentForCook\IRIDynamicDeployment.upk">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ContentForCook\IRIDynamicDeployment_Perks.upk">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ContentForCook\IRIDynamicDeployment_UI.upk">
