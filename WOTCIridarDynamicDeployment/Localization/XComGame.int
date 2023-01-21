@@ -34,3 +34,8 @@ LocHelpText="This unit will no longer break concealment when Dynamically Deploye
 LocFriendlyName="Phantom Deployment"
 LocLongDescription="If this unit is not visible to any enemies after deployment, they will automatically enter concealment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
+[IRI_DDUnlock_FastDrop X2AbilityTemplate]
+LocFriendlyName="Fast Drop"
+LocLongDescription="This unit does not count towards the Deployment delay."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

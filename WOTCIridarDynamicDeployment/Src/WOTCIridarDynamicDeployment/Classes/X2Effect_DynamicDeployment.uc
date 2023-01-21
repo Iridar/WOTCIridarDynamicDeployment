@@ -102,6 +102,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	}
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
+
+	// TODO: Make MCM configurable cooldown here
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerState.ObjectID, NewGameState);
 }
 
 

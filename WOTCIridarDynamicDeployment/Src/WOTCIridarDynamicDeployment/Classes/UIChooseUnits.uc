@@ -59,10 +59,6 @@ private function OnSoldierClicked(StateObjectReference UnitRef)
 
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	DDObject.ToggleUnitSelection(UnitRef.ObjectID);
-
-	// This prevents the Deploy ability from being used until the specified number of turns passes
-	//class'Help'.static.SetGlobalCooldown('IRI_SparkFall_Deploy', `GETMCMVAR(DEPLOY_DELAY_TUNRS), SourcePlayerID, NewGameState);
-
 	`GAMERULES.SubmitGameState(NewGameState);
 
 	//class'Help'.static.PreloadAssetsForUnit(UnitStates[ItemIndex]);
@@ -75,11 +71,10 @@ simulated function OnCancel()
 {
 	local XComGameState NewGameState;
 
-	//class'Help'.static.SetGlobalCooldown('IRI_SparkFall', 0, SourcePlayerID);
-
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Dynamic Deployment deselect all units");
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	DDObject.DeselectAllUnits();
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 0, SourcePlayerID, NewGameState);
 	`GAMERULES.SubmitGameState(NewGameState);
 
 	CloseScreen();
@@ -159,7 +154,8 @@ private function OnConfirmButtonClicked(UIButton Button)
 	}
 	else
 	{
-		//DDObject.PreloadAssets();
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourcePlayerID); // Set huge cooldown for now, actual cooldown will be set by the deploy abiltiy
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DDObject.GetDeployDelay(), SourcePlayerID);
 		CloseScreen();
 	}
 }
@@ -220,13 +216,14 @@ private function OnConfirmPayCostDialogCallback(Name eAction)
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Pay dynamic deployment cost");
 		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(XComHQ.Class, XComHQ.ObjectID));
 		XComHQ.PayStrategyCost(NewGameState, TotalCost, DummyArray);
+
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourcePlayerID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DDObject.GetDeployDelay(), SourcePlayerID, NewGameState);
 		`GAMERULES.SubmitGameState(NewGameState);
 
 		CloseScreen();
 	}
 }
-
-
 
 simulated function UpdateNavHelp() {} 
 simulated function SpawnNavHelpIcons() {} // No nav help in tactical

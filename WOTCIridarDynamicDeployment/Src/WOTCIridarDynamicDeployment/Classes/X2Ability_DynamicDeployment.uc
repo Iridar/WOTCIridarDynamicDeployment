@@ -11,6 +11,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', ""));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', ""));
 	
 	Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
 
@@ -79,7 +80,7 @@ static function X2AbilityTemplate IRI_DDUnlock_SparkOverdrive()
 	// A persistent effect for the effects code to attach a duration to
 	PerkAttachEffect = new class'X2Effect_PerkAttachForFX';
 	PerkAttachEffect.EffectName = 'AdaptiveAimPerk';
-	PerkAttachEffect.BuildPersistentEffect( 1, false, true, false, eGameRule_PlayerTurnEnd );
+	PerkAttachEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd );
 	AbilityCondition = new class'X2Condition_AbilityProperty';
 	AbilityCondition.OwnerHasSoldierAbilities.AddItem('AdaptiveAim');
 	PerkAttachEffect.TargetConditions.AddItem(AbilityCondition);

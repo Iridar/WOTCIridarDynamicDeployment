@@ -28,8 +28,9 @@ Figure out why SPARKs land with their feet halfway into the ground.
 TODO: Disable DD in Jet Packs mod if this mod is present.
 
 # Universal:
-
-Hit the ground running - gain a Move action after deployment.
+- Wider DD area for this unit (requires precision drop)
+- This unit doesn't count towards DD delay (high AP cost)
+- Hit the ground running - gain a Move action after deployment.
 - Smoke Screen - apply a cloud of smoke around the deployment area upon deployment.
 - Enter Overwatch upon landing.
 

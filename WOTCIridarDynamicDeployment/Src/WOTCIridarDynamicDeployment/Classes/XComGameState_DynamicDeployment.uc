@@ -60,6 +60,24 @@ final function int GetNumSelectedUnits()
 	return SelectedUnitIDs.Length;
 }
 
+final function int GetDeployDelay()
+{
+	local array<XComGameState_Unit> UnitStates;
+	local XComGameState_Unit		UnitState;
+	local int						iDelay;
+
+	UnitStates = GetUnitsToDeploy();
+	foreach UnitStates(UnitState)
+	{
+		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FastDrop'))
+		{
+			continue;
+		}
+		iDelay++;
+	}
+	return iDelay;
+}
+
 // Not sure this even does anything though
 final function PreloadAssets()
 {

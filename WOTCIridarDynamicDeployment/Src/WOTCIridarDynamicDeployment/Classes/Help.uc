@@ -7,6 +7,31 @@ class Help extends Object abstract;
 
 var privatewrite name DDEventName;
 
+static final function SetGlobalCooldown(const name AbilityName, const int Cooldown, const int SourcePlayerID, optional XComGameState UseGameState)
+{
+	local XComGameState			NewGameState;
+	local XComGameStateHistory	History;
+	local XComGameState_Player	PlayerState;
+
+	History = `XCOMHISTORY;
+	PlayerState = XComGameState_Player(History.GetGameStateForObjectID(SourcePlayerID));
+	if (PlayerState == none)
+		return;
+
+	if (UseGameState != none)
+	{
+		PlayerState = XComGameState_Player(UseGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
+		PlayerState.SetCooldown(AbilityName, Cooldown);
+	}
+	else
+	{	
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState(AbilityName @ "set global cooldown:" @ Cooldown);
+		PlayerState = XComGameState_Player(NewGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
+		PlayerState.SetCooldown(AbilityName, Cooldown);
+		`GAMERULES.SubmitGameState(NewGameState);
+	}
+}
+
 static final function bool SquadStartsConcealed()
 {
 	local XComGameState_BattleData	BattleDataState;
