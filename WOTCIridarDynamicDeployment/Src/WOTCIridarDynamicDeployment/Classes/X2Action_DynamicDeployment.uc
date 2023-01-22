@@ -9,8 +9,8 @@ var private DeployLocationActor MatineeBaseActor;
 var private vector TargetLocation;
 
 var private int DropshipSlotCount;
-
-var config string UseMatinee;
+var private array<string>	PossibleMatinees;
+var private string			SelectedMatinee;
 
 function Init()
 {
@@ -148,10 +148,20 @@ simulated state Executing
 Begin:
 
 	AddUnitsToMatinee();
+
+	// B1 - works, but SPARK is misaligned.
+	// B2 - perfect
+	// B3 - misaligned
+	// B4 - perfect
+	// B5 - perfect
+	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("Intro B1");
+	PossibleMatinees.AddItem("Intro B2");
+	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("Intro B3");
+	PossibleMatinees.AddItem("Intro B4");
+	PossibleMatinees.AddItem("Intro B5");
+	SelectedMatinee = PossibleMatinees[Rand(PossibleMatinees.Length)];
 	
-	//SelectMatineeByTag(default.UseMatinee);
-	SelectMatineeByTag("Intro B1"); // [0; 4] + 1 = [1; 5]
-	//SelectMatineeByTag("Intro B" $ (Rand(5) + 1)); // [0; 4] + 1 = [1; 5]
+	SelectMatineeByTag(SelectedMatinee);
 	PlayMatinee();
 
 	do
