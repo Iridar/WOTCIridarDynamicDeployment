@@ -356,9 +356,11 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 			AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
 		}
 		AnimationAction.Params.BlendTime = 0.0f;
-		AnimationAction.Params.DesiredEndingAtoms.Add(1);
-		AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
-		AnimationAction.Params.DesiredEndingAtoms[0].Translation = SpawnLocation;
+
+		// Apparently this isn't neccessary and it only makes SPARKs land halfway into the ground.
+		//AnimationAction.Params.DesiredEndingAtoms.Add(1);
+		//AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
+		//AnimationAction.Params.DesiredEndingAtoms[0].Translation = SpawnLocation;
 
 		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		HideUnitFlag.bHideUIUnitFlag = false;
