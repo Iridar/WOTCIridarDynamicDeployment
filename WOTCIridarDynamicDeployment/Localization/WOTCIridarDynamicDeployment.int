@@ -1,6 +1,6 @@
 [Help]
-IRI_DynamicDeployment_ArmoryLabel_Robotic = "Jet Pack Upgrades"
-IRI_DynamicDeployment_ArmoryLabel = "Jet Pack Training"
+IRI_DynamicDeployment_ArmoryLabel_Robotic = "Dynamic Deployment"
+IRI_DynamicDeployment_ArmoryLabel = "Dynamic Deployment"
 IRI_DynamicDeployment_UnlockLabel = "UNLOCK"
 
 IRI_DynamicDeployment_UnlockedLabel_Robotic = "UPGRADE INSTALLED"
@@ -14,11 +14,5 @@ IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
 IRI_DynamicDeployment_CannotAffordDeployment_Title = "Cannot afford the deployment"
 IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will cost:\n\n"%Cost%"\n\nYou cannot afford this deployment."
 
-strText = `GetLocalizedString("IRI_DynamicDeployment_ConfirmDeploymentCost");
-	strText = Repl(strText, "%Cost%", class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
-
-	kDialogData.strTitle = `GetLocalizedString("IRI_DynamicDeployment_ConfirmDeploymentCost_Title");
-
-			strText = "Deploying selected units will cost:\n\n";
-	strText $= `YELLOW(class'UIUtilities_Strategy'.static.GetStrategyCostString(TotalCost, DummyArray));
-	strText $= "\n\nThe cost will be paid immediately. Do you accept?";
+IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
+IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n"%Cost%"\n\nThe cost will be paid immediately. Do you accept?"

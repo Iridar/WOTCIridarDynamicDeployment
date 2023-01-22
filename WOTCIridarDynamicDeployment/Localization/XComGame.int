@@ -39,3 +39,8 @@ LocHelpText="This unit will no longer break concealment when Dynamically Deploye
 LocFriendlyName="Fast Drop"
 LocLongDescription="This unit does not count towards the Deployment delay."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
+[IRI_DDUnlock_AerialScout X2AbilityTemplate]
+LocFriendlyName="Aerial Scout"
+LocLongDescription="Reveals area and units in 6 additional tiles around the deployment area until the end of turn. Revealed area is increased if there are multiple deploying units with Aerial Scout."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

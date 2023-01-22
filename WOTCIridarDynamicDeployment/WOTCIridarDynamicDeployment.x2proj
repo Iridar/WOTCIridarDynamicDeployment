@@ -90,12 +90,18 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_UnstreamMap.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_AerialScout.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_SoldierRank.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2DLCInfo_WOTCIridarDynamicDeployment.uc" />
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\Help.uc" />
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\ConfigEngine.uc" />
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_AerialScout.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>

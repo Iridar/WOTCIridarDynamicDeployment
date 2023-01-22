@@ -12,8 +12,10 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', ""));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', ""));
 	
-	Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
+	
+	//Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
 
 	
 	//Templates.AddItem(IRI_DynamicDeployment_BlackOps());
@@ -21,96 +23,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	return Templates;
 }
 
-static function X2AbilityTemplate IRI_DDUnlock_SparkOverdrive()
-{
-	local X2AbilityTemplate						Template;
-	local X2Effect_GrantActionPoints            PointEffect;
-	local X2Effect_Persistent			        ActionPointPersistEffect;
-	local X2Effect_DLC_3Overdrive               OverdriveEffect;
-	local X2Condition_AbilityProperty           AbilityCondition;
-	local X2Effect_PersistentTraversalChange    WallbreakEffect;
-	local X2Effect_PerkAttachForFX              PerkAttachEffect;
-	local X2AbilityTrigger_EventListener		EventListenerTrigger;
-	local X2AbilityCost_Charges					ChargeCost;
-	local X2AbilityCharges                      Charges;
-
-	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DDUnlock_SparkOverdrive');
-
-	ChargeCost = new class'X2AbilityCost_Charges';
-	ChargeCost.NumCharges = 1;
-	Template.AbilityCosts.AddItem(ChargeCost);
-
-	Charges = new class'X2AbilityCharges';
-	Charges.InitialCharges = 1;
-	Template.AbilityCharges = Charges;
-
-	Template.AbilitySourceName = 'eAbilitySource_Perk';
-	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-	Template.Hostility = eHostility_Neutral;
-	Template.IconImage = "img:///UILibrary_DLC3Images.UIPerk_spark_overdrive";
-
-	Template.AbilityToHitCalc = default.DeadEye;
-	Template.AbilityTargetStyle = default.SelfTarget;
-	
-	EventListenerTrigger = new class'X2AbilityTrigger_EventListener';
-	EventListenerTrigger.ListenerData.Deferral = ELD_OnStateSubmitted;
-	EventListenerTrigger.ListenerData.EventID = class'Help'.default.DDEventName;
-	EventListenerTrigger.ListenerData.Filter = eFilter_Player;
-	EventListenerTrigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_Self;
-	Template.AbilityTriggers.AddItem(EventListenerTrigger);
-
-	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-
-	PointEffect = new class'X2Effect_GrantActionPoints';
-	PointEffect.NumActionPoints = 1;
-	PointEffect.PointType = class'X2CharacterTemplateManager'.default.StandardActionPoint;
-	Template.AddTargetEffect(PointEffect);
-
-	// A persistent effect for the effects code to attach a duration to
-	ActionPointPersistEffect = new class'X2Effect_Persistent';
-	ActionPointPersistEffect.EffectName = 'OverdrivePerk';
-	ActionPointPersistEffect.BuildPersistentEffect( 1, false, true, false, eGameRule_PlayerTurnEnd );
-	Template.AddTargetEffect(ActionPointPersistEffect);
-
-	OverdriveEffect = new class'X2Effect_DLC_3Overdrive';
-	OverdriveEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
-	OverdriveEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, , , Template.AbilitySourceName);
-	Template.AddTargetEffect(OverdriveEffect);
-
-	// A persistent effect for the effects code to attach a duration to
-	PerkAttachEffect = new class'X2Effect_PerkAttachForFX';
-	PerkAttachEffect.EffectName = 'AdaptiveAimPerk';
-	PerkAttachEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd );
-	AbilityCondition = new class'X2Condition_AbilityProperty';
-	AbilityCondition.OwnerHasSoldierAbilities.AddItem('AdaptiveAim');
-	PerkAttachEffect.TargetConditions.AddItem(AbilityCondition);
-	Template.AddTargetEffect(PerkAttachEffect);
-
-	AbilityCondition = new class'X2Condition_AbilityProperty';
-	AbilityCondition.OwnerHasSoldierAbilities.AddItem('WreckingBall');
-	WallbreakEffect = new class'X2Effect_PersistentTraversalChange';
-	WallbreakEffect.AddTraversalChange(eTraversal_BreakWall, true);
-	WallbreakEffect.EffectName = 'WreckingBallTraversal';
-	WallbreakEffect.DuplicateResponse = eDupe_Ignore;
-	WallbreakEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
-	WallbreakEffect.TargetConditions.AddItem(AbilityCondition);
-	Template.AddTargetEffect(WallbreakEffect);
-
-	Template.CustomFireAnim = 'IRI_DD_Overdrive'; // Purely for perk activation
-	Template.bShowActivation = false;
-	Template.bSkipFireAction = false;
-	Template.bSkipExitCoverWhenFiring = true;
-
-	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
-	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
-	Template.FrameAbilityCameraType = eCameraFraming_Never; 
-
-	Template.PostActivationEvents.AddItem('OverdriveActivated');
-
-	Template.AssociatedPlayTiming = SPT_BeforeSequential;
-	
-	return Template;
-}
 
 static private function X2AbilityTemplate CreatePassiveDDUnlock(const name TemplateName, const string strImage)
 {
@@ -176,7 +88,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.AddShooterEffectExclusions();
 
 	SoldierRank = new class'X2Condition_SoldierRank';
-	SoldierRank.MinRank = `GetConfigInt("DynamicDeploymentMinRank");
+	SoldierRank.MinRank = `GetConfigInt("IRI_DD_MinRank");
 	Template.AbilityShooterConditions.AddItem(SoldierRank);
 
 	// Targeting and Triggering
@@ -223,12 +135,13 @@ static final function DynamicDeployment_Select_BuildVisualization(XComGameState 
 
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 {
-	local X2AbilityTemplate             Template;
-	//local X2AbilityCooldown_Global      GlobalCooldown;
-	local X2AbilityCost_ActionPoints    ActionPointCost;
-	local X2AbilityTarget_Cursor        CursorTarget;
-	local X2AbilityMultiTarget_Radius   RadiusMultiTarget;
-	local X2Condition_SoldierRank		SoldierRank;
+	local X2AbilityTemplate					Template;
+	//local X2AbilityCooldown_Global		GlobalCooldown;
+	local X2AbilityCost_ActionPoints		ActionPointCost;
+	local X2AbilityTarget_Cursor			CursorTarget;
+	local X2AbilityMultiTarget_Radius		RadiusMultiTarget;
+	local X2Condition_SoldierRank			SoldierRank;
+	local X2Effect_AerialScout				AerialScout;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Deploy');
 
@@ -260,7 +173,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.AddShooterEffectExclusions();
 
 	SoldierRank = new class'X2Condition_SoldierRank';
-	SoldierRank.MinRank = `GetConfigInt("DynamicDeploymentMinRank");
+	SoldierRank.MinRank = `GetConfigInt("IRI_DD_MinRank");
 	Template.AbilityShooterConditions.AddItem(SoldierRank);
 
 	// Targeting and Triggering
@@ -282,6 +195,11 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 
 	// Effects
 	Template.AddShooterEffect(new class'X2Effect_DynamicDeployment');
+
+	AerialScout = new class'X2Effect_AerialScout';
+	AerialScout.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
+	AerialScout.TargetConditions.AddItem(new class'X2Condition_AerialScout');
+	Template.AddShooterEffect(AerialScout);
 	
 	// State and Vis
 	Template.Hostility = eHostility_Neutral;
@@ -465,3 +383,97 @@ static function PrintActionRecursive(X2Action Action, int iLayer)
 		PrintActionRecursive(ChildAction, iLayer + 1);
 	}
 }
+
+
+
+/*
+static function X2AbilityTemplate IRI_DDUnlock_SparkOverdrive()
+{
+	local X2AbilityTemplate						Template;
+	local X2Effect_GrantActionPoints            PointEffect;
+	local X2Effect_Persistent			        ActionPointPersistEffect;
+	local X2Effect_DLC_3Overdrive               OverdriveEffect;
+	local X2Condition_AbilityProperty           AbilityCondition;
+	local X2Effect_PersistentTraversalChange    WallbreakEffect;
+	local X2Effect_PerkAttachForFX              PerkAttachEffect;
+	local X2AbilityTrigger_EventListener		EventListenerTrigger;
+	local X2AbilityCost_Charges					ChargeCost;
+	local X2AbilityCharges                      Charges;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DDUnlock_SparkOverdrive');
+
+	ChargeCost = new class'X2AbilityCost_Charges';
+	ChargeCost.NumCharges = 1;
+	Template.AbilityCosts.AddItem(ChargeCost);
+
+	Charges = new class'X2AbilityCharges';
+	Charges.InitialCharges = 1;
+	Template.AbilityCharges = Charges;
+
+	Template.AbilitySourceName = 'eAbilitySource_Perk';
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.Hostility = eHostility_Neutral;
+	Template.IconImage = "img:///UILibrary_DLC3Images.UIPerk_spark_overdrive";
+
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	
+	EventListenerTrigger = new class'X2AbilityTrigger_EventListener';
+	EventListenerTrigger.ListenerData.Deferral = ELD_OnStateSubmitted;
+	EventListenerTrigger.ListenerData.EventID = class'Help'.default.DDEventName;
+	EventListenerTrigger.ListenerData.Filter = eFilter_Player;
+	EventListenerTrigger.ListenerData.EventFn = class'XComGameState_Ability'.static.AbilityTriggerEventListener_Self;
+	Template.AbilityTriggers.AddItem(EventListenerTrigger);
+
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	PointEffect = new class'X2Effect_GrantActionPoints';
+	PointEffect.NumActionPoints = 1;
+	PointEffect.PointType = class'X2CharacterTemplateManager'.default.StandardActionPoint;
+	Template.AddTargetEffect(PointEffect);
+
+	// A persistent effect for the effects code to attach a duration to
+	ActionPointPersistEffect = new class'X2Effect_Persistent';
+	ActionPointPersistEffect.EffectName = 'OverdrivePerk';
+	ActionPointPersistEffect.BuildPersistentEffect( 1, false, true, false, eGameRule_PlayerTurnEnd );
+	Template.AddTargetEffect(ActionPointPersistEffect);
+
+	OverdriveEffect = new class'X2Effect_DLC_3Overdrive';
+	OverdriveEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
+	OverdriveEffect.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyHelpText(), Template.IconImage, , , Template.AbilitySourceName);
+	Template.AddTargetEffect(OverdriveEffect);
+
+	// A persistent effect for the effects code to attach a duration to
+	PerkAttachEffect = new class'X2Effect_PerkAttachForFX';
+	PerkAttachEffect.EffectName = 'AdaptiveAimPerk';
+	PerkAttachEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd );
+	AbilityCondition = new class'X2Condition_AbilityProperty';
+	AbilityCondition.OwnerHasSoldierAbilities.AddItem('AdaptiveAim');
+	PerkAttachEffect.TargetConditions.AddItem(AbilityCondition);
+	Template.AddTargetEffect(PerkAttachEffect);
+
+	AbilityCondition = new class'X2Condition_AbilityProperty';
+	AbilityCondition.OwnerHasSoldierAbilities.AddItem('WreckingBall');
+	WallbreakEffect = new class'X2Effect_PersistentTraversalChange';
+	WallbreakEffect.AddTraversalChange(eTraversal_BreakWall, true);
+	WallbreakEffect.EffectName = 'WreckingBallTraversal';
+	WallbreakEffect.DuplicateResponse = eDupe_Ignore;
+	WallbreakEffect.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnEnd);
+	WallbreakEffect.TargetConditions.AddItem(AbilityCondition);
+	Template.AddTargetEffect(WallbreakEffect);
+
+	Template.CustomFireAnim = 'IRI_DD_Overdrive'; // Purely for perk activation
+	Template.bShowActivation = false;
+	Template.bSkipFireAction = false;
+	Template.bSkipExitCoverWhenFiring = true;
+
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.FrameAbilityCameraType = eCameraFraming_Never; 
+
+	Template.PostActivationEvents.AddItem('OverdriveActivated');
+
+	Template.AssociatedPlayTiming = SPT_BeforeSequential;
+	
+	return Template;
+}*/

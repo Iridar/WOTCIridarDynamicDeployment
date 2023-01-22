@@ -12,6 +12,9 @@ static final function SetGlobalCooldown(const name AbilityName, const int Cooldo
 	local XComGameState			NewGameState;
 	local XComGameStateHistory	History;
 	local XComGameState_Player	PlayerState;
+	
+// TODO: DEBUG ONLY
+return;
 
 	History = `XCOMHISTORY;
 	PlayerState = XComGameState_Player(History.GetGameStateForObjectID(SourcePlayerID));
