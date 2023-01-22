@@ -53,12 +53,6 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 }
 /// End Issue #409
 
-exec function SetMatineeName(string MatineeName)
-{
-	class'X2Action_DynamicDeployment'.default.UseMatinee = MatineeName;
-
-}
-
 static event OnPostTemplatesCreated()
 {
 	AddGTSUnlock('IRI_DynamicDeployment_GTS_Unlock');
