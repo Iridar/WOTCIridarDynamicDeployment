@@ -22,7 +22,7 @@ function Init()
 	}
 
 	super.Init();
-
+	
 	SetMatineeLocation(TargetLocation);
 	MatineeBaseActor = WorldInfo.Spawn(class'DeployLocationActor', WorldInfo, '', TargetLocation);
 	MatineeBases.AddItem(MatineeBaseActor);

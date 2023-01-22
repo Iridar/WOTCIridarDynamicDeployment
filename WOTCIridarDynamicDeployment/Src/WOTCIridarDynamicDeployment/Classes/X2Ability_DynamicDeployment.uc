@@ -76,11 +76,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	//GlobalCooldown.iNumTurns = `GETMCMVAR(SPARKFALL_COOLDOWN) + `GETMCMVAR(DEPLOY_DELAY_TUNRS);
 	//Template.AbilityCooldown = GlobalCooldown;
 
-	ActionPointCost = new class'X2AbilityCost_ActionPoints';
-	ActionPointCost.iNumPoints = 1;
-	//ActionPointCost.bFreeCost = `GETMCMVAR(SPARKFALL_IS_FREE_ACTION);
-	//ActionPointCost.bConsumeAllPoints = `GETMCMVAR(SPARKFALL_ENDS_TURN);
-	Template.AbilityCosts.AddItem(ActionPointCost);
+	Template.AbilityCosts.AddItem(default.FreeActionCost);
 
 	// Shooter Conditions
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
@@ -164,7 +160,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	ActionPointCost = new class'X2AbilityCost_ActionPoints';
 	ActionPointCost.iNumPoints = 1;
 	//ActionPointCost.bFreeCost = `GETMCMVAR(SPARKFALL_IS_FREE_ACTION);
-	//ActionPointCost.bConsumeAllPoints = `GETMCMVAR(SPARKFALL_ENDS_TURN);
+	ActionPointCost.bConsumeAllPoints = true;
 	Template.AbilityCosts.AddItem(ActionPointCost);
 
 	// Shooter Conditions
@@ -203,7 +199,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	
 	// State and Vis
 	Template.Hostility = eHostility_Neutral;
-	Template.bSkipExitCoverWhenFiring = true;
+	Template.bSkipExitCoverWhenFiring = false;
 	Template.CustomFireAnim = 'HL_SignalPointA';
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;

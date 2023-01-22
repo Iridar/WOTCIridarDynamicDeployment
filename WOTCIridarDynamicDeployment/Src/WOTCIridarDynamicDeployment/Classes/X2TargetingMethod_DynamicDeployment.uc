@@ -91,6 +91,10 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 	}
 
 	`AMLOG("All pawns are spawned, final commit.");
+
+	// Save selected tiles to be used later by the deployment effect
+	class'XComGameState_DynamicDeployment'.static.SavePrecisionDropTiles_SubmitGameState(PrecisionDropUnitStates, PrecisionDropTiles);
+
 	return true;
 }
 
@@ -370,13 +374,6 @@ function Canceled()
 	ReleaseAllPawns(); // In case some hotkey isn't caught by StagedCancel(), such as switching to another ability or something.
 	Pres.m_kTacticalHUD.Movie.Stack.UnsubscribeFromOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
 	super.Canceled();
-}
-
-function Committed()
-{
-	// Save selected tiles to be used later by the deployment effect
-	class'XComGameState_DynamicDeployment'.static.SavePrecisionDropTiles_SubmitGameState(PrecisionDropUnitStates, PrecisionDropTiles);
-	super.Committed();
 }
 
 private function ReleaseAllPawns()

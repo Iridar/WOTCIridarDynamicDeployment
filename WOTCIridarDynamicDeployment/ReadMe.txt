@@ -15,7 +15,14 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Modpreview
 // TODO: Mod description
 // comments
-// TODO: add compatibility for lightning strike GTS tactic--cancelled
+
+// MCM configurable
+
+Restore global cooldown
+
+Do something about cutscene not playing on mission start (worst case scenario: make cutscene play only after loading a save)
+Do something about visualization of pod activation hanging (worst case scenario: remove pod cutscene via PostBuildVis)
+
 MCM toggles for dead, unconscious or captured soldiers. 
 
 TODO: Disable DD on Avenger Defense mission and waterworld. 
@@ -24,13 +31,14 @@ Potentially replace it with a psi gate on the water world.
 Add a delay to DD equal to number of soldiers selected.
 TODO: Call for evac should put DD on cooldown. Compatibility with Request Evac here. Just let it slide on missions with fixed evac? 
 
-Figure out why SPARKs land with their feet halfway into the ground.
+
+
 TODO: Disable DD in Jet Packs mod if this mod is present.
 
 # Universal:
-- Wider DD area for this unit (requires precision drop)
 
-- This unit doesn't count towards DD delay (high AP cost)
+- Mobility boost after deployment
+- Stat boosts for staying in deployment area (or moving less than six tiles)
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

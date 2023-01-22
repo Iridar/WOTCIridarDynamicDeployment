@@ -231,10 +231,8 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local bool								bAtLeastOneUnitIsSparkLike;
 	local X2Action							CommonParent;
 	local X2Action_UnstreamMap				UnstreamMap;
-	local bool								bSteamMaps;
-	local XComTacticalMissionManager			MissionManager;	
-	local MissionIntroDefinition				MissionIntro;
-	local AdditionalMissionIntroPackageMapping	AdditionalIntroPackage;
+	local bool								bStreamedMaps;
+	local bool								bUndergroundPlot;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -266,39 +264,10 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	LookAtTargetAction.LookAtDuration = 3.0f;
 	CommonParent = LookAtTargetAction;
 
-	// Play dust particle effect while underground
-	if (IsUndergroundPlot())
-	{
-		// The effect will play at the same time as the unit drop animation.
-		EffectAction = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
-		EffectAction.EffectName = "FX_Tunnel_Reinforcements.P_Unit_Drop";
-		EffectAction.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
-	}
-	else // Play the "running off skyranger" matinee here
+	bUndergroundPlot = IsUndergroundPlot();
+	if (!bUndergroundPlot) // Play the "running off skyranger" matinee here
 	{	
-		bSteamMaps = true;
-
-		MissionManager = `TACTICALMISSIONMGR;
-		MissionIntro = MissionManager.GetActiveMissionIntroDefinition();
-
-		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		StreamMap.MapToStream = MissionIntro.MatineePackage;
-		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
-
-		`AMLOG("Streaming map:" @ StreamMap.MapToStream);
-
-		// load any additional maps that were added by mods
-		foreach MissionManager.AdditionalMissionIntroPackages(AdditionalIntroPackage)
-		{
-			if (AdditionalIntroPackage.OriginalIntroMatineePackage == MissionIntro.MatineePackage)
-			{
-				StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-				StreamMap.MapToStream = AdditionalIntroPackage.AdditionalIntroMatineePackage;
-				StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
-
-				`AMLOG("Streaming map:" @ StreamMap.MapToStream);
-			}
-		}
+		bStreamedMaps = true;
 
 		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		StreamMap.MapToStream = "CIN_SkyrangerIntros";
@@ -347,14 +316,30 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		
 		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 
-		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
+		if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
 		{
-			AnimationAction.Params.AnimName = 'HL_DynamicDeploymentSilent';
+			if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeploymentSilent';
+			}
+			else
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
+			}
 		}
 		else
 		{
-			AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
+			if (bUndergroundPlot)
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment_Underground';
+			}
+			else
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
+			}
 		}
+		
+
 		AnimationAction.Params.BlendTime = 0.0f;
 
 		// Apparently this isn't neccessary and it only makes SPARKs land halfway into the ground.
@@ -408,10 +393,8 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		DeployGremlin.MoveLocation = World.GetPositionFromTileCoordinates(GremlinTile);
 	}
 
-	if (bSteamMaps)
+	if (bStreamedMaps)
 	{
-		class'X2Action_UnstreamDropshipIntro'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded);
-
 		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		UnstreamMap.MapToUnstream = "CIN_SkyrangerIntros";
 
