@@ -32,9 +32,6 @@ Potentially replace it with a psi gate on the water world.
 TODO: Call for evac should put DD on cooldown. Compatibility with Request Evac here. Just let it slide on missions with fixed evac? 
 
 
-# Universal:
-
-- Mobility boost after deployment
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

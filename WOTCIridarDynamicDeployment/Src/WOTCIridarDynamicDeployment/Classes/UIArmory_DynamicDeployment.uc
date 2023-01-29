@@ -215,7 +215,7 @@ simulated function PopulateData()
 		AbilityCommodity.Desc = Template.GetMyLongDescription(, UnitState);
 		if (DDUnlock.MutuallyExclusiveUnlocks.Length > 0)
 		{
-			AbilityCommodity.Desc @= `GetLocalizedString("IRI_DynamicDeployment_MutuallyExclusiveUnlock") @ GetListOfMutuallyExclusiveUnlocks(DDUnlock.MutuallyExclusiveUnlocks);
+			AbilityCommodity.Desc $= `YELLOW("\n" $ `GetLocalizedString("IRI_DynamicDeployment_MutuallyExclusiveUnlock") @ GetListOfMutuallyExclusiveUnlocks(DDUnlock.MutuallyExclusiveUnlocks));
 		}
 		arrItems.AddItem(AbilityCommodity);
 

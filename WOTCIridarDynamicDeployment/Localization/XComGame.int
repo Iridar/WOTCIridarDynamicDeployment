@@ -51,3 +51,9 @@ LocLongDescription="Gain bonuses until dashing"
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 LocFlyOverText="Take and Hold"
 
+[IRI_DDUnlock_HitGroundRunning X2AbilityTemplate]
+LocFriendlyName="Hit The Ground Running"
+LocLongDescription="Gain mobility bonus for one turn after deployment."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+LocFlyOverText="Hit The Ground Running"
+
