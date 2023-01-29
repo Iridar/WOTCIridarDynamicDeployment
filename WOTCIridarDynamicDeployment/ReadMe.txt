@@ -11,9 +11,9 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 
 // TODO: Localization
 // TODO: Stuff configurable
-// Ability icons
 // TODO: Modpreview
 // TODO: Mod description
+// TODO: Icons for abilities
 // comments
 
 // MCM configurable
@@ -28,17 +28,13 @@ MCM toggles for dead, unconscious or captured soldiers.
 TODO: Disable DD on Avenger Defense mission and waterworld. 
 
 Potentially replace it with a psi gate on the water world. 
-Add a delay to DD equal to number of soldiers selected.
+
 TODO: Call for evac should put DD on cooldown. Compatibility with Request Evac here. Just let it slide on missions with fixed evac? 
 
-
-
-TODO: Disable DD in Jet Packs mod if this mod is present.
 
 # Universal:
 
 - Mobility boost after deployment
-- Stat boosts for staying in deployment area (or moving less than six tiles)
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

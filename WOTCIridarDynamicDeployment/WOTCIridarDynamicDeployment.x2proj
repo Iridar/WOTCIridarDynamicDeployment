@@ -105,6 +105,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_TakeAndHold.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2EventListener_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>

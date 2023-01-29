@@ -1,6 +1,6 @@
 class X2Ability_DynamicDeployment extends X2Ability;
 
-// TODO: Icons for abilities
+
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -13,7 +13,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', ""));
-	
+	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	
 	//Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
 
@@ -23,6 +23,49 @@ static function array<X2DataTemplate> CreateTemplates()
 	return Templates;
 }
 
+
+static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
+{
+	local X2AbilityTemplate		Template;
+	local X2Effect_TakeAndHold	TakeAndHold;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DDUnlock_TakeAndHold');
+
+	// Icon Setup
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.DynamicDeployment";
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
+	Template.AbilitySourceName = 'eAbilitySource_Commander';
+	SetHidden(Template);
+	Template.bDontDisplayInAbilitySummary = false;
+
+	// Targeting and Triggering
+	SetSelfTarget_WithEventTrigger(Template, class'Help'.default.DDEventName, ELD_OnStateSubmitted, eFilter_Player, 50);
+
+	// Shooter Conditions
+	// Incase you get dead'ed by overwatch or something
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+	
+	// Effects
+	TakeAndHold = new class'X2Effect_TakeAndHold';
+	TakeAndHold.BuildPersistentEffect(2, false, true, false, eGameRule_PlayerTurnBegin);
+	TakeAndHold.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
+	TakeAndHold.AddPersistentStatChange(eStat_Offense, 10);
+	TakeAndHold.AddPersistentStatChange(eStat_Defense, 10);
+	Template.AddShooterEffect(TakeAndHold);
+
+	// State and Vis
+	Template.Hostility = eHostility_Neutral;
+	Template.bSkipExitCoverWhenFiring = true;
+	Template.bSkipFireAction = true;
+	Template.bShowActivation = true;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	
+	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
+	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+	
+	return Template;
+}
 
 static private function X2AbilityTemplate CreatePassiveDDUnlock(const name TemplateName, const string strImage)
 {
@@ -55,7 +98,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 {
 	local X2AbilityTemplate             Template;
 //	local X2AbilityCooldown_Global      GlobalCooldown;
-	local X2AbilityCost_ActionPoints    ActionPointCost;
 	local X2Condition_SoldierRank		SoldierRank;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');

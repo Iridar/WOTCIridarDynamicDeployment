@@ -214,7 +214,6 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local X2Action_DeployGremlin			DeployGremlin;
 	local TTile								GremlinTile;
 	local X2Action_CameraLookAt				LookAtTargetAction;
-	local X2Action_PlayEffect				EffectAction;
 	local X2Action_SelectNextActiveUnit		SelectUnitAction;
 	local X2Action_StreamMap				StreamMap;
 	local X2Action_DynamicDeployment		SkyrangerIntro;
