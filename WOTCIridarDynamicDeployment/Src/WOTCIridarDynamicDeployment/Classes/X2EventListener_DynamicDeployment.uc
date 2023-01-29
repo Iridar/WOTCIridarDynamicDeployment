@@ -135,8 +135,43 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.RegisterInStrategy = false;
 
 	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
+	Template.AddCHEvent('EvacZonePlaced', OnEvacZonePlaced, ELD_OnStateSubmitted);
+
+	// This event probably isn't triggered by anything other Request Evac, but better safe than sorry,
+	// since if the event is triggered, but Request Evac isn't present, we're gonna hard crash the game.
+	if (class'Help'.static.IsModActive('RequestEvac'))
+	{
+		Template.AddCHEvent('EvacSpawnerCreated', OnEvacSpawnerCreated, ELD_OnStateSubmitted);
+	}
 
 	return Template;
+}
+
+static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local StateObjectReference PlayerStateRef;
+	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
+
+	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
+
+	RequestEvacState = XComGameState_RequestEvac(EventSource);
+	if (RequestEvacState == none)
+		return ELR_NoInterrupt;
+
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown, PlayerStateRef.ObjectID); // TODO: Configurable
+
+	return ELR_NoInterrupt;
+}
+
+static private function EventListenerReturn OnEvacZonePlaced(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local StateObjectReference PlayerStateRef;
+
+	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
+
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerStateRef.ObjectID); // TODO: Configurable
+
+	return ELR_NoInterrupt;
 }
 
 

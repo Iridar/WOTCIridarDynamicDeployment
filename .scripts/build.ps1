@@ -17,6 +17,8 @@ $builder = [BuildProject]::new("WOTCIridarDynamicDeployment", $srcDirectory, $sd
 
 # Uncomment the next line to enable building against Highlander.
 $builder.IncludeSrc("$srcDirectory\X2WOTCCommunityHighlander\X2WOTCCommunityHighlander\Src")
+$builder.IncludeSrc("C:\Program Files (x86)\Steam\steamapps\workshop\content\268500\1823265096\Src")
+
 
 switch ($config)
 {

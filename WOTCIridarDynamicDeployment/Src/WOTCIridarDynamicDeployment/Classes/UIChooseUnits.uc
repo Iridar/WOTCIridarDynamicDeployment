@@ -138,6 +138,7 @@ function UpdateConfirmButtonVisibility()
 private function OnConfirmButtonClicked(UIButton Button)
 {	
 	local StrategyCost EmptyCost;	
+	local int DeployDelay;
 
 	CalculateTotalCost();
 
@@ -154,8 +155,11 @@ private function OnConfirmButtonClicked(UIButton Button)
 	}
 	else
 	{
+		DeployDelay = DDObject.GetDeployDelay();
+
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourcePlayerID); // Set huge cooldown for now, actual cooldown will be set by the deploy abiltiy
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DDObject.GetDeployDelay(), SourcePlayerID);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DeployDelay, SourcePlayerID);
+		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourcePlayerID);
 		CloseScreen();
 	}
 }
@@ -208,6 +212,7 @@ private function RaiseConfirmPayCostDialog()
 private function OnConfirmPayCostDialogCallback(Name eAction)
 {
 	local XComGameState NewGameState;
+	local int DeployDelay;
 
 	// `XTACTICALSOUNDMGR.PlaySoundEvent("Play_MenuClickNegative");
 
@@ -217,8 +222,12 @@ private function OnConfirmPayCostDialogCallback(Name eAction)
 		XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(XComHQ.Class, XComHQ.ObjectID));
 		XComHQ.PayStrategyCost(NewGameState, TotalCost, DummyArray);
 
+		DeployDelay = DDObject.GetDeployDelay();
+
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourcePlayerID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DDObject.GetDeployDelay(), SourcePlayerID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DeployDelay, SourcePlayerID, NewGameState);
+		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourcePlayerID, NewGameState);
+
 		`GAMERULES.SubmitGameState(NewGameState);
 
 		CloseScreen();
