@@ -3,6 +3,8 @@ class X2Effect_DynamicDeployment extends X2Effect config(DynamicDeployment);
 var protected config array<name> AFTER_SPAWN_ACTION_POINTS;
 var protected X2Condition_Visibility VisibilityCondition;
 
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
+
 // TODO: Resolve reveal AI issue
 // TODO: Replace matinee animations for soldiers
 // TODO: Some skyranger intros appear to be broken (only with SPARKs-only DD?)
@@ -37,8 +39,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		PlayerState = XComGameState_Player(NewGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
 	}
 		
-	// Put the SPARK Fall on cooldown // TODO: Why is this commented out?
-	//class'Help'.static.SetGlobalCooldown('IRI_SparkFall', `GETMCMVAR(SPARKFALL_COOLDOWN), TargetUnitState.ControllingPlayer.ObjectID, NewGameState);
+	// Put DD Soldier Select on cooldown.
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 
 	DDObject = XComGameState_DynamicDeployment(History.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
@@ -263,7 +265,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	LookAtTargetAction.LookAtDuration = 3.0f;
 	CommonParent = LookAtTargetAction;
 
-	bUndergroundPlot = IsUndergroundPlot();
+	bUndergroundPlot = class'Help'.static.IsUndergroundPlot();
 	if (!bUndergroundPlot) // Play the "running off skyranger" matinee here
 	{	
 		bStreamedMaps = true;
@@ -405,33 +407,6 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 
 		
 	}
-}
-
-static final protected function bool IsUndergroundPlot()
-{
-	local XComGameState_BattleData	BattleData;
-	local XComGameState_MissionSite MissionSite;
-	local XComGameStateHistory		History;
-
-	History = `XCOMHISTORY;
-	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData', true));
-	if (BattleData != none)
-	{
-		MissionSite = XComGameState_MissionSite(History.GetGameStateForObjectID(BattleData.m_iMissionID));
-		if (MissionSite != none)
-		{
-			switch (MissionSite.GeneratedMission.Plot.strType)
-			{
-				case "Tunnels_Sewer":
-				case "Tunnels_Subway":
-				case "Stronghold":
-					return true;
-				default:
-					break;
-			}
-		}
-	}
-	return false;
 }
 
 

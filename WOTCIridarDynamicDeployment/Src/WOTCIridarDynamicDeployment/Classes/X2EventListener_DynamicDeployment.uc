@@ -1,5 +1,7 @@
 class X2EventListener_DynamicDeployment extends X2EventListener;
 
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
+
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
@@ -135,7 +137,7 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.RegisterInStrategy = false;
 
 	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
-	Template.AddCHEvent('EvacZonePlaced', OnEvacZonePlaced, ELD_OnStateSubmitted);
+	//Template.AddCHEvent('EvacZonePlaced', OnEvacZonePlaced, ELD_OnStateSubmitted);
 
 	// This event probably isn't triggered by anything other Request Evac, but better safe than sorry,
 	// since if the event is triggered, but Request Evac isn't present, we're gonna hard crash the game.
@@ -144,7 +146,41 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 		Template.AddCHEvent('EvacSpawnerCreated', OnEvacSpawnerCreated, ELD_OnStateSubmitted);
 	}
 
+	Template.AddCHEvent('PlayerTurnBegun', OnFirstTurn, ELD_OnStateSubmitted);
+
 	return Template;
+}
+
+static private function EventListenerReturn OnFirstTurn(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
+{
+	local XComGameState_Player PlayerState;
+
+	PlayerState = XComGameState_Player(EventSource);
+	if (PlayerState == none || PlayerState.GetTeam() != eTeam_XCom)
+		return ELR_NoInterrupt;
+		
+	if (IsFirstTurn())
+	{
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
+	}
+
+	return ELR_NoInterrupt;
+}
+
+static private function bool IsFirstTurn()
+{
+	local XComGameStateHistory		History;
+	local XComGameState_BattleData	BattleData;
+
+	History = `XCOMHISTORY;
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (BattleData == none)
+	{
+		`AMLOG("WARNING :: No Battle Data!" @ GetScriptTrace());
+		return false;
+	}
+
+    return BattleData.TacticalTurnCount == 1;
 }
 
 static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
@@ -158,21 +194,21 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 	if (RequestEvacState == none)
 		return ELR_NoInterrupt;
 
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown, PlayerStateRef.ObjectID); // TODO: Configurable
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown + class'XComGameState_RequestEvac'.default.TurnsBeforeEvacExpires, PlayerStateRef.ObjectID);
 
 	return ELR_NoInterrupt;
 }
 
-static private function EventListenerReturn OnEvacZonePlaced(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
-{
-	local StateObjectReference PlayerStateRef;
-
-	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
-
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerStateRef.ObjectID); // TODO: Configurable
-
-	return ELR_NoInterrupt;
-}
+//static private function EventListenerReturn OnEvacZonePlaced(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+//{
+//	local StateObjectReference PlayerStateRef;
+//
+//	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
+//
+//	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerStateRef.ObjectID); 
+//
+//	return ELR_NoInterrupt;
+//}
 
 
 static private function EventListenerReturn OnOverridePersonnelStatus(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
@@ -191,7 +227,7 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 	{
 		OverrideTuple = XComLWTuple(EventData);
 		OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
-		OverrideTuple.Data[4].i = eUIState_Highlight;
+		OverrideTuple.Data[4].i = eUIState_Warning;
 	}
 
 	return ELR_NoInterrupt;

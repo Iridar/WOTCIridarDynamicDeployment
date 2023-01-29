@@ -1,5 +1,7 @@
 class XComGameState_DynamicDeployment extends XComGameState_BaseObject;
 
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
+
 struct PrecisionDropTileStorageStruct
 {
 	var int		UnitObjectID;
@@ -66,6 +68,8 @@ final function int GetDeployDelay()
 	local XComGameState_Unit		UnitState;
 	local int						iDelay;
 
+	iDelay = `GETMCMVAR(DD_SOLDIER_SELECT_DELAY_TURNS_FLAT);
+
 	UnitStates = GetUnitsToDeploy();
 	foreach UnitStates(UnitState)
 	{
@@ -73,7 +77,7 @@ final function int GetDeployDelay()
 		{
 			continue;
 		}
-		iDelay++;
+		iDelay += `GETMCMVAR(DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT);
 	}
 	return iDelay;
 }
@@ -231,7 +235,7 @@ final function GetSpawnLocations(const vector DesiredLocation, const out array<X
 	SpawnLocation = DesiredLocation;
 	SpawnTile = World.GetTileCoordinatesFromPosition(SpawnLocation);
 	NumUnitsDeploying = DeployingUnits.Length;
-	Width = Max(5, FCeil(Sqrt(NumUnitsDeploying))); // TODO: Replace 5 with configured value
+	Width = Max(`GetConfigFloat("IRI_DD_DeploymentAreaRadius") + 0.5f, FCeil(Sqrt(NumUnitsDeploying)));
 	SpawnTile.X -= FFloor(float(Width) / 2.0f); // GetSpawnTilePossibilities treats the given tile as upper left corner, not as center. Apply offset equal to half width.
 	SpawnTile.Y -= FFloor(float(Width) / 2.0f);
 
@@ -329,24 +333,39 @@ final function bool CanSelectMoreSoldiers()
 	local XComGameState_MissionSite			MissionState;
 	local XComGameState_HeadquartersXCom	XComHQ;
 	local XComGameStateHistory				History;
+	local XComGameState_Unit				UnitState;
 	local int CurrentSquadSize;
 	local int i;
 
-	//if (`GETMCMVAR(ALLOW_SPARKFALL_AT_FULL_SQUAD))
-	//{
-	//	return true;
-	//}
-	
 	History = `XCOMHISTORY;
 	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
 	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(XComHQ.MissionRef.ObjectID));
 
 	CurrentSquadSize = 0;
-	for (i=0; i < XComHQ.Squad.Length; i++)
+	for (i = 0; i < XComHQ.Squad.Length; i++)
 	{
-		if (XComHQ.Squad[i].ObjectID != 0) CurrentSquadSize++;
+		if (XComHQ.Squad[i].ObjectID == 0)
+			continue;
+
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(XComHQ.Squad[i].ObjectID));
+		if (UnitState == none)
+			continue;
+
+		if (UnitState.IsDead() && !`GETMCMVAR(COUNT_DEAD_SOLDIERS))
+			continue;
+
+		if (UnitState.bCaptured && !`GETMCMVAR(COUNT_CAPTURED_SOLDIERS))
+			continue;
+
+		if (UnitState.IsUnconscious() && !`GETMCMVAR(COUNT_UNCONSCIOUS_SOLDIERS))
+			continue;
+
+		if (UnitState.IsBleedingOut() && !`GETMCMVAR(COUNT_BLEEDING_OUT_SOLDIERS))
+			continue;
+
+		CurrentSquadSize++;
 	}
-	return CurrentSquadSize + SelectedUnitIDs.Length < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState);
+	return CurrentSquadSize + SelectedUnitIDs.Length < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
 }
 
 DefaultProperties

@@ -16,3 +16,61 @@ IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will co
 
 IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
 IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n"%Cost%"\n\nThe cost will be paid immediately. Do you accept?"
+
+IRI_DD_UnitPreparingForDeployment = "Preparing for deployment"
+
+[WOTCIridarDynamicDeployment_MCMScreen]
+
+ModName = "Dynamic Deployment"
+PageTitle = "Dynamic Deployment"
+GroupHeader = "Soldier Selection Options"
+GroupHeader2 = "Soldier Deployment Options"
+GroupHeader3 = "Misc"
+EndLabel = "Created by Iridar | www.patreon.com/Iridar"
+EndLabel_Tip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me at Patreon so I can afford the time to make more awesome mods <3"
+
+DD_OVER_SQUAD_SIZE_OFFSET_Label = "Allowed soldiers above Squad Size"
+DD_OVER_SQUAD_SIZE_OFFSET_Tip = "How many soldiers above current Squad Size can be deployed via Dynamic Deployment."
+
+DD_MISSION_START_DELAY_TURNS_Label = "Mission start delay, turns"
+DD_MISSION_START_DELAY_TURNS_Tip = "Number of turns from the start of the mission that must pass before you can use Dynamic Deployment for the first time."
+
+DD_AFTER_DEPLOY_COOLDOWN_Label = "Dynamic Deployment cooldown"
+DD_AFTER_DEPLOY_COOLDOWN_Tip = "The number of turns that must pass before you can use Dynamic Deployment again."
+
+DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Label = "Deploy delay flat, turns"
+DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Tip = "The number of turns that must pass between you selecting a unit to deploy, and you being able to drop that unit on the battlefield."
+
+DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Label = "Deploy delay per unit, turns"
+DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Tip = "The number of turns that must pass between you selecting a unit to deploy, and you being able to drop that unit on the battlefield."
+
+
+COUNT_DEAD_SOLDIERS_Label = "Count dead soldiers"
+COUNT_DEAD_SOLDIERS_Tip = ""
+
+COUNT_CAPTURED_SOLDIERS_Label = "Count captured soldiers"
+COUNT_CAPTURED_SOLDIERS_Tip = ""
+
+COUNT_UNCONSCIOUS_SOLDIERS_Label = "Count unconscious soldiers"
+COUNT_UNCONSCIOUS_SOLDIERS_Tip = ""
+
+COUNT_BLEEDING_OUT_SOLDIERS_Label = "Count bleeding out soldiers"
+COUNT_BLEEDING_OUT_SOLDIERS_Tip = ""
+
+SQUAD_MUST_SEE_TILE_Label = "Squad must see selected tile"
+SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in squad must see the selected location for deployment, i.e. you will not be able to deploy a unit into fog of war."
+
+DEPLOY_CAST_RANGE_TILES_Label = "Deploy range, tiles"
+DEPLOY_CAST_RANGE_TILES_Tip = "The maximum tile distance from the soldier calling for the deployment and the deployment location."
+
+DD_SOLDIER_SELECT_IS_FREE_ACTION_Label = "SPARK Fall is a free action"
+DD_SOLDIER_SELECT_IS_FREE_ACTION_Tip = "If enabled, using SPARK Fall will not cost any action points."
+
+DD_SOLDIER_SELECT_ENDS_TURN_Label = "SPARK Fall ends turn"
+DD_SOLDIER_SELECT_ENDS_TURN_Tip = "If enabled, using SPARK Fall will end soldier's turn, consuming all their remaining action points."
+
+DD_DEPLOY_IS_FREE_ACTION_Label = "Deploy is a free action"
+DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, choosing a location to deploy a unit will not cost any action points."
+
+DD_DEPLOY_ENDS_TURN_Label = "Deploy ends turn"
+DD_DEPLOY_ENDS_TURN_Tip = "If enabled, choosing a deployment location will end soldier's turn, consuming all their remaining action points."

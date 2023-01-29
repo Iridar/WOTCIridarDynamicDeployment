@@ -1,6 +1,6 @@
 class X2Ability_DynamicDeployment extends X2Ability;
 
-
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -138,9 +138,9 @@ static private function X2AbilityTemplate CreatePassiveDDUnlock(const name Templ
 
 static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 {
-	local X2AbilityTemplate             Template;
-//	local X2AbilityCooldown_Global      GlobalCooldown;
+	local X2AbilityTemplate				Template;
 	local X2Condition_SoldierRank		SoldierRank;
+	local X2AbilityCost_ActionPoints	ActionPointCost;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');
 
@@ -156,15 +156,14 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.bDisplayInUITooltip = false;
 	
 	// Cost and Cooldown
-	//GlobalCooldown = new class'X2AbilityCooldown_Global';
-	//GlobalCooldown.iNumTurns = `GETMCMVAR(SPARKFALL_COOLDOWN) + `GETMCMVAR(DEPLOY_DELAY_TUNRS);
-	//Template.AbilityCooldown = GlobalCooldown;
-
-	Template.AbilityCosts.AddItem(default.FreeActionCost);
+	ActionPointCost = new class'X2AbilityCost_ActionPoints';
+	ActionPointCost.iNumPoints = 1;
+	ActionPointCost.bFreeCost = `GETMCMVAR(DD_SOLDIER_SELECT_IS_FREE_ACTION);
+	ActionPointCost.bConsumeAllPoints = `GETMCMVAR(DD_SOLDIER_SELECT_ENDS_TURN);
+	Template.AbilityCosts.AddItem(ActionPointCost);
 
 	// Shooter Conditions
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-	//Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkFall');
 	Template.AddShooterEffectExclusions();
 
 	SoldierRank = new class'X2Condition_SoldierRank';
@@ -209,14 +208,14 @@ static final function DynamicDeployment_Select_BuildVisualization(XComGameState 
 	FireAction = X2Action_Fire(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_Fire', SourceVisualizer));
 	ActionMetadata = FireAction.Metadata;
 
-	class'X2Action_SelectUnits'.static.AddToVisualizationTree(ActionMetadata, Context, false, FireAction);
+	class'X2Action_SelectUnits'.static.AddToVisualizationTree(ActionMetadata, Context, false,, FireAction.ParentActions);
 }
 
 
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 {
 	local X2AbilityTemplate					Template;
-	//local X2AbilityCooldown_Global		GlobalCooldown;
+	local X2AbilityCooldown_Global			GlobalCooldown;
 	local X2AbilityCost_ActionPoints		ActionPointCost;
 	local X2AbilityTarget_Cursor			CursorTarget;
 	local X2AbilityMultiTarget_Radius		RadiusMultiTarget;
@@ -237,14 +236,14 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.bDisplayInUITooltip = false;
 
 	// Cost and Cooldown
-	//GlobalCooldown = new class'X2AbilityCooldown_Global';
-	//GlobalCooldown.iNumTurns = `GETMCMVAR(SPARKFALL_COOLDOWN) + `GETMCMVAR(DEPLOY_DELAY_TUNRS);
-	//Template.AbilityCooldown = GlobalCooldown;
+	GlobalCooldown = new class'X2AbilityCooldown_Global';
+	GlobalCooldown.iNumTurns = `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN);
+	Template.AbilityCooldown = GlobalCooldown;
 
 	ActionPointCost = new class'X2AbilityCost_ActionPoints';
 	ActionPointCost.iNumPoints = 1;
-	//ActionPointCost.bFreeCost = `GETMCMVAR(SPARKFALL_IS_FREE_ACTION);
-	ActionPointCost.bConsumeAllPoints = true;
+	ActionPointCost.bFreeCost = `GETMCMVAR(DD_DEPLOY_IS_FREE_ACTION);
+	ActionPointCost.bConsumeAllPoints = `GETMCMVAR(DD_DEPLOY_ENDS_TURN);
 	Template.AbilityCosts.AddItem(ActionPointCost);
 
 	// Shooter Conditions
@@ -260,12 +259,12 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.AbilityToHitCalc = default.DeadEye;
 
 	CursorTarget = new class'X2AbilityTarget_Cursor';
-	CursorTarget.FixedAbilityRange = `TILESTOMETERS(16);
-	CursorTarget.bRestrictToSquadsightRange =  true;
+	CursorTarget.FixedAbilityRange = `TILESTOMETERS(`GETMCMVAR(DEPLOY_CAST_RANGE_TILES));
+	CursorTarget.bRestrictToSquadsightRange = `GETMCMVAR(SQUAD_MUST_SEE_TILE);
 	Template.AbilityTargetStyle = CursorTarget;
 
 	RadiusMultiTarget = new class'X2AbilityMultiTarget_Radius';
-	RadiusMultiTarget.fTargetRadius = 4.5f; // TODO: Configurable and mirror to GetSpawnLocations
+	RadiusMultiTarget.fTargetRadius = `GetConfigFloat("IRI_DD_DeploymentAreaRadius"); // Also used in GetSpawnLocations()
 	RadiusMultiTarget.bIgnoreBlockingCover = false; 
 	Template.AbilityMultiTargetStyle = RadiusMultiTarget;
 

@@ -8,7 +8,7 @@ event name CallMeetsCondition(XComGameState_BaseObject kTarget)
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
 
-	if (class'X2Effect_DynamicDeployment'.static.IsUndergroundPlot())
+	if (class'Help'.static.IsUndergroundPlot())
 	{
 		return 'AA_AbilityUnavailable';
 	}

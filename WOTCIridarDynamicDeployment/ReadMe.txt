@@ -10,24 +10,29 @@ Get news and updates here:
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
 // TODO: Localization
-// TODO: Stuff configurable
+
 // TODO: Modpreview
 // TODO: Mod description
 // TODO: Icons for abilities
-// comments
+// TODO: comments
+// TODO: debug console commands for removing and adding DD unlocks
 
-// MCM configurable
+// Polish MCM
+// More Stuff configurable, if there is anything
 
-Restore global cooldown
+// Select/Deploy ability template visibility
+
+Allow DD on missions with fixed evac?
+XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac
 
 Do something about cutscene not playing on mission start (worst case scenario: make cutscene play only after loading a save)
 Do something about visualization of pod activation hanging (worst case scenario: remove pod cutscene via PostBuildVis)
 
-MCM toggles for dead, unconscious or captured soldiers. 
-
 TODO: Disable DD on Avenger Defense mission and waterworld. 
 
-Potentially replace it with a psi gate on the water world. 
+Psi Gate deployment after new Shadow Research
+
+TODO: Polish deploy camera framing, maybe removing framing from the ability itself and increase camera hold while soldiers are dropping
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
