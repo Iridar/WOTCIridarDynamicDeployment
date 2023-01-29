@@ -49,7 +49,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_HitGroundRunning()
 	StatChange = new class'X2Effect_PersistentStatChange';
 	StatChange.BuildPersistentEffect(1, false, true, false, eGameRule_PlayerTurnBegin);
 	StatChange.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
-	StatChange.AddPersistentStatChange(eStat_Mobility, 6); // TODO: Configurable
+	StatChange.AddPersistentStatChange(eStat_Mobility, `GetConfigInt("IRI_DD_HitGroundRunning_MobilityBonus"));
 	Template.AddShooterEffect(StatChange);
 
 	// State and Vis
@@ -91,8 +91,8 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 	TakeAndHold = new class'X2Effect_TakeAndHold';
 	TakeAndHold.BuildPersistentEffect(2, false, true, false, eGameRule_PlayerTurnBegin);
 	TakeAndHold.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
-	TakeAndHold.AddPersistentStatChange(eStat_Offense, 10);  // TODO: Configurable
-	TakeAndHold.AddPersistentStatChange(eStat_Defense, 10);
+	TakeAndHold.AddPersistentStatChange(eStat_Offense, `GetConfigInt("IRI_DD_TakeAndHold_AimBonus")); 
+	TakeAndHold.AddPersistentStatChange(eStat_Defense, `GetConfigInt("IRI_DD_TakeAndHold_DefenseBonus"));
 	Template.AddShooterEffect(TakeAndHold);
 
 	// State and Vis

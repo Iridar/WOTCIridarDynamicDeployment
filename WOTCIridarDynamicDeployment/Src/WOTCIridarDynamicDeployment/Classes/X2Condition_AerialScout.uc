@@ -8,6 +8,11 @@ event name CallMeetsCondition(XComGameState_BaseObject kTarget)
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
 
+	if (class'X2Effect_DynamicDeployment'.static.IsUndergroundPlot())
+	{
+		return 'AA_AbilityUnavailable';
+	}
+
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	UnitStates = DDObject.GetUnitsToDeploy();
 

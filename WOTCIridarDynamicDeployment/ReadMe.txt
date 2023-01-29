@@ -29,10 +29,6 @@ TODO: Disable DD on Avenger Defense mission and waterworld.
 
 Potentially replace it with a psi gate on the water world. 
 
-TODO: Call for evac should put DD on cooldown. Compatibility with Request Evac here. Just let it slide on missions with fixed evac? 
-
-
-
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
 Extraction Team: After the objective is completed, XCOM may deploy up to two additional soldiers near the evac zone. (Appears on fixed evac missions)
@@ -40,6 +36,9 @@ All In: XCOM can drop reinforcements to replace lost soldiers until they have no
 
 
 
+
+[WOTC] Request Evac
+https://steamcommunity.com/sharedfiles/filedetails/?id=1823265096
 
 
 [WOTC] Dynamic Deployment by Iridar

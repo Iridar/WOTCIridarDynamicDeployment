@@ -30,11 +30,6 @@ LocFriendlyName="Precision Drop"
 LocLongDescription="Select precise location for this unit's Dynamic Deployment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 
-[IRI_DDUnlock_ShadowDeployment X2AbilityTemplate]
-LocFriendlyName="Phantom Deployment"
-LocLongDescription="If this unit is not visible to any enemies after deployment, they will automatically enter concealment."
-LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
-
 [IRI_DDUnlock_FastDrop X2AbilityTemplate]
 LocFriendlyName="Fast Drop"
 LocLongDescription="This unit does not count towards the Deployment delay."
@@ -42,7 +37,7 @@ LocHelpText="This unit will no longer break concealment when Dynamically Deploye
 
 [IRI_DDUnlock_AerialScout X2AbilityTemplate]
 LocFriendlyName="Aerial Scout"
-LocLongDescription="Reveals area and units in 6 additional tiles around the deployment area until the end of turn. Revealed area is increased if there are multiple deploying units with Aerial Scout."
+LocLongDescription="Reveals area and units in 6 additional tiles around the deployment area until the end of turn. Revealed area is increased if there are multiple deploying units with Aerial Scout. No effect when deploying underground."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 
 [IRI_DDUnlock_TakeAndHold X2AbilityTemplate]
