@@ -46,6 +46,9 @@
     <Content Include="Content\DDCIN_SkyrangerIntros.umap">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Content\DDCIN_SkyrangerIntros_Spark.umap">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ModPreview.jpg" />
     <Content Include="ContentOptions.json" />
     <Content Include="Config\Base\XComEditor.ini" />

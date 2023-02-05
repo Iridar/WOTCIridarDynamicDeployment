@@ -277,13 +277,12 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		if (bAtLeastOneUnitIsSparkLike)
 		{
 			StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-			StreamMap.MapToStream = "CIN_SkyrangerIntros_Spark";
+			StreamMap.MapToStream = "DDCIN_SkyrangerIntros_Spark";
 			StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 		}
 		
 		SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		SkyrangerIntro.UnitStates = UnitStates;
-		SkyrangerIntro.bAtLeastOneUnitIsSparkLike = bAtLeastOneUnitIsSparkLike;
 		CommonParent = SkyrangerIntro;
 	}
 
@@ -402,7 +401,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		if (bAtLeastOneUnitIsSparkLike)
 		{
 			UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-			UnstreamMap.MapToUnstream = "CIN_SkyrangerIntros_Spark";
+			UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros_Spark";
 		}
 
 		

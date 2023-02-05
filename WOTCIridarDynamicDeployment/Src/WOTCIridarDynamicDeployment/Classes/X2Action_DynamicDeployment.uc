@@ -1,8 +1,6 @@
 class X2Action_DynamicDeployment extends X2Action_PlayMatinee config(GameData);
 
 var array<XComGameState_Unit>	UnitStates;
-var bool bAtLeastOneUnitIsSparkLike;
-
 var private XComGameState_Unit	UnitState;
 
 var private DeployLocationActor MatineeBaseActor;
@@ -70,7 +68,6 @@ simulated function SelectMatineeByTag(string TagPrefix)
 	local Sequence GameSeq;
 	local SeqAct_Interp FoundMatinee;
 	local int Index;
-	local string AdjustedAuxPrefix;
 
 	`AMLOG("Looking for matinee:" @ TagPrefix);
 
@@ -96,11 +93,10 @@ simulated function SelectMatineeByTag(string TagPrefix)
 	}
 
 	// add any layered auxiallary matinees from mods
-	AdjustedAuxPrefix = Repl(TagPrefix, "DD", "");
 	for (Index = 0; Index < FoundMatinees.length; Index++)
 	{
 		FoundMatinee = SeqAct_Interp(FoundMatinees[Index]);
-		if (FoundMatinee.BaseMatineeComment == AdjustedAuxPrefix)
+		if (FoundMatinee.BaseMatineeComment == TagPrefix)
 		{
 			`AMLOG("Found layered matinee:" @ FoundMatinee.ObjComment @ FoundMatinee.BaseMatineeComment);
 			Matinees.AddItem(FoundMatinee);
@@ -153,14 +149,9 @@ Begin:
 
 	AddUnitsToMatinee();
 
-	// B1 - works, but SPARK is misaligned.
-	// B2 - perfect
-	// B3 - misaligned
-	// B4 - perfect
-	// B5 - perfect
-	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("DDIntro B1");
+	PossibleMatinees.AddItem("DDIntro B1");
 	PossibleMatinees.AddItem("DDIntro B2");
-	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("DDIntro B3");
+	PossibleMatinees.AddItem("DDIntro B3");
 	PossibleMatinees.AddItem("DDIntro B4");
 	PossibleMatinees.AddItem("DDIntro B5");
 	SelectedMatinee = PossibleMatinees[Rand(PossibleMatinees.Length)];
