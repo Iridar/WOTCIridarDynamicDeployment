@@ -1,4 +1,4 @@
-class X2Effect_DynamicDeployment extends X2Effect config(DynamicDeployment);
+class X2Effect_DynamicDeployment extends X2Effect_Persistent config(DynamicDeployment);
 
 var protected config array<name> AFTER_SPAWN_ACTION_POINTS;
 var protected X2Condition_Visibility VisibilityCondition;
@@ -48,7 +48,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	UnitStates = DDObject.GetUnitsToDeploy();
-	DDObject.bPendingDeployment = false; // Prevent SparkFall Deploy from being activated again.
+	DDObject.bPendingDeployment = false; // Prevent Deploy from being activated again.
 
 	XComHQ = `XCOMHQ;
 	XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(XComHQ.Class, XComHQ.ObjectID));
@@ -107,6 +107,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	// TODO: Make MCM configurable cooldown here
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerState.ObjectID, NewGameState);
+
+	`AMLOG("Deployment complete");
 }
 
 
@@ -415,9 +417,87 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	}
 }
 
+function RegisterForEvents(XComGameState_Effect EffectGameState)
+{
+	local X2EventManager	EventMgr;
+	local Object			EffectObj;
+
+	EventMgr = `XEVENTMGR;
+	EffectObj = EffectGameState;
+
+	// When set up this way, we'll nuke scamper visualization caused by any unit that was deployed this turn, 
+	// even if they pull pods by moving after deployment.
+	// Unfortunate, but I don't know how else to handle this.
+	// For some reason X2Action_RevealAIBegin just times out in PlayMatinee(), which is native, so no good way to figure it out.
+	EventMgr.RegisterForEvent(EffectObj, 'ScamperBegin', OnScamperBegin, ELD_OnStateSubmitted,, ,, );	
+}
+
+static private function EventListenerReturn OnScamperBegin(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
+{
+	local XComGameState_AIGroup GroupState;
+	local XComGameState_DynamicDeployment DDObject;
+
+	GroupState = XComGameState_AIGroup(EventSource);
+	if (GroupState == none)
+		return ELR_NoInterrupt;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none || !DDObject.IsUnitSelected(GroupState.RevealInstigatorUnitObjectID))
+		return ELR_NoInterrupt;
+		
+	// If we're here, it means scamper was caused by a soldier dropped via DD. 
+	`AMLOG("Adding post build vis");
+	GameState.GetContext().PostBuildVisualizationFn.AddItem(RemovePodReveal_PostBuildVisualization);
+
+	return ELR_NoInterrupt;
+}
+// Pod reveal cinematic for some reason doesn't play properly after DD, so nuke it.
+static private function RemovePodReveal_PostBuildVisualization(XComGameState VisualizeGameState)
+{
+	local XComGameStateVisualizationMgr		VisMgr;	
+	local X2Action_MarkerNamed				ReplaceAction;	
+	local array<X2Action>					FindActions;
+	local X2Action							FindAction;
+
+	`AMLOG("Running");
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+
+	VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_RevealAIBegin', FindActions);
+
+	`AMLOG("Found Reveal AI Begin actions in Build Vis Tree:" @ FindActions.Length);
+	foreach FindActions(FindAction)
+	{
+		ReplaceAction = X2Action_MarkerNamed(class'X2Action'.static.CreateVisualizationActionClass(class'X2Action_MarkerNamed', FindAction.StateChangeContext));
+		ReplaceAction.SetName("ReplaceActionStub1");
+		VisMgr.ReplaceNode(ReplaceAction, FindAction);
+
+		`AMLOG("Nuking Reveal AI Begin action");
+	}
+
+	VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_RevealAIEnd', FindActions);
+
+	`AMLOG("Found Reveal AI End actions in Build Vis Tree:" @ FindActions.Length);
+	foreach FindActions(FindAction)
+	{
+		ReplaceAction = X2Action_MarkerNamed(class'X2Action'.static.CreateVisualizationActionClass(class'X2Action_MarkerNamed', FindAction.StateChangeContext));
+		ReplaceAction.SetName("ReplaceActionStub2");
+		VisMgr.ReplaceNode(ReplaceAction, FindAction);
+
+		`AMLOG("Nuking Reveal AI End action");
+	}
+}
+
+
 
 defaultproperties
 {
+	iNumTurns = 1
+	bInfiniteDuration = false
+	bRemoveWhenSourceDies = false
+	bIgnorePlayerCheckOnTick = false
+	WatchRule = eGameRule_PlayerTurnEnd
+
     Begin Object Class=X2Condition_Visibility Name=DefaultVisibilityCondition
         bNoEnemyViewers = true
     End Object

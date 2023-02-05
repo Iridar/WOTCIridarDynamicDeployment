@@ -25,9 +25,8 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 Allow DD on missions with fixed evac?
 XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac
 
-Do something about visualization of pod activation hanging (worst case scenario: remove pod cutscene via PostBuildVis)
-
 TODO: Disable DD on Avenger Defense mission and waterworld. 
+TODO: Cook the cinematic umaps or find other ways of getting rid of log warnings
 
 Psi Gate deployment after new Shadow Research
 
