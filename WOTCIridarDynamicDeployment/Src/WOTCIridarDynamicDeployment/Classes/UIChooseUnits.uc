@@ -158,22 +158,21 @@ private function OnConfirmButtonClicked(UIButton Button)
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set Global Cooldowns");
 		SetGlobalCooldowns(NewGameState);
 		`GAMERULES.SubmitGameState(NewGameState);
-		DisplayBanners();
+		//DisplayBanners();
 		CloseScreen();
 	}
 }
 
-private function DisplayBanners()
-{
-	local XComGameState_Unit UnitState;
-
-	foreach UnitStates(UnitState)
-	{
-		// TODO: Figure out why this doesn't work. Use `PRESBASE, maybe? And hardcode the strings and replace the image.
-		// Also maybe call this after closing the screen.
-		`PRES.NotifyBanner(`GetLocalizedString("IRI_DD_UnitPreparingForDeployment"), "img:///IRIBountyContractsUI.MapPin_Contract", UnitState.GetFullName(), "", eUIState_Good);
-	}
-}
+// Displaying too many banners at once makes the whole lot of them bug out and not display properly.
+//private function DisplayBanners()
+//{
+//	local XComGameState_Unit UnitState;
+//
+//	foreach UnitStates(UnitState)
+//	{
+//		`PRES.NotifyBanner(`GetLocalizedString("IRI_DD_UnitPreparingForDeployment"), "img:///UILibrary_StrategyImages.X2StrategyMap.MapPin_Landing", UnitState.GetFullName(), "", eUIState_Good);
+//	}
+//}
 
 private function SetGlobalCooldowns(XComGameState NewGameState)
 {
@@ -252,7 +251,7 @@ private function OnConfirmPayCostDialogCallback(Name eAction)
 
 		`GAMERULES.SubmitGameState(NewGameState);
 
-		DisplayBanners();
+		//DisplayBanners();
 		CloseScreen();
 	}
 }
