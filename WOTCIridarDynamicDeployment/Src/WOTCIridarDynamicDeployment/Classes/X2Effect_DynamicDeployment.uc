@@ -234,6 +234,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	local X2Action_UnstreamMap				UnstreamMap;
 	local bool								bStreamedMaps;
 	local bool								bUndergroundPlot;
+	local X2Action_TimedWait				CameraArrive;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -262,27 +263,33 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	// Move camera to deployment location
 	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
-	LookAtTargetAction.LookAtDuration = 3.0f;
-	CommonParent = LookAtTargetAction;
+	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+
+	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	CameraArrive.DelayTimeSec = 1.5f;
+
+	CommonParent = CameraArrive;
 
 	bUndergroundPlot = class'Help'.static.IsUndergroundPlot();
 	if (!bUndergroundPlot) // Play the "running off skyranger" matinee here
 	{	
 		bStreamedMaps = true;
 
-		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
 		StreamMap.MapToStream = "DDCIN_SkyrangerIntros";
 		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 
 		if (bAtLeastOneUnitIsSparkLike)
 		{
-			StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+			StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
 			StreamMap.MapToStream = "DDCIN_SkyrangerIntros_Spark";
 			StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 		}
 		
-		SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		// Begin playing once camera arrives
+		SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
 		SkyrangerIntro.UnitStates = UnitStates;
+
 		CommonParent = SkyrangerIntro;
 	}
 

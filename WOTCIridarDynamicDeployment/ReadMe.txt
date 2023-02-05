@@ -25,14 +25,11 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 Allow DD on missions with fixed evac?
 XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac
 
-Do something about cutscene not playing on mission start (worst case scenario: make cutscene play only after loading a save)
 Do something about visualization of pod activation hanging (worst case scenario: remove pod cutscene via PostBuildVis)
 
 TODO: Disable DD on Avenger Defense mission and waterworld. 
 
 Psi Gate deployment after new Shadow Research
-
-TODO: Polish deploy camera framing, maybe removing framing from the ability itself and increase camera hold while soldiers are dropping
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
