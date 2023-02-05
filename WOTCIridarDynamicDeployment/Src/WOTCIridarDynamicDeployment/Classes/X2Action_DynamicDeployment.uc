@@ -70,6 +70,7 @@ simulated function SelectMatineeByTag(string TagPrefix)
 	local Sequence GameSeq;
 	local SeqAct_Interp FoundMatinee;
 	local int Index;
+	local string AdjustedAuxPrefix;
 
 	`AMLOG("Looking for matinee:" @ TagPrefix);
 
@@ -82,16 +83,6 @@ simulated function SelectMatineeByTag(string TagPrefix)
 
 	Matinees.Length = 0;
 
-	// add any layered auxiallary matinees from mods
-	for (Index = 0; Index < FoundMatinees.length; Index++)
-	{
-		FoundMatinee = SeqAct_Interp(FoundMatinees[Index]);
-		if (FoundMatinee.BaseMatineeComment == TagPrefix)
-		{
-			`AMLOG("Found layered matinee:" @ FoundMatinee.ObjComment @ FoundMatinee.BaseMatineeComment);
-			Matinees.AddItem(FoundMatinee);
-		}
-	}
 
 	for (Index = 0; Index < FoundMatinees.length; Index++)
 	{
@@ -103,6 +94,19 @@ simulated function SelectMatineeByTag(string TagPrefix)
 			break;
 		}
 	}
+
+	// add any layered auxiallary matinees from mods
+	AdjustedAuxPrefix = Repl(TagPrefix, "DD", "");
+	for (Index = 0; Index < FoundMatinees.length; Index++)
+	{
+		FoundMatinee = SeqAct_Interp(FoundMatinees[Index]);
+		if (FoundMatinee.BaseMatineeComment == AdjustedAuxPrefix)
+		{
+			`AMLOG("Found layered matinee:" @ FoundMatinee.ObjComment @ FoundMatinee.BaseMatineeComment);
+			Matinees.AddItem(FoundMatinee);
+		}
+	}
+
 
 	if (Matinees.Length == 0)
 	{
@@ -154,11 +158,11 @@ Begin:
 	// B3 - misaligned
 	// B4 - perfect
 	// B5 - perfect
-	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("Intro B1");
-	PossibleMatinees.AddItem("Intro B2");
-	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("Intro B3");
-	PossibleMatinees.AddItem("Intro B4");
-	PossibleMatinees.AddItem("Intro B5");
+	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("DDIntro B1");
+	PossibleMatinees.AddItem("DDIntro B2");
+	if (!bAtLeastOneUnitIsSparkLike) PossibleMatinees.AddItem("DDIntro B3");
+	PossibleMatinees.AddItem("DDIntro B4");
+	PossibleMatinees.AddItem("DDIntro B5");
 	SelectedMatinee = PossibleMatinees[Rand(PossibleMatinees.Length)];
 	
 	SelectMatineeByTag(SelectedMatinee);

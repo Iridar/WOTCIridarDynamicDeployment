@@ -43,6 +43,9 @@
     <Content Include="ContentForCook\IRIDynamicDeployment_UI.upk">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Content\DDCIN_SkyrangerIntros.umap">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ModPreview.jpg" />
     <Content Include="ContentOptions.json" />
     <Content Include="Config\Base\XComEditor.ini" />
@@ -99,15 +102,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DeployLocationActor.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DD_DropShipMatinee_Actor.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\MSEventListenerTemplate.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\MSEventListener_StrategyListener.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIArmory_DynamicDeployment.uc">

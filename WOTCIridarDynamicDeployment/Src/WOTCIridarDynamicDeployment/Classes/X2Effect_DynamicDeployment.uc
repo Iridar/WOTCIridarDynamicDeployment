@@ -271,7 +271,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		bStreamedMaps = true;
 
 		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		StreamMap.MapToStream = "CIN_SkyrangerIntros";
+		StreamMap.MapToStream = "DDCIN_SkyrangerIntros";
 		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 
 		if (bAtLeastOneUnitIsSparkLike)
@@ -397,7 +397,7 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 	if (bStreamedMaps)
 	{
 		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		UnstreamMap.MapToUnstream = "CIN_SkyrangerIntros";
+		UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros";
 
 		if (bAtLeastOneUnitIsSparkLike)
 		{
