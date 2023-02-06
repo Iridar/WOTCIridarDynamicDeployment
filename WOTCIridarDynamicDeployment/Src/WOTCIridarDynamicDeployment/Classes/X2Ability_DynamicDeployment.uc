@@ -9,8 +9,8 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Select());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
 
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', ""));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', ""));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', ""));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', ""));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
@@ -145,7 +145,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');
 
 	// Icon Setup
-	Template.IconImage = "img:///IRIDynamicDeployment_UI.DynamicDeployment";
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicSelect";
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
@@ -225,7 +225,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Deploy');
 
 	// Icon Setup
-	Template.IconImage = "img:///IRIDynamicDeployment_UI.DynamicDeployment";
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicDeploy";
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
