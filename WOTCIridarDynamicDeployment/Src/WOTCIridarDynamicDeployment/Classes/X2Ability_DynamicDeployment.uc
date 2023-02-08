@@ -11,14 +11,12 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', ""));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', ""));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', "img:///IRIDynamicDeployment_UI.UIPerk_FastDrop"));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
 	
 	//Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
-
-	
 	//Templates.AddItem(IRI_DynamicDeployment_BlackOps());
 
 	return Templates;
@@ -32,8 +30,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_HitGroundRunning()
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DDUnlock_HitGroundRunning');
 
 	// Icon Setup
-	Template.IconImage = "img:///IRIDynamicDeployment_UI.DynamicDeployment";
-	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_HitGroundRunning";
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	SetHidden(Template);
 	Template.bDontDisplayInAbilitySummary = false;
@@ -74,8 +71,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DDUnlock_TakeAndHold');
 
 	// Icon Setup
-	Template.IconImage = "img:///IRIDynamicDeployment_UI.DynamicDeployment";
-	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_TakeAndHold";
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	SetHidden(Template);
 	Template.bDontDisplayInAbilitySummary = false;
@@ -146,7 +142,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 
 	// Icon Setup
 	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicSelect";
-	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 	//Template.OverrideAbilityAvailabilityFn = SparkFall_OverrideAbilityAvailability;
@@ -226,7 +222,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 
 	// Icon Setup
 	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicDeploy";
-	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 1;
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 	//Template.OverrideAbilityAvailabilityFn = SparkFall_OverrideAbilityAvailability;
