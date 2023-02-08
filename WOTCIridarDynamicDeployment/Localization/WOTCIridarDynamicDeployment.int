@@ -12,10 +12,10 @@ IRI_DynamicDeployment_MutuallyExclusiveUnlock = "Mutually exclusive with:"
 IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
 
 IRI_DynamicDeployment_CannotAffordDeployment_Title = "Cannot afford the deployment"
-IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will cost:\n\n"%Cost%"\n\nYou cannot afford this deployment."
+IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will cost:\n\n%Cost%\n\nYou cannot afford this deployment."
 
 IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
-IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n"%Cost%"\n\nThe cost will be paid immediately. Do you accept?"
+IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n%Cost%\n\nThe cost will be paid immediately."
 
 IRI_DD_UnitPreparingForDeployment = "Preparing for deployment"
 
