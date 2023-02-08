@@ -14,7 +14,7 @@ var int SourcePlayerID;
 var private array<XComGameState_Unit> UnitStates;
 var private XComGameState_DynamicDeployment DDObject;
 var private UILargeButton ConfirmButton;
-var private UITacticalHUD TacticalHUD;;
+var private UITacticalHUD TacticalHUD;
 var private UIX2ResourceHeader ResourceContainer;
 
 //`include(WOTCIridarSPARKFall\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
@@ -82,6 +82,7 @@ private function OnSoldierClicked(StateObjectReference UnitRef)
 	`XTACTICALSOUNDMGR.PlaySoundEvent("Play_MenuSelect");
 	RefreshData();
 	UpdateConfirmButtonVisibility();
+	UpdateResources();
 }
 
 simulated function OnCancel()
@@ -217,14 +218,20 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 private function CalculateTotalCost()
 {	
 	local int UnitCostMultiplier;
+	local int NumSelectedUnits;
 
-	UnitCostMultiplier = -100 * DDObject.GetNumSelectedUnits();
+	NumSelectedUnits = DDObject.GetNumSelectedUnits();
+
+	`AMLOG("Num selected units:" @ NumSelectedUnits);
+
+	UnitCostMultiplier = -100 * (NumSelectedUnits - 1);
 
 	TotalCost = XComHQ.GetScaledStrategyCost(PerUnitCost, DummyArray, UnitCostMultiplier);
 
 	class'X2StrategyGameRulesetDataStructures'.static.AddCosts(FlatCost, TotalCost);
 
 	`AMLOG("Total cost:" @ TotalCost.ResourceCosts[0].ItemTemplateName @ TotalCost.ResourceCosts[0].Quantity);
+	`AMLOG("Total cost:" @ TotalCost.ResourceCosts[1].ItemTemplateName @ TotalCost.ResourceCosts[1].Quantity);
 }
 
 private function RaiseCannotAffordCostDialog()
@@ -301,28 +308,71 @@ simulated function SpawnNavHelpIcons() {} // No nav help in tactical
 // --------------------------------------------------------------------------------------------------
 
 
-//Updated the resources based on the current screen context. 
-simulated function UpdateResources()
+//Updated the resources based on the current screen context.
+private function UpdateResources()
 {
+	local ArtifactCost	Cost;
+	local string		Label;
+	local int			CurrentResource;
+	local int			CostResource;
+	local string		ResourceString;
+
+	CalculateTotalCost();
+	
 	ResourceContainer.ClearResources();
 	ResourceContainer.Show();
 	ResourceContainer.AnimateIn(0);
 
-	UpdateMonthlySupplies();
-	UpdateSupplies();
-	UpdateIntel();
-	UpdateEleriumCrystals();
-	UpdateAlienAlloys();
+	foreach TotalCost.ResourceCosts(Cost)
+	{
+		CostResource = Cost.Quantity;
+		if (CostResource == 0) // Cost can be zero if there are no units selected, so the CalculateTotalCost()'s "discount" neuters the per unit cost.
+			continue;
 
-	// Issue #174 Start
-	// Add event hook. Mods should register for this event with an ELD_Immediate listener (for example using CHEventListenerTemplate)
-	// and check if they want to affect the current screen on the stack. They should add resources with `HQPRES.m_kAvengerHUD.AddResource and
-	// call ShowResources() when they add at least one. This is mod-interoperable.
-	`XEVENTMGR.TriggerEvent('UpdateResources', self, self, none);
-	// Issue #174 End
+		CurrentResource = XComHQ.GetResourceAmount(Cost.ItemTemplateName);
+
+		Label = class'UIUtilities_Strategy'.static.GetResourceDisplayName(Cost.ItemTemplateName, CurrentResource);
+
+		if (CurrentResource > CostResource)
+		{
+			ResourceString = class'UIUtilities_Text'.static.GetColoredText(string(CurrentResource), eUIState_Cash);
+		}
+		else
+		{
+			ResourceString = class'UIUtilities_Text'.static.GetColoredText(string(CurrentResource), eUIState_Bad);
+		}
+
+		ResourceString = CurrentResource $ " - " $ class'UIUtilities_Text'.static.GetColoredText(string(CostResource), eUIState_Bad);
+		
+		ResourceContainer.AddResource(Label, ResourceString);
+	}
+
+	foreach TotalCost.ArtifactCosts(Cost)
+	{
+		CostResource = Cost.Quantity;
+		if (CostResource == 0)
+			continue;
+
+		CurrentResource = XComHQ.GetResourceAmount(Cost.ItemTemplateName);
+
+		Label = class'UIUtilities_Strategy'.static.GetResourceDisplayName(Cost.ItemTemplateName, CurrentResource);
+
+		if (CurrentResource > CostResource)
+		{
+			ResourceString = class'UIUtilities_Text'.static.GetColoredText(string(CurrentResource), eUIState_Cash);
+		}
+		else
+		{
+			ResourceString = class'UIUtilities_Text'.static.GetColoredText(string(CurrentResource), eUIState_Bad);
+		}
+
+		ResourceString = CurrentResource $ " - " $ class'UIUtilities_Text'.static.GetColoredText(string(CostResource), eUIState_Bad);
+		
+		ResourceContainer.AddResource(Label, ResourceString);
+	}
 }
 
-simulated function UpdateMonthlySupplies()
+private function UpdateMonthlySupplies()
 {
 	local int iMonthly;
 	local string Monthly, Prefix;
@@ -334,7 +384,7 @@ simulated function UpdateMonthlySupplies()
 	AddResource(class'UIAvengerHUD'.default.MonthlyLabel, Monthly);
 }
 
-simulated function UpdateSupplies()
+private function UpdateSupplies()
 {
 	local int iSupplies; 
 	local string Supplies, Prefix; 
@@ -346,7 +396,7 @@ simulated function UpdateSupplies()
 	AddResource(Caps(class'UIUtilities_Strategy'.static.GetResourceDisplayName('Supplies', iSupplies)), Supplies);
 }
 
-simulated function UpdateIntel()
+private function UpdateIntel()
 {
 	local int iIntel;
 	
@@ -354,7 +404,7 @@ simulated function UpdateIntel()
 	AddResource(Caps(class'UIUtilities_Strategy'.static.GetResourceDisplayName('Intel', iIntel)), class'UIUtilities_Text'.static.GetColoredText(String(iIntel), (iIntel > 0) ? eUIState_Normal : eUIState_Bad));
 }
 
-simulated function UpdateEleriumCrystals()
+private function UpdateEleriumCrystals()
 {
 	local int iEleriumCrystals;
 
@@ -362,7 +412,7 @@ simulated function UpdateEleriumCrystals()
 	AddResource(class'UIAvengerHUD'.default.EleriumLabel, class'UIUtilities_Text'.static.GetColoredText(String(iEleriumCrystals), (iEleriumCrystals > 0) ? eUIState_Normal : eUIState_Bad));
 }
 
-simulated function UpdateAlienAlloys()
+private function UpdateAlienAlloys()
 {
 	local int iAlloys;
 
@@ -370,14 +420,14 @@ simulated function UpdateAlienAlloys()
 	AddResource(class'UIAvengerHUD'.default.AlloysLabel, class'UIUtilities_Text'.static.GetColoredText(String(iAlloys), (iAlloys > 0) ? eUIState_Normal : eUIState_Bad));
 }
 
-simulated function UpdateEleriumCores()
+private function UpdateEleriumCores()
 {
 	local int iCores;
 
 	iCores = class'UIUtilities_Strategy'.static.GetResource('EleriumCore');
 	AddResource(class'UIAvengerHUD'.default.CoresLabel, class'UIUtilities_Text'.static.GetColoredText(String(iCores), (iCores > 0) ? eUIState_Normal : eUIState_Bad));
 }
-simulated function AddResource(string label, string data)
+private function AddResource(string label, string data)
 {
 	ResourceContainer.AddResource(label, data);
 }
