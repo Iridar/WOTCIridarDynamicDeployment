@@ -28,6 +28,8 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxVars(COUNT_CAPTURED_SOLDIERS);
 `MCM_API_AutoCheckBoxVars(COUNT_UNCONSCIOUS_SOLDIERS);
 `MCM_API_AutoCheckBoxVars(COUNT_BLEEDING_OUT_SOLDIERS);
+`MCM_API_AutoCheckBoxVars(COUNT_EVACED_SOLDIERS);
+
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
@@ -47,6 +49,7 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxFns(COUNT_CAPTURED_SOLDIERS, 1);
 `MCM_API_AutoCheckBoxFns(COUNT_UNCONSCIOUS_SOLDIERS, 1);
 `MCM_API_AutoCheckBoxFns(COUNT_BLEEDING_OUT_SOLDIERS, 1);
+`MCM_API_AutoCheckBoxFns(COUNT_EVACED_SOLDIERS, 1);
 
 event OnInit(UIScreen Screen)
 {
@@ -81,6 +84,8 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	`MCM_API_AutoAddCheckBox(Group, COUNT_CAPTURED_SOLDIERS);	
 	`MCM_API_AutoAddCheckBox(Group, COUNT_UNCONSCIOUS_SOLDIERS);	
 	`MCM_API_AutoAddCheckBox(Group, COUNT_BLEEDING_OUT_SOLDIERS);	
+	`MCM_API_AutoAddCheckBox(Group, COUNT_EVACED_SOLDIERS);	
+	
 
 	// "Soldier Deployment Options"
 	Group = Page.AddGroup('Group_2', GroupHeader2);
@@ -139,6 +144,8 @@ simulated function LoadSavedSettings()
 	COUNT_CAPTURED_SOLDIERS = `GETMCMVAR(COUNT_CAPTURED_SOLDIERS);
 	COUNT_UNCONSCIOUS_SOLDIERS = `GETMCMVAR(COUNT_UNCONSCIOUS_SOLDIERS);
 	COUNT_BLEEDING_OUT_SOLDIERS = `GETMCMVAR(COUNT_BLEEDING_OUT_SOLDIERS);
+	COUNT_EVACED_SOLDIERS = `GETMCMVAR(COUNT_EVACED_SOLDIERS);
+	
 }
 
 simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
@@ -160,6 +167,8 @@ simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
 	`MCM_API_AutoReset(COUNT_CAPTURED_SOLDIERS);
 	`MCM_API_AutoReset(COUNT_UNCONSCIOUS_SOLDIERS);
 	`MCM_API_AutoReset(COUNT_BLEEDING_OUT_SOLDIERS);
+	`MCM_API_AutoReset(COUNT_EVACED_SOLDIERS);
+	
 }
 
 

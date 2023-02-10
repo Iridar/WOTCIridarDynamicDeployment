@@ -22,7 +22,7 @@ IRI_DD_UnitPreparingForDeployment = "Preparing for deployment"
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"
-PageTitle = "Dynamic Deployment"
+PageTitle = "Dynamic Deployment by Iridar"
 GroupHeader = "Soldier Selection Options"
 GroupHeader2 = "Soldier Deployment Options"
 GroupHeader3 = "Misc"
@@ -56,6 +56,10 @@ COUNT_UNCONSCIOUS_SOLDIERS_Tip = ""
 
 COUNT_BLEEDING_OUT_SOLDIERS_Label = "Count bleeding out soldiers"
 COUNT_BLEEDING_OUT_SOLDIERS_Tip = ""
+
+COUNT_EVACED_SOLDIERS_Label = "Count evacuated soldiers"
+COUNT_EVACED_SOLDIERS_Tip = ""
+
 
 SQUAD_MUST_SEE_TILE_Label = "Squad must see selected tile"
 SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in squad must see the selected location for deployment, i.e. you will not be able to deploy a unit into fog of war."

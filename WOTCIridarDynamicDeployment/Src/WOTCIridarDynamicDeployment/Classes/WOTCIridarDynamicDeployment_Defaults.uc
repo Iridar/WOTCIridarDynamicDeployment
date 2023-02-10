@@ -18,3 +18,4 @@ var config bool COUNT_DEAD_SOLDIERS;
 var config bool COUNT_CAPTURED_SOLDIERS;
 var config bool COUNT_UNCONSCIOUS_SOLDIERS;
 var config bool COUNT_BLEEDING_OUT_SOLDIERS;
+var config bool COUNT_EVACED_SOLDIERS;

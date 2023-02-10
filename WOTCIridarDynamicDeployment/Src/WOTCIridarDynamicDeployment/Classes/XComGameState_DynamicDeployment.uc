@@ -363,6 +363,9 @@ final function bool CanSelectMoreSoldiers()
 		if (UnitState.IsBleedingOut() && !`GETMCMVAR(COUNT_BLEEDING_OUT_SOLDIERS))
 			continue;
 
+		if (UnitState.bRemovedFromPlay && !`GETMCMVAR(COUNT_EVACED_SOLDIERS))
+			continue;
+
 		CurrentSquadSize++;
 	}
 	return CurrentSquadSize + SelectedUnitIDs.Length < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
