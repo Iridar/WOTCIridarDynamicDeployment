@@ -3,5 +3,9 @@
 		"IRIDynamicDeployment",
 		"IRIDynamicDeployment_Perks",
 		"IRIDynamicDeployment_UI"
+    ],
+	"sfMaps": [
+		"DDCIN_SkyrangerIntros",
+		"DDCIN_SkyrangerIntros_Spark"
     ]
 }

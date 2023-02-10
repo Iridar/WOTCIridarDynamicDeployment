@@ -14,7 +14,6 @@
     <Folder Include="Config\Base\" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
-    <Folder Include="Content\" />
     <Folder Include="ContentForCook\" />
     <Folder Include="Src\ModConfigMenuAPI\" />
     <Folder Include="Src\ModConfigMenuAPI\Classes\" />
@@ -34,6 +33,12 @@
     <Content Include="Config\XComWOTCIridarDynamicDeployment_DEFAULT.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="ContentForCook\DDCIN_SkyrangerIntros.umap">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ContentForCook\DDCIN_SkyrangerIntros_Spark.umap">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ContentForCook\IRIDynamicDeployment.upk">
       <SubType>Content</SubType>
     </Content>
@@ -41,12 +46,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="ContentForCook\IRIDynamicDeployment_UI.upk">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\DDCIN_SkyrangerIntros.umap">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Content\DDCIN_SkyrangerIntros_Spark.umap">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ModPreview.jpg" />
