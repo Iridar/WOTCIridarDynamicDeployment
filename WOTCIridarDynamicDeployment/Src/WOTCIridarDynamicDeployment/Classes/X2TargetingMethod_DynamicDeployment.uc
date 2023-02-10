@@ -23,12 +23,14 @@ var private bool							bAreaLocked;
 var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
 var private int								MaxZ;
+var private bool							bCheckMaxZ;
 
 // Parallel arrays
 var private array<XComGameState_Unit>		PrecisionDropUnitStates;
 var private array<XComUnitPawn>				PrecisionDropPawns;
 var private array<TTile>					PrecisionDropTiles;
 var private transient array<XComEmitter>	BeamEmitters;
+
 
 function Init(AvailableAction InAction, int NewTargetIndex)
 {
@@ -43,6 +45,7 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
+	bCheckMaxZ = !class'Help'.static.ShouldUseTeleportDeployment();
 
 	PrecisionDropUnitStates = DDObject.GetPrecisionDropUnits();
 	if (PrecisionDropUnitStates.Length > 0)
@@ -309,7 +312,7 @@ private function bool IsTileValid(const TTile TestTile)
 	local vector TestLocation;
 	
 	TestLocation = World.GetPositionFromTileCoordinates(TestTile);
-	if (!World.HasOverheadClearance(TestLocation, MaxZ))
+	if (bCheckMaxZ && !World.HasOverheadClearance(TestLocation, MaxZ))
 	{
 		return false;
 	}
@@ -402,7 +405,7 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 	{
 		// Only tiles with clearance to MaxZ are valid.
 		SelectedLocation = TargetLocations[0];
-		if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
+		if (bCheckMaxZ && !World.HasOverheadClearance(SelectedLocation, MaxZ))
 		{
 			AbilityAvailability = 'AA_TileIsBlocked';
 		}
@@ -528,5 +531,6 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 
 defaultproperties
 {
+	bCheckMaxZ = true
 	bRestrictToSquadsightRange = true;
 }

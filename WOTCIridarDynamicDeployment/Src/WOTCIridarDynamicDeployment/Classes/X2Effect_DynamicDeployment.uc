@@ -206,6 +206,372 @@ static final protected function XComGameState_AIGroup GetPlayerGroup()
 
 simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
+	if (class'Help'.static.ShouldUseTeleportDeployment())
+	{
+		TeleportDeploymentVisualization(VisualizeGameState, ActionMetadata);
+	}
+	else if (class'Help'.static.IsUndergroundPlot())
+	{
+		UndergroundDeploymentVisualization(VisualizeGameState, ActionMetadata);
+	}
+	else
+	{
+		SkyrangerDeploymentVisualization(VisualizeGameState, ActionMetadata);
+	}
+}
+
+private function TeleportDeploymentVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata)
+{
+	local XComGameStateContext_Ability		AbilityContext;
+	local X2Action_ShowSpawnedUnit			ShowUnitAction;
+	local X2Action_PlayAnimation			AnimationAction;
+	local VisualizationActionMetadata		SpawnedUnitMetadata;
+	local VisualizationActionMetadata		EmptyMetadata;
+	local XComGameState_Unit				CosmeticUnit;
+	local VisualizationActionMetadata		CosmeticUnitMetadata;
+	local XComGameState_Item				ItemIterator;
+	local X2Action_HideUIUnitFlag			HideUnitFlag;
+	local X2Action_CameraLookAt				LookAtTargetAction;
+	local X2Action_SelectNextActiveUnit		SelectUnitAction;
+	local XComGameState_DynamicDeployment	DDObject;
+	local array<XComGameState_Unit>			UnitStates;
+	local XComGameState_Unit				UnitState;
+	local int								iNumUnit;
+	local X2Action_TimedWait				WaitAction;
+	local X2Action_PlayEffect				PlayEffect;
+	local X2Action_TimedWait				CameraArrive;
+	local TTile								GremlinTile;
+	local XComWorldData						World;
+
+	World = `XWORLD;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none)
+		return;
+
+	UnitStates = DDObject.GetUnitsToDeploy(VisualizeGameState);
+	if (UnitStates.Length == 0)
+		return;
+
+	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
+
+	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+
+	// Move camera to deployment location
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
+	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+
+	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	CameraArrive.DelayTimeSec = 1.0f;
+
+	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, HideUnitFlag));
+	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Open";
+	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
+
+	// Wait for the teleport effect to pop
+	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+	WaitAction.DelayTimeSec = 1.0f;
+
+	foreach UnitStates(UnitState, iNumUnit)
+	{
+		`AMLOG("Visualizing unit spawn:" @ UnitState.GetFullName());
+
+		SpawnedUnitMetadata = EmptyMetadata;
+		SpawnedUnitMetadata.StateObject_OldState = UnitState;
+		SpawnedUnitMetadata.StateObject_NewState = UnitState;
+
+		//	insert a random time delay for each unit spawn so they don't all drop down at exactly the same time
+		WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+		WaitAction.DelayTimeSec = iNumUnit + FRand();
+
+		// Normally, Show Unit -> Play Animation makes the unit appear for split second at the spawn location, and then DD animation plays.
+		// Stroke of genius: show the unit at the ceiling, and use DesiredEndingAtoms to rubberband the unit into the intended spot.
+		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		ShowUnitAction.ChangeTimeoutLength(10.0f);
+
+		// Hide the unit flag while the DD animation is playing.
+		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		HideUnitFlag.bHideUIUnitFlag = true;
+
+		PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, HideUnitFlag));
+		PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
+		PlayEffect.EffectLocation = World.GetPositionFromTileCoordinates(UnitState.TileLocation);
+
+		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, HideUnitFlag));
+		AnimationAction.Params.AnimName = 'MV_RunFwd_StopStand';
+		AnimationAction.Params.BlendTime = 0.0f;
+		AnimationAction.Params.DesiredEndingAtoms.Add(1);
+		AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
+		AnimationAction.Params.DesiredEndingAtoms[0].Translation = World.GetPositionFromTileCoordinates(UnitState.TileLocation);;
+
+		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		HideUnitFlag.bHideUIUnitFlag = false;
+		
+		// Deploy unit's Gremlin/Bit, if any.
+		CosmeticUnit = none;
+		foreach VisualizeGameState.IterateByClassType(class'XComGameState_Item', ItemIterator)
+		{
+			if (UnitState.ObjectID == ItemIterator.AttachedUnitRef.ObjectID && ItemIterator.CosmeticUnitRef.ObjectID > 0)
+			{
+				CosmeticUnit = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(ItemIterator.CosmeticUnitRef.ObjectID));
+				if (CosmeticUnit != none)
+				{
+					break;
+				}
+			}
+		}
+		if (CosmeticUnit == none)
+			continue;
+
+		CosmeticUnitMetadata = EmptyMetadata;
+		CosmeticUnitMetadata.StateObject_OldState = CosmeticUnit;
+		CosmeticUnitMetadata.StateObject_NewState = CosmeticUnit;
+		
+		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(CosmeticUnitMetadata, AbilityContext));
+		ShowUnitAction.ChangeTimeoutLength(10.0f);
+
+		GremlinTile = UnitState.GetDesiredTileForAttachedCosmeticUnit();
+		GremlinTile.Z += UnitState.UnitHeight - 2;
+
+		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(CosmeticUnitMetadata, AbilityContext, false, ShowUnitAction));
+		AnimationAction.Params.AnimName = 'MV_RunFwd_StopStand';
+		AnimationAction.Params.BlendTime = 0.0f;
+		AnimationAction.Params.DesiredEndingAtoms.Add(1);
+		AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
+		AnimationAction.Params.DesiredEndingAtoms[0].Translation = World.GetPositionFromTileCoordinates(GremlinTile);;
+	}
+
+	UnitState = UnitStates[0];
+	if (UnitState.ActionPoints.Length > 0)
+	{
+		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		SelectUnitAction.TargetID = UnitState.ObjectID;
+	}
+
+	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, WaitAction));
+	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
+	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
+	PlayEffect.bStopEffect = true;
+}
+
+
+private function UndergroundDeploymentVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata)
+{
+	local XComGameStateContext_Ability		AbilityContext;
+	local X2Action_ShowSpawnedUnit			ShowUnitAction;
+	local X2Action_PlayAnimation			AnimationAction;
+	local VisualizationActionMetadata		SpawnedUnitMetadata;
+	local VisualizationActionMetadata		EmptyMetadata;
+	local XComGameState_Unit				CosmeticUnit;
+	local VisualizationActionMetadata		CosmeticUnitMetadata;
+	local XComGameState_Item				ItemIterator;
+	local X2Action_HideUIUnitFlag			HideUnitFlag;
+	local X2Action_DeployGremlin			DeployGremlin;
+	local TTile								GremlinTile;
+	local X2Action_CameraLookAt				LookAtTargetAction;
+	local X2Action_SelectNextActiveUnit		SelectUnitAction;
+	local X2Action_StreamMap				StreamMap;
+	local X2Action_DynamicDeployment		SkyrangerIntro;
+	local XComGameState_DynamicDeployment	DDObject;
+	local array<XComGameState_Unit>			UnitStates;
+	local XComGameState_Unit				UnitState;
+	local int								iNumUnit;
+	local X2Action_TimedWait				WaitAction;
+	local X2Action_TimedWait				GremlinWaitAction;
+	local vector							SpawnLocation;
+	local XComWorldData						World;
+	local TTile								SpawnTile;
+	local int								MaxZ;
+	local bool								bAtLeastOneUnitIsSparkLike;
+	local X2Action							CommonParent;
+	local X2Action_UnstreamMap				UnstreamMap;
+	local bool								bStreamedMaps;
+	local bool								bUndergroundPlot;
+	local X2Action_TimedWait				CameraArrive;
+
+	World = `XWORLD;
+	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none)
+		return;
+
+	UnitStates = DDObject.GetUnitsToDeploy(VisualizeGameState);
+	if (UnitStates.Length == 0)
+		return;
+
+	foreach UnitStates(UnitState)
+	{
+		if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
+		{
+			bAtLeastOneUnitIsSparkLike = true;
+			break;
+		}
+	}
+
+	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
+
+	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+
+	// Move camera to deployment location
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
+	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+
+	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	CameraArrive.DelayTimeSec = 1.5f;
+
+	CommonParent = CameraArrive;
+
+	bUndergroundPlot = class'Help'.static.IsUndergroundPlot();
+	if (!bUndergroundPlot) // Play the "running off skyranger" matinee here
+	{	
+		bStreamedMaps = true;
+
+		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+		StreamMap.MapToStream = "DDCIN_SkyrangerIntros";
+		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
+
+		if (bAtLeastOneUnitIsSparkLike)
+		{
+			StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+			StreamMap.MapToStream = "DDCIN_SkyrangerIntros_Spark";
+			StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
+		}
+		
+		// Begin playing once camera arrives
+		SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+		SkyrangerIntro.UnitStates = UnitStates;
+
+		CommonParent = SkyrangerIntro;
+	}
+
+
+	foreach UnitStates(UnitState, iNumUnit)
+	{
+		`AMLOG("Visualizing unit spawn:" @ UnitState.GetFullName());
+
+		SpawnedUnitMetadata = EmptyMetadata;
+		SpawnedUnitMetadata.StateObject_OldState = UnitState;
+		SpawnedUnitMetadata.StateObject_NewState = UnitState;
+
+		SpawnTile = UnitState.TileLocation;
+		SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+
+		//	insert a random time delay for each unit spawn so they don't all drop down at exactly the same time
+		WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CommonParent));
+		WaitAction.DelayTimeSec = iNumUnit + FRand();
+
+		// Normally, Show Unit -> Play Animation makes the unit appear for split second at the spawn location, and then DD animation plays.
+		// Stroke of genius: show the unit at the ceiling, and use DesiredEndingAtoms to rubberband the unit into the intended spot.
+		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		ShowUnitAction.ChangeTimeoutLength(10.0f);
+		ShowUnitAction.bUseOverride = true;
+		ShowUnitAction.OverrideVisualizationLocation = SpawnLocation;
+		ShowUnitAction.OverrideVisualizationLocation.Z = MaxZ;
+
+		// Hide the unit flag while the DD animation is playing.
+		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		HideUnitFlag.bHideUIUnitFlag = true;
+		
+		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+
+		if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
+		{
+			if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeploymentSilent';
+			}
+			else
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
+			}
+		}
+		else
+		{
+			if (bUndergroundPlot)
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment_Underground';
+			}
+			else
+			{
+				AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
+			}
+		}
+		
+
+		AnimationAction.Params.BlendTime = 0.0f;
+
+		// Apparently this isn't neccessary and it only makes SPARKs land halfway into the ground.
+		//AnimationAction.Params.DesiredEndingAtoms.Add(1);
+		//AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
+		//AnimationAction.Params.DesiredEndingAtoms[0].Translation = SpawnLocation;
+
+		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		HideUnitFlag.bHideUIUnitFlag = false;
+
+		if (iNumUnit == 0 && UnitState.ActionPoints.Length > 0)
+		{
+			SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+			SelectUnitAction.TargetID = UnitState.ObjectID;
+		}
+		
+		// Deploy unit's Gremlin/Bit, if any.
+		CosmeticUnit = none;
+		foreach VisualizeGameState.IterateByClassType(class'XComGameState_Item', ItemIterator)
+		{
+			if (UnitState.ObjectID == ItemIterator.AttachedUnitRef.ObjectID && ItemIterator.CosmeticUnitRef.ObjectID > 0)
+			{
+				CosmeticUnit = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(ItemIterator.CosmeticUnitRef.ObjectID));
+				if (CosmeticUnit != none)
+				{
+					break;
+				}
+			}
+		}
+		if (CosmeticUnit == none)
+			continue;
+
+		CosmeticUnitMetadata = EmptyMetadata;
+		CosmeticUnitMetadata.StateObject_OldState = CosmeticUnit;
+		CosmeticUnitMetadata.StateObject_NewState = CosmeticUnit;
+		
+		// Add a 0.5-1.0 sec delay before spawning the gremlin so it doesn't clip through the deploying unit
+		GremlinWaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, WaitAction));
+		GremlinWaitAction.DelayTimeSec = 0.5f + FRand() / 2.0f;
+		
+		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(CosmeticUnitMetadata, AbilityContext, false, GremlinWaitAction));
+		ShowUnitAction.ChangeTimeoutLength(10.0f);
+		ShowUnitAction.bUseOverride = true;
+		ShowUnitAction.OverrideVisualizationLocation = SpawnLocation;
+		ShowUnitAction.OverrideVisualizationLocation.Z = MaxZ;
+
+		GremlinTile = UnitState.GetDesiredTileForAttachedCosmeticUnit();
+		GremlinTile.Z += UnitState.UnitHeight - 2;
+
+		DeployGremlin = X2Action_DeployGremlin(class'X2Action_DeployGremlin'.static.AddToVisualizationTree(CosmeticUnitMetadata, VisualizeGameState.GetContext(), false, ShowUnitAction));
+		DeployGremlin.MoveLocation = World.GetPositionFromTileCoordinates(GremlinTile);
+	}
+
+	if (bStreamedMaps)
+	{
+		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros";
+
+		if (bAtLeastOneUnitIsSparkLike)
+		{
+			UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+			UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros_Spark";
+		}
+
+		
+	}
+}
+
+
+private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata)
+{
 	local XComGameStateContext_Ability		AbilityContext;
 	local X2Action_ShowSpawnedUnit			ShowUnitAction;
 	local X2Action_PlayAnimation			AnimationAction;

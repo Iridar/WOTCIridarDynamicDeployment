@@ -151,9 +151,14 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	return Template;
 }
 
+// Set DD on cooldown on mission start.
 static private function EventListenerReturn OnFirstTurn(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_Player PlayerState;
+
+	// If teleport is available, we're not tied to Skyranger.
+	if (class'Help'.static.ShouldUseTeleportDeployment())
+		return ELR_NoInterrupt;
 
 	PlayerState = XComGameState_Player(EventSource);
 	if (PlayerState == none || PlayerState.GetTeam() != eTeam_XCom)
@@ -183,10 +188,15 @@ static private function bool IsFirstTurn()
     return BattleData.TacticalTurnCount == 1;
 }
 
+// Set DD on cooldown when Evac is requested via Request Evac mod.
 static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local StateObjectReference PlayerStateRef;
 	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
+
+	// If teleport is available, we're not tied to Skyranger.
+	if (class'Help'.static.ShouldUseTeleportDeployment())
+		return ELR_NoInterrupt;
 
 	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
 

@@ -9,6 +9,20 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
+
+
+MV_RunFwd_StopStandA
+ParticleSystem'IRIDynamicDeployment.PFX.PS_Teleport'
+IRI_DD_TeleportDeployment
+
+// If teleport is available, we're not tied to Skyranger.
+	if (class'Help'.static.ShouldUseTeleportDeployment())
+		return ELR_NoInterrupt;
+
+
+
+// Cooking maps breaks the SPARK deployment for some reason.
+
 // TODO: Localization
 
 // TODO: Modpreview
@@ -26,7 +40,6 @@ Allow DD on missions with fixed evac?
 XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac
 
 TODO: Disable DD on Avenger Defense mission and waterworld. 
-TODO: Cook the cinematic umaps or find other ways of getting rid of log warnings
 
 Psi Gate deployment after new Shadow Research
 

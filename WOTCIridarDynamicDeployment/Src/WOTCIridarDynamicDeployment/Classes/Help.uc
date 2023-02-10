@@ -7,6 +7,12 @@ class Help extends Object abstract;
 
 var privatewrite name DDEventName;
 
+static final function bool ShouldUseTeleportDeployment()
+{
+	return true;
+	return `XCOMHQ.IsTechResearched('IRI_DD_TeleportDeployment');
+}
+
 static final function bool IsUndergroundPlot()
 {
 	local XComGameState_BattleData	BattleData;

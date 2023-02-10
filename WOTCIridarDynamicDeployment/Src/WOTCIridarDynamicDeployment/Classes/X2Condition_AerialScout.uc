@@ -8,7 +8,8 @@ event name CallMeetsCondition(XComGameState_BaseObject kTarget)
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
 
-	if (class'Help'.static.IsUndergroundPlot())
+	// No scouting when we're not deploying via parachute.
+	if (class'Help'.static.IsUndergroundPlot() || class'Help'.static.ShouldUseTeleportDeployment())
 	{
 		return 'AA_AbilityUnavailable';
 	}
