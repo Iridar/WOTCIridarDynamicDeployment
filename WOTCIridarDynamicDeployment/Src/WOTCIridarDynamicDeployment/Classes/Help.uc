@@ -9,8 +9,7 @@ var privatewrite name DDEventName;
 
 static final function bool ShouldUseTeleportDeployment()
 {
-	return true;
-	return `XCOMHQ.IsTechResearched('IRI_DD_TeleportDeployment');
+	return `XCOMHQ.IsTechResearched(`GetConfigName("IRI_DD_TechRequiredToUnlockTeleport"));
 }
 
 static final function bool IsUndergroundPlot()

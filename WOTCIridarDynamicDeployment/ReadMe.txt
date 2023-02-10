@@ -19,15 +19,12 @@ IRI_DD_TeleportDeployment
 	if (class'Help'.static.ShouldUseTeleportDeployment())
 		return ELR_NoInterrupt;
 
-
-
 // Cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Localization
 
 // TODO: Modpreview
 // TODO: Mod description
-// TODO: Icons for abilities
 // TODO: comments
 // TODO: debug console commands for removing and adding DD unlocks
 
@@ -41,7 +38,6 @@ XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with R
 
 TODO: Disable DD on Avenger Defense mission and waterworld. 
 
-Psi Gate deployment after new Shadow Research
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
