@@ -32,7 +32,7 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxVars(COUNT_UNCONSCIOUS_SOLDIERS);
 `MCM_API_AutoCheckBoxVars(COUNT_BLEEDING_OUT_SOLDIERS);
 `MCM_API_AutoCheckBoxVars(COUNT_EVACED_SOLDIERS);
-
+`MCM_API_AutoCheckBoxVars(DEBUG_LOGGING);
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
@@ -55,6 +55,7 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxFns(COUNT_UNCONSCIOUS_SOLDIERS, 1);
 `MCM_API_AutoCheckBoxFns(COUNT_BLEEDING_OUT_SOLDIERS, 1);
 `MCM_API_AutoCheckBoxFns(COUNT_EVACED_SOLDIERS, 1);
+`MCM_API_AutoCheckBoxFns(DEBUG_LOGGING, 1);
 
 event OnInit(UIScreen Screen)
 {
@@ -115,6 +116,7 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	// Misc
 	Group = Page.AddGroup('Group4', GroupHeader4);
 
+	`MCM_API_AutoAddCheckBox(Group, DEBUG_LOGGING);	
 	Group.AddLabel('Label_End', EndLabel, EndLabel_Tip);
 	
 	Page.ShowSettings();
@@ -168,6 +170,7 @@ simulated function LoadSavedSettings()
 
 	ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED = `GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
 	DISALLOW_DD_IF_EVAC_ZONE_EXISTS = `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS);
+	DEBUG_LOGGING = `GETMCMVAR(DEBUG_LOGGING);
 }
 
 simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
@@ -193,6 +196,7 @@ simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
 
 	`MCM_API_AutoReset(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
 	`MCM_API_AutoReset(DISALLOW_DD_IF_EVAC_ZONE_EXISTS);
+	`MCM_API_AutoReset(DEBUG_LOGGING);
 }
 
 

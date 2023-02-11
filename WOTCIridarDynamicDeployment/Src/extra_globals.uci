@@ -1,4 +1,4 @@
-`define AMLOG(msg) `LOG(GetFuncName() @ `msg, /* class'WOTCIridarDynamicDeployment_Defaults'.default.VERSION_CFG > class'WOTCIridarDynamicDeployment_MCMScreen'.default.VERSION_CFG ? class'WOTCIridarDynamicDeployment_Defaults'.default.DEBUG_LOGGING : class'WOTCIridarDynamicDeployment_MCMScreen'.default.DEBUG_LOGGING */, 'WOTCIridarDynamicDeployment')
+`define AMLOG(msg) `LOG(GetFuncName() @ `msg, class'WOTCIridarDynamicDeployment_Defaults'.default.VERSION_CFG > class'WOTCIridarDynamicDeployment_MCMScreen'.default.VERSION_CFG ? class'WOTCIridarDynamicDeployment_Defaults'.default.DEBUG_LOGGING : class'WOTCIridarDynamicDeployment_MCMScreen'.default.DEBUG_LOGGING, 'WOTCIridarDynamicDeployment')
 
 `define CAPS(VarName) class'UIUtilities_Text'.static.CapsCheckForGermanScharfesS(`VarName)
 

@@ -330,6 +330,11 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 
 final function bool CanSelectMoreSoldiers()
 {
+	return  GetNumSelectedUnits() < GetMaxNumSoldiersToSelect();
+}
+
+final function int GetMaxNumSoldiersToSelect()
+{
 	local XComGameState_MissionSite			MissionState;
 	local XComGameState_HeadquartersXCom	XComHQ;
 	local XComGameStateHistory				History;
@@ -368,7 +373,7 @@ final function bool CanSelectMoreSoldiers()
 
 		CurrentSquadSize++;
 	}
-	return CurrentSquadSize + GetNumSelectedUnits() < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
+	return class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) - CurrentSquadSize + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
 }
 
 DefaultProperties

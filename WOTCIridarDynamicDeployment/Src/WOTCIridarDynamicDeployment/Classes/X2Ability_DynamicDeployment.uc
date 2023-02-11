@@ -150,7 +150,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.bHideOnClassUnlock = true;
 	Template.bDisplayInUITooltip = false;
 	
-	// Cost and Cooldown
+	// Cost
 	ActionPointCost = new class'X2AbilityCost_ActionPoints';
 	ActionPointCost.iNumPoints = 1;
 	ActionPointCost.bFreeCost = `GETMCMVAR(DD_SOLDIER_SELECT_IS_FREE_ACTION);

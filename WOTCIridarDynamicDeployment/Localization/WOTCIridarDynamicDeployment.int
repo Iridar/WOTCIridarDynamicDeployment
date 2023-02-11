@@ -17,8 +17,6 @@ IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will co
 IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
 IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n%Cost%\n\nThe cost will be paid immediately."
 
-IRI_DD_UnitPreparingForDeployment = "Preparing for deployment"
-
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"
@@ -85,3 +83,6 @@ DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Tip = "If enabled, choosing a deployment locatio
 
 ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Label = "Allow if Evac Zone is mission-placed"
 ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Tip = "If enabled, choosing a deployment location will end soldier's turn, consuming all their remaining action points."
+
+DEBUG_LOGGING_Label = "Enable debug logging"
+DEBUG_LOGGING_Tip = "If enabled, choosing a deployment location will end soldier's turn, consumin"

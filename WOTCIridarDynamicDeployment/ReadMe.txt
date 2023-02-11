@@ -20,6 +20,10 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // Polish MCM
 // More Stuff configurable, if there is anything
 
+// TODO: Display banner after DD select screen is closed
+// TODO: fix DD Deploy targeting sending camera to hell
+// TODO: Add a popup after Psi Gate research is completed?
+
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
 Extraction Team: After the objective is completed, XCOM may deploy up to two additional soldiers near the evac zone. (Appears on fixed evac missions)

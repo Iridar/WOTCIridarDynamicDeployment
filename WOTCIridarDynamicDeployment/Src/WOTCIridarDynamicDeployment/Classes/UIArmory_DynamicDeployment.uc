@@ -1,4 +1,9 @@
 class UIArmory_DynamicDeployment extends UISimpleCommodityScreen;
+
+// Armory screen for purchasing DD Unlocks.
+
+var StateObjectReference m_UnitRef;
+
 /*
 struct native SoldierClassAbilityType
 {
@@ -18,12 +23,10 @@ struct DDUnlockStruct
 	var array<name>				RequiredUnlocks;
 	var array<name>				MutuallyExclusiveUnlocks;
 };
-
 var privatewrite config(DynamicDeployment) array<DDUnlockStruct> DDUnlocks;
 
 var private X2AbilityTemplateManager	AbilityMgr;
 var private XComGameState_Unit			UnitState;
-var StateObjectReference				m_UnitRef;
 var private string						m_strUnlockedLabel;
 
 private function bool ShouldDisplayDDUnlock(const DDUnlockStruct DDUnlock)
@@ -129,7 +132,7 @@ private function string GetDisabledReason(const DDUnlockStruct DDUnlock)
 	{
 		return `YELLOW(class'UIUtilities_Strategy'.default.m_strSoldierRank @ `GET_RANK_STR(DDUnlock.RequiredRank, UnitState.GetSoldierClassTemplateName()));
 	}
-	// Required Jet Pack Unlocks
+	// Required DD Unlocks
 	foreach DDUnlock.RequiredUnlocks(UnlockName)
 	{
 		Template = AbilityMgr.FindAbilityTemplate(UnlockName);
@@ -225,6 +228,7 @@ simulated function PopulateData()
 		ListItem.InitInventoryListCommodity(AbilityCommodity, , m_strBuy, m_eStyle, , 126);
 	}
 
+	// Unlocked upgrades are displayed at the end of the list.
 	foreach UnlockedUpgrades(DDUnlock)
 	{	
 		`AMLOG("Looking for ability template:" @ DDUnlock.Ability.AbilityName);
@@ -284,6 +288,7 @@ private function bool UnlockAbility(UIList kList, int itemIndex)
 	UnitState.AbilityPoints -= AbilityPointCost;
 	if (UnitState.AbilityPoints < 0)
 	{
+		// Such optimized algorithm, very wow
 		XComHQ.AddResource(NewGameState, 'AbilityPoint', UnitState.AbilityPoints);
 		UnitState.AbilityPoints = 0;
 	}
