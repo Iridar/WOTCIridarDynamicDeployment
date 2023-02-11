@@ -30,12 +30,6 @@ IRI_DD_TeleportDeployment
 // Polish MCM
 // More Stuff configurable, if there is anything
 
-Allow DD on missions with fixed evac?
-XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac
-
-TODO: Disable DD on Avenger Defense mission and waterworld. 
-
-
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
 Extraction Team: After the objective is completed, XCOM may deploy up to two additional soldiers near the evac zone. (Appears on fixed evac missions)

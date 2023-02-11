@@ -146,7 +146,7 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_AerialScout.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_SoldierRank.uc">
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2DLCInfo_WOTCIridarDynamicDeployment.uc" />

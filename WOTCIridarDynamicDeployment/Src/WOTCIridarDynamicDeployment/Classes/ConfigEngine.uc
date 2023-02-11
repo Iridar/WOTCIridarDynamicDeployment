@@ -179,3 +179,18 @@ static final function array<float> GetConfigArrayFloat(const coerce string Confi
 
 	return ReturnArray;
 }
+
+static final function array<name> GetConfigArrayName(const coerce string ConfigName)
+{
+	local array<string>	StringArray;
+	local array<name>	ReturnArray;
+	local int			Index;
+
+	StringArray = GetConfig(ConfigName).VA;
+	for (Index = 0; Index < StringArray.Length; Index++)
+	{
+		ReturnArray.AddItem(name(StringArray[Index]));
+	}
+
+	return ReturnArray;
+}

@@ -4,9 +4,10 @@ var config int VERSION_CFG;
 
 var localized string ModName;
 var localized string PageTitle;
-var localized string GroupHeader;
+var localized string GroupHeader1;
 var localized string GroupHeader2;
 var localized string GroupHeader3;
+var localized string GroupHeader4;
 var localized string EndLabel;
 var localized string EndLabel_Tip;
 
@@ -23,6 +24,8 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxVars(DD_SOLDIER_SELECT_ENDS_TURN);
 `MCM_API_AutoCheckBoxVars(DD_DEPLOY_IS_FREE_ACTION);
 `MCM_API_AutoCheckBoxVars(DD_DEPLOY_ENDS_TURN);
+`MCM_API_AutoCheckBoxVars(DISALLOW_DD_IF_EVAC_ZONE_EXISTS);
+`MCM_API_AutoCheckBoxVars(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
 
 `MCM_API_AutoCheckBoxVars(COUNT_DEAD_SOLDIERS);
 `MCM_API_AutoCheckBoxVars(COUNT_CAPTURED_SOLDIERS);
@@ -44,6 +47,8 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxFns(DD_SOLDIER_SELECT_ENDS_TURN, 1);
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_IS_FREE_ACTION, 1);
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_ENDS_TURN, 1);
+`MCM_API_AutoCheckBoxFns(DISALLOW_DD_IF_EVAC_ZONE_EXISTS, 1);
+`MCM_API_AutoCheckBoxFns(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED, 1);
 
 `MCM_API_AutoCheckBoxFns(COUNT_DEAD_SOLDIERS, 1);
 `MCM_API_AutoCheckBoxFns(COUNT_CAPTURED_SOLDIERS, 1);
@@ -68,16 +73,9 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	Page.SetSaveHandler(SaveButtonClicked);
 	Page.EnableResetButton(ResetButtonClicked);
 
-	Group = Page.AddGroup('Group', GroupHeader);
+	// Soldier Selection Options
 
-	// "Soldier Selection Options"
-	`MCM_API_AutoAddSLider(GROUP, DD_MISSION_START_DELAY_TURNS, 0, 99, 1);
-	`MCM_API_AutoAddSLider(GROUP, DD_SOLDIER_SELECT_DELAY_TURNS_FLAT, 0, 99, 1);
-	`MCM_API_AutoAddSLider(GROUP, DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT, 0, 99, 1);
-
-	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_IS_FREE_ACTION, DD_SOLDIER_SELECT_IS_FREE_ACTION_ChangeHandler);	
-	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_ENDS_TURN);	
-	Group.GetSettingByName('DD_SOLDIER_SELECT_ENDS_TURN').SetEditable(!DD_SOLDIER_SELECT_IS_FREE_ACTION); 
+	Group = Page.AddGroup('Group1', GroupHeader1);
 
 	`MCM_API_AutoAddSLider(GROUP, DD_OVER_SQUAD_SIZE_OFFSET, 0, 99, 1);
 	`MCM_API_AutoAddCheckBox(Group, COUNT_DEAD_SOLDIERS);	
@@ -85,25 +83,47 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	`MCM_API_AutoAddCheckBox(Group, COUNT_UNCONSCIOUS_SOLDIERS);	
 	`MCM_API_AutoAddCheckBox(Group, COUNT_BLEEDING_OUT_SOLDIERS);	
 	`MCM_API_AutoAddCheckBox(Group, COUNT_EVACED_SOLDIERS);	
-	
 
-	// "Soldier Deployment Options"
-	Group = Page.AddGroup('Group_2', GroupHeader2);
+	// Action Economy
 
-	`MCM_API_AutoAddSLider(GROUP, DD_AFTER_DEPLOY_COOLDOWN, 0, 99, 1);
-	`MCM_API_AutoAddSLider(GROUP, DEPLOY_CAST_RANGE_TILES, 0, 99, 1);
-	`MCM_API_AutoAddCheckBox(Group, SQUAD_MUST_SEE_TILE);	
+	Group = Page.AddGroup('Group2', GroupHeader2);
+
+	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_IS_FREE_ACTION, DD_SOLDIER_SELECT_IS_FREE_ACTION_ChangeHandler);	
+	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_ENDS_TURN);	
+	Group.GetSettingByName('DD_SOLDIER_SELECT_ENDS_TURN').SetEditable(!DD_SOLDIER_SELECT_IS_FREE_ACTION); 
 
 	`MCM_API_AutoAddCheckBox(Group, DD_DEPLOY_IS_FREE_ACTION, DD_DEPLOY_IS_FREE_ACTION_ChangeHandler);	
 	`MCM_API_AutoAddCheckBox(Group, DD_DEPLOY_ENDS_TURN);	
 	Group.GetSettingByName('DD_DEPLOY_ENDS_TURN').SetEditable(!DD_DEPLOY_IS_FREE_ACTION); 
 
+	// Deployment Rules
+
+	Group = Page.AddGroup('Group3', GroupHeader3);
+
+	`MCM_API_AutoAddCheckBox(Group, DISALLOW_DD_IF_EVAC_ZONE_EXISTS, DISALLOW_DD_IF_EVAC_ZONE_EXISTS_ChangeHandler);	
+	`MCM_API_AutoAddCheckBox(Group, ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
+	Group.GetSettingByName('ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED').SetEditable(DISALLOW_DD_IF_EVAC_ZONE_EXISTS); 
+
+	`MCM_API_AutoAddSLider(GROUP, DD_MISSION_START_DELAY_TURNS, 0, 99, 1);
+	`MCM_API_AutoAddSLider(GROUP, DD_SOLDIER_SELECT_DELAY_TURNS_FLAT, 0, 99, 1);
+	`MCM_API_AutoAddSLider(GROUP, DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT, 0, 99, 1);
+
+	`MCM_API_AutoAddSLider(GROUP, DD_AFTER_DEPLOY_COOLDOWN, 0, 99, 1);
+	`MCM_API_AutoAddSLider(GROUP, DEPLOY_CAST_RANGE_TILES, 0, 99, 1);
+	`MCM_API_AutoAddCheckBox(Group, SQUAD_MUST_SEE_TILE);	
+	
 	// Misc
-	Group = Page.AddGroup('Group_3', GroupHeader3);
+	Group = Page.AddGroup('Group4', GroupHeader4);
 
 	Group.AddLabel('Label_End', EndLabel, EndLabel_Tip);
 	
 	Page.ShowSettings();
+}
+
+simulated function DISALLOW_DD_IF_EVAC_ZONE_EXISTS_ChangeHandler(MCM_API_Setting _Setting, bool _SettingValue)
+{
+	DISALLOW_DD_IF_EVAC_ZONE_EXISTS = _SettingValue;
+	_Setting.GetParentGroup().GetSettingByName('ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED').SetEditable(DISALLOW_DD_IF_EVAC_ZONE_EXISTS); 
 }
 
 simulated function DD_SOLDIER_SELECT_IS_FREE_ACTION_ChangeHandler(MCM_API_Setting _Setting, bool _SettingValue)
@@ -145,7 +165,9 @@ simulated function LoadSavedSettings()
 	COUNT_UNCONSCIOUS_SOLDIERS = `GETMCMVAR(COUNT_UNCONSCIOUS_SOLDIERS);
 	COUNT_BLEEDING_OUT_SOLDIERS = `GETMCMVAR(COUNT_BLEEDING_OUT_SOLDIERS);
 	COUNT_EVACED_SOLDIERS = `GETMCMVAR(COUNT_EVACED_SOLDIERS);
-	
+
+	ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED = `GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
+	DISALLOW_DD_IF_EVAC_ZONE_EXISTS = `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS);
 }
 
 simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
@@ -168,7 +190,9 @@ simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
 	`MCM_API_AutoReset(COUNT_UNCONSCIOUS_SOLDIERS);
 	`MCM_API_AutoReset(COUNT_BLEEDING_OUT_SOLDIERS);
 	`MCM_API_AutoReset(COUNT_EVACED_SOLDIERS);
-	
+
+	`MCM_API_AutoReset(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED);
+	`MCM_API_AutoReset(DISALLOW_DD_IF_EVAC_ZONE_EXISTS);
 }
 
 

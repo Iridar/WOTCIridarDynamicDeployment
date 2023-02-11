@@ -135,7 +135,6 @@ static private function X2AbilityTemplate CreatePassiveDDUnlock(const name Templ
 static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 {
 	local X2AbilityTemplate				Template;
-	local X2Condition_SoldierRank		SoldierRank;
 	local X2AbilityCost_ActionPoints	ActionPointCost;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');
@@ -162,9 +161,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	Template.AddShooterEffectExclusions();
 
-	SoldierRank = new class'X2Condition_SoldierRank';
-	SoldierRank.MinRank = `GetConfigInt("IRI_DD_MinRank");
-	Template.AbilityShooterConditions.AddItem(SoldierRank);
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -215,7 +212,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	local X2AbilityCost_ActionPoints		ActionPointCost;
 	local X2AbilityTarget_Cursor			CursorTarget;
 	local X2AbilityMultiTarget_Radius		RadiusMultiTarget;
-	local X2Condition_SoldierRank			SoldierRank;
 	local X2Effect_AerialScout				AerialScout;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Deploy');
@@ -247,9 +243,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	//Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkFall');
 	Template.AddShooterEffectExclusions();
 
-	SoldierRank = new class'X2Condition_SoldierRank';
-	SoldierRank.MinRank = `GetConfigInt("IRI_DD_MinRank");
-	Template.AbilityShooterConditions.AddItem(SoldierRank);
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -292,7 +286,16 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 
 static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
 {
-	local XComGameState_DynamicDeployment DDObject;
+	local XComGameState_DynamicDeployment	DDObject;
+	local XComGameState_EvacZone			EvacZone;
+
+	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
+	if (EvacZone != none && (`GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS) || `GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced))
+	{
+		`AMLOG("Evac zone is placed, hiding");
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+		return;
+	}
 
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none) // Special handle first deployment of the campaign.
@@ -329,7 +332,23 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 
 static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
 {
-	local XComGameState_DynamicDeployment DDObject;
+	local XComGameState_DynamicDeployment	DDObject;
+	local XComGameState_EvacZone			EvacZone;
+
+	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
+	if (EvacZone != none && `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS))
+	{
+		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
+		{
+			// Do nothing
+		}
+		else
+		{
+			`AMLOG("Evac zone is placed, hiding");
+			Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+			return;
+		}
+	}
 
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none ||						// Shouldn't happen
