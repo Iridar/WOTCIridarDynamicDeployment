@@ -9,6 +9,7 @@ var privatewrite name DDEventName;
 
 static final function bool ShouldUseTeleportDeployment()
 {
+	return true; // TODO: DEBUG ONLY
 	return `XCOMHQ.IsTechResearched(`GetConfigName("IRI_DD_TechRequiredToUnlockTeleport"));
 }
 

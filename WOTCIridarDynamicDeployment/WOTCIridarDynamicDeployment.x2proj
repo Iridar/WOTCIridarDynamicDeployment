@@ -34,6 +34,9 @@
     <Content Include="Config\XComWOTCIridarDynamicDeployment_DEFAULT.ini">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="ContentForCook\DDCIN_Teleport.umap">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ContentForCook\IRIDynamicDeployment.upk">
       <SubType>Content</SubType>
     </Content>
