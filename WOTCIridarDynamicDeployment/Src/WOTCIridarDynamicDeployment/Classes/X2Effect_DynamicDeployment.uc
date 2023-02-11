@@ -41,6 +41,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	if (DDObject == none || !DDObject.bPendingDeployment)
 		return;
 
+	DDObject.PreloadAssets();
+
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	UnitStates = DDObject.GetUnitsToDeploy();
 	DDObject.bPendingDeployment = false; // Prevent Deploy from being activated again.
@@ -257,15 +259,15 @@ private function TeleportDeploymentVisualization(XComGameState VisualizeGameStat
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
 
-	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
 	CameraArrive.DelayTimeSec = 1.0f;
 
-	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, CameraArrive));
 	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
 	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
 
 	// Wait for the teleport effect to pop
-	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, CameraArrive));
 	WaitAction.DelayTimeSec = 1.0f;
 	CommonParent = WaitAction;
 
@@ -341,11 +343,11 @@ private function TeleportDeploymentVisualization(XComGameState VisualizeGameStat
 	UnitState = UnitStates[0];
 	if (UnitState.ActionPoints.Length > 0)
 	{
-		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		SelectUnitAction.TargetID = UnitState.ObjectID;
 	}
 
-	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, WaitAction));
+	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
 	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
 	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
 	PlayEffect.bStopEffect = true;
@@ -399,7 +401,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
 
-	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
 	CameraArrive.DelayTimeSec = 1.5f;
 
 	foreach UnitStates(UnitState, iNumUnit)
@@ -492,7 +494,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	UnitState = UnitStates[0];
 	if (UnitState.ActionPoints.Length > 0)
 	{
-		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		SelectUnitAction.TargetID = UnitState.ObjectID;
 	}
 }
@@ -511,7 +513,6 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local X2Action_HideUIUnitFlag			HideUnitFlag;
 	local X2Action_DeployGremlin			DeployGremlin;
 	local TTile								GremlinTile;
-	local X2Action_CameraLookAt				LookAtTargetAction;
 	local X2Action_SelectNextActiveUnit		SelectUnitAction;
 	local X2Action_StreamMap				StreamMap;
 	local X2Action_DynamicDeployment		SkyrangerIntro;
@@ -528,6 +529,8 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local bool								bAtLeastOneUnitIsSparkLike;
 	local X2Action_UnstreamMap				UnstreamMap;
 	local X2Action_TimedWait				CameraArrive;
+	local array<X2Action>					StreamActions;
+	local X2Action							WaitForEffect;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -553,27 +556,39 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
+	// TODO: Uncomment.
+	// TODO: replace grenade flying mesh with green one and get rid of red beeps,
+	// and preserve trail somehow.
+	// TODO: Add your own socket for the grenade?
+
 	// Move camera to deployment location
-	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
-	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
-	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+	//LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	//LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
+	//LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+	//
+	
+	WaitForEffect = class'X2Action_WaitForAbilityEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded);
 
-	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
-	CameraArrive.DelayTimeSec = 1.5f;
+	// Wait for the deploy flare to pout a bit of smoke
+	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitForEffect));
+	WaitAction.DelayTimeSec = 1.5f;
 
-	StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+	// Only then begin streaming maps, cuz it messes with lighting, really wanna start playing matinee ASAP once maps load.
+	StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
 	StreamMap.MapToStream = "DDCIN_SkyrangerIntros";
 	StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
+	StreamActions.AddItem(StreamMap);
 
 	if (bAtLeastOneUnitIsSparkLike)
 	{
-		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, LookAtTargetAction));
+		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
 		StreamMap.MapToStream = "DDCIN_SkyrangerIntros_Spark";
 		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
+		StreamActions.AddItem(StreamMap);
 	}
 		
 	// Begin playing once camera arrives
-	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CameraArrive));
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
 	SkyrangerIntro.UnitStates = UnitStates;
 
 	foreach UnitStates(UnitState, iNumUnit)
@@ -620,7 +635,6 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 		{
 			AnimationAction.Params.AnimName = 'HL_DynamicDeployment';
 		}
-		
 
 		AnimationAction.Params.BlendTime = 0.0f;
 
@@ -632,12 +646,6 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		HideUnitFlag.bHideUIUnitFlag = false;
 
-		if (iNumUnit == 0 && UnitState.ActionPoints.Length > 0)
-		{
-			SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-			SelectUnitAction.TargetID = UnitState.ObjectID;
-		}
-		
 		// Deploy unit's Gremlin/Bit, if any.
 		CosmeticUnit = none;
 		foreach VisualizeGameState.IterateByClassType(class'XComGameState_Item', ItemIterator)
@@ -675,12 +683,19 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 		DeployGremlin.MoveLocation = World.GetPositionFromTileCoordinates(GremlinTile);
 	}
 
-	UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+	UnitState = UnitStates[0];
+	if (UnitState.ActionPoints.Length > 0)
+	{
+		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		SelectUnitAction.TargetID = UnitState.ObjectID;
+	}
+
+	UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 	UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros";
 
 	if (bAtLeastOneUnitIsSparkLike)
 	{
-		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros_Spark";
 	}
 }

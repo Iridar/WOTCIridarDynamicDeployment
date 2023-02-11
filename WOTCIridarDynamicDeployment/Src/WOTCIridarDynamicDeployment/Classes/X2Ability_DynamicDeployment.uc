@@ -39,7 +39,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_HitGroundRunning()
 	SetSelfTarget_WithEventTrigger(Template, class'Help'.default.DDEventName, ELD_OnStateSubmitted, eFilter_Player, 50);
 
 	// Shooter Conditions
-	// Incase you get dead'ed by overwatch or something
+	// In case you get dead'ed by overwatch or something
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	
 	// Effects
@@ -171,8 +171,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	// State and Vis
 	Template.Hostility = eHostility_Neutral;
 	Template.bSkipExitCoverWhenFiring = true;
-	Template.CustomFireAnim = 'HL_CallReinforcements';
-	Template.CustomSelfFireAnim = 'HL_CallReinforcements';
+	Template.bSkipFireAction = true;
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = DynamicDeployment_Select_BuildVisualization;
 	
@@ -186,22 +185,43 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 
 static final function DynamicDeployment_Select_BuildVisualization(XComGameState VisualizeGameState)
 {
-	local XComGameStateVisualizationMgr		VisMgr;
-	local Actor								SourceVisualizer;
-	local XComGameStateContext_Ability		Context;
-	local VisualizationActionMetadata		ActionMetadata;
-	local X2Action_Fire						FireAction;
+	local XComGameStateHistory			History;
+	local XComGameStateContext_Ability  Context;
+	local StateObjectReference          ShootingUnitRef;	
+	local X2Action_PlayAnimation		PlayAnimation;
+	local VisualizationActionMetadata	ActionMetadata;
+	local X2Action_TimedWait			TimedWait;
+	local X2Action						CommonParent;
+	local XComGameState_Unit			UnitState;
 
-	TypicalAbility_BuildVisualization(VisualizeGameState);
-
-	VisMgr = `XCOMVISUALIZATIONMGR;
+	History = `XCOMHISTORY;
 	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
-	SourceVisualizer = `XCOMHISTORY.GetVisualizer(Context.InputContext.SourceObject.ObjectID);
 
-	FireAction = X2Action_Fire(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_Fire', SourceVisualizer));
-	ActionMetadata = FireAction.Metadata;
+	ShootingUnitRef = Context.InputContext.SourceObject;
+	UnitState = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(ShootingUnitRef.ObjectID));
 
-	class'X2Action_SelectUnits'.static.AddToVisualizationTree(ActionMetadata, Context, false,, FireAction.ParentActions);
+	ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(ShootingUnitRef.ObjectID, eReturnType_Reference, VisualizeGameState.HistoryIndex - 1);
+	ActionMetadata.StateObject_NewState = UnitState;
+	ActionMetadata.VisualizeActor = History.GetVisualizer(ShootingUnitRef.ObjectID);
+
+	CommonParent = class'X2Action_MarkerTreeInsertBegin'.static.AddToVisualizationTree(ActionMetadata, Context);
+
+	PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, CommonParent));
+
+	if (UnitState != none && class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
+	{
+		PlayAnimation.Params.AnimName = 'HL_SignalPositivePost';
+	}
+	else
+	{
+		PlayAnimation.Params.AnimName = 'HL_CallReinforcements';
+	}
+		
+	// Use a delay to display the screen some time into the animation, but don't wait for it to complete fully.
+	TimedWait = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, CommonParent));
+	TimedWait.DelayTimeSec = 1.5f;
+
+	class'X2Action_SelectUnits'.static.AddToVisualizationTree(ActionMetadata, Context, false, TimedWait);
 }
 
 
@@ -271,12 +291,15 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.AddShooterEffect(AerialScout);
 	
 	// State and Vis
+	Template.bAllowUnderhandAnim = true;
 	Template.Hostility = eHostility_Neutral;
 	Template.bSkipExitCoverWhenFiring = false;
-	Template.CustomFireAnim = 'HL_SignalPointA';
+	Template.ActionFireClass = class'X2Action_Fire_Deployment';
+	Template.CustomFireAnim = 'FF_Grenade';
+	Template.ActivationSpeech = 'InDropPosition';
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
-	Template.FrameAbilityCameraType = eCameraFraming_Never; // Using custom camera work in X2Effect_DD instead.
+	//Template.FrameAbilityCameraType = eCameraFraming_Never; // Using custom camera work in X2Effect_DD instead.
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
@@ -289,29 +312,43 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 	local XComGameState_DynamicDeployment	DDObject;
 	local XComGameState_EvacZone			EvacZone;
 
+	`AMLOG("Running");
+
+	// 1. Hide if Evac Zone is placed.
 	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
-	if (EvacZone != none && (`GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS) || `GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced))
+	if (EvacZone != none && `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS))
 	{
-		`AMLOG("Evac zone is placed, hiding");
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-		return;
+		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
+		{
+			`AMLOG("Evac Zone is mission-placed and MCM setting allows DD.");
+			// Do nothing.
+		}
+		else
+		{
+			`AMLOG("Evac zone is placed and MCM setting does not allow DD.");
+			Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+			return;
+		}
 	}
 
+	// Special handle first deployment of the mission.
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none) // Special handle first deployment of the campaign.
+	if (DDObject == none) 
 	{
-		`AMLOG("DDObject no exist, show");
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 		return;
 	}
 
-	if (!DDObject.CanSelectMoreSoldiers() ||		// Can't deploy any more soldiers
-		DDObject.IsAnyUnitSelected() && DDObject.bPendingDeployment) // Already have some soldiers selected for deployment
+	// Hide if can't deploy any more soldiers
+	if (!DDObject.CanSelectMoreSoldiers())		
 	{
-		`AMLOG("Can't select more soldiers:" @ !DDObject.CanSelectMoreSoldiers());
-		`AMLOG("Any unit selected:" @ DDObject.IsAnyUnitSelected());
-		`AMLOG("Pending deployment:" @ DDObject.bPendingDeployment);
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+		return;
+	}
 
+	// Hide jf already have some soldiers selected for deployment
+	if (DDObject.IsAnyUnitSelected() && DDObject.bPendingDeployment) 
+	{
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 		return;
 	}
@@ -319,13 +356,11 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 	// Display when on cooldown.
 	if (Action.AvailableCode == 'AA_CoolingDown')
 	{
-		`AMLOG("Show when on cooldown");
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
 	}
 	else
 	{	
 		// Otherwise display when other condiitons succeed.
-		`AMLOG("Other conditions");
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
 	}
 }
@@ -340,19 +375,20 @@ static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction
 	{
 		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
 		{
-			// Do nothing
+			`AMLOG("Evac Zone is mission-placed and MCM setting allows DD.");
+			// Do nothing.
 		}
 		else
 		{
-			`AMLOG("Evac zone is placed, hiding");
+			`AMLOG("Evac zone is placed and MCM setting does not allow DD.");
 			Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 			return;
 		}
 	}
 
+	// Hide if no unit selected for deployment
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none ||						// Shouldn't happen
-		!DDObject.IsAnyUnitSelected() || !DDObject.bPendingDeployment) // No unit selected for deployment
+	if (DDObject == none || !DDObject.IsAnyUnitSelected() || !DDObject.bPendingDeployment) 
 	{
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 		return;
@@ -542,7 +578,8 @@ static function PrintActionRecursive(X2Action Action, int iLayer)
 }
 
 
-
+// Scrapped, because I didn't want DD to mess with the action economy.
+// You wanna overdrive - do it yourself after deployment.
 /*
 static function X2AbilityTemplate IRI_DDUnlock_SparkOverdrive()
 {

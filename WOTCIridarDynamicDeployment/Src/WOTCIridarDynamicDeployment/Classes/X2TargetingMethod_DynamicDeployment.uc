@@ -63,6 +63,7 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	super.Init(InAction, NewTargetIndex);
 }
 
+
 // Hijack left click or other ways to confirm ability activation if there are any precision drop units.
 // Consecutive clicks will lock the location of the last spawned pawn, and spawn a new one,
 // if there are any remaining.
@@ -427,6 +428,35 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 		}
 	}
 	return AbilityAvailability;
+}
+
+// Grenade targeting
+
+static function bool UseGrenadePath() { return !class'Help'.static.ShouldUseTeleportDeployment(); }
+
+function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathData WeaponPrecomputedPathData)
+{
+	local array<XComPerkContent> Perks;
+	local int i;
+	local XComWeapon Weapon;
+
+	class'XComPerkContent'.static.GetAssociatedPerkDefinitions(Perks, FiringUnit.GetPawn(), Ability.GetMyTemplateName());
+
+	for (i = 0; i < Perks.Length; ++i)
+	{
+		Weapon = Perks[i].PerkSpecificWeapon;
+		if (Weapon != none)
+		{
+			WeaponEntity = FiringUnit.GetPawn().Spawn(class'XComWeapon', FiringUnit.GetPawn(), , , , Weapon);
+			break;
+		}
+	}	
+	if (WeaponEntity == none)
+	{
+		`RedScreen("Unable to find a perk weapon for" @ Ability.GetMyTemplateName());
+	}
+
+	// WeaponPrecomputedPathData kept to default values, common for all grenades.
 }
 
 // Teleport

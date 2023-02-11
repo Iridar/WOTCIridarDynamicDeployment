@@ -6,7 +6,7 @@ class UIChooseUnits extends UIPersonnel;
 
 // Thanks to RustyDios for the idea to use UIPersonnel.
 
-var int SourcePlayerID;
+var XComGameState_Unit SourceUnit;
 
 var private config(StrategyTuning) StrategyCost	FlatCost;
 var private config(StrategyTuning) StrategyCost	PerUnitCost;
@@ -255,6 +255,7 @@ private function OnConfirmButtonClicked(UIButton Button)
 private function FinalizeSelectionAndClose()
 {
 	local XComGameState	NewGameState;
+	local XGUnit		GameUnit;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set Global Cooldowns");
 	SetGlobalCooldowns(NewGameState);
@@ -263,6 +264,13 @@ private function FinalizeSelectionAndClose()
 	CloseScreen();
 
 	MaybeDisplayBanner();
+
+	GameUnit = XGUnit(SourceUnit.GetVisualizer());
+	if (GameUnit != none)
+	{
+		// This line is in the banks, but basegame voices don't appear to have any cues for it, so this probably will never do anything.
+		GameUnit.UnitSpeak('RequestReinforcements');
+	}
 }
 
 // Wanted to display an individual banner for each soldier, 
@@ -272,7 +280,7 @@ private function MaybeDisplayBanner()
 {
 	local string strBannerTitle;
 	local string strBannerBody;
-	local string strBannerThirdLine;
+	//local string strBannerThirdLine;
 
 	if (DDObject.GetDeployDelay() == 0)
 		return;
@@ -283,7 +291,7 @@ private function MaybeDisplayBanner()
 	// "Turns until arrival: "
 	strBannerBody = Localize("MissionTimers", "NeutralizeFieldCommanderSubtitle", "XComGame") $ ": " $ DDObject.GetDeployDelay();
 	
-	`PRES.NotifyBanner(strBannerTitle, "img:///IRIDynamicDeployment_UI.MapPin_DynamicDeployment", strBannerBody, strBannerThirdLine, eUIState_Good);
+	`PRES.NotifyBanner(strBannerTitle, "img:///IRIDynamicDeployment_UI.MapPin_DynamicDeployment", strBannerBody, /*strBannerThirdLine*/, eUIState_Good);
 
 	`SOUNDMGR.PlayPersistentSoundEvent("UI_Blade_Positive");
 }
@@ -294,13 +302,13 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 
 	DeployDelay = DDObject.GetDeployDelay();
 
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourcePlayerID, NewGameState); // Set huge cooldown for now, actual cooldown will be set by the deploy abiltiy
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DeployDelay, SourcePlayerID, NewGameState);
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourceUnit.ControllingPlayer.ObjectID, NewGameState); // Set huge cooldown for now, actual cooldown will be set by the deploy abiltiy
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 
 	// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
 	if (class'Help'.static.IsModActive('RequestEvac'))
 	{
-		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourcePlayerID, NewGameState);
+		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 	}
 }
 

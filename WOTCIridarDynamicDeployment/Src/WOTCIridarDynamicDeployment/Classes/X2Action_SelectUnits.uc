@@ -17,7 +17,7 @@ simulated state Executing
 
 		Popup = Pres.Spawn(class'UIChooseUnits', Pres);
 		Popup.AllowShowDuringCinematic(true);
-		Popup.SourcePlayerID = SourceUnit.ControllingPlayer.ObjectID;
+		Popup.SourceUnit = SourceUnit;
 		Pres.ScreenStack.Push(Popup);
 	}
 

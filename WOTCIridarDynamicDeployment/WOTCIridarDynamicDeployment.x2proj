@@ -134,6 +134,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_Fire_Deployment.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_SelectUnits.uc">
       <SubType>Content</SubType>
     </Content>

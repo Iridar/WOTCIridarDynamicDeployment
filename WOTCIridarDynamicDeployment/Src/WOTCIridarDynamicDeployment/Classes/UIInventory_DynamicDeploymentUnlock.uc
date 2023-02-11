@@ -1,21 +1,23 @@
 class UIInventory_DynamicDeploymentUnlock extends UIInventory_ClassListItem;
 
+// List Item in the list of DD Unlocks in the armory.
+
 var DDUnlockStruct DDUnlock;
 
 var bool bUnlocked;
 var string strDisabledReason;
 var string strUnlockedLabel;
 
-var private UIIcon Icon;
+var private UIIcon AbilityIcon;
 var private UIText DisabledText;
 
 simulated function UIPanel InitPanel(optional name InitName, optional name InitLibID)
 {
 	super.InitPanel(InitName, InitLibID);
 
-	Icon = Spawn(class'UIIcon', self);
-	Icon.InitIcon('IconMC',, false, true, 54); // 'IconMC' matches instance name of control in Flash's 'AbilityItem' Symbol // 36 default
-	Icon.SetPosition(20, 20); // offset because we scale the icon
+	AbilityIcon = Spawn(class'UIIcon', self);
+	AbilityIcon.InitIcon('IconMC',, false, true, 54); // 'IconMC' matches instance name of control in Flash's 'AbilityItem' Symbol // 36 default
+	AbilityIcon.SetPosition(20, 20); // offset because we scale the icon
 
 	//Icon.MC.FunctionVoid("hideSelectionBrackets");
 	//Icon.LoadIcon("");
@@ -33,9 +35,9 @@ simulated function PopulateData(optional bool bRealizeDisabled)
 
 	DummyArray.Length = 0;
 
-	Icon.LoadIcon(ItemComodity.Image);
-	Icon.SetScale(2.0f);
-	Icon.EnableMouseAutomaticColor(class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR, class'UIUtilities_Colors'.const.BLACK_HTML_COLOR);
+	AbilityIcon.LoadIcon(ItemComodity.Image);
+	AbilityIcon.SetScale(2.0f);
+	AbilityIcon.EnableMouseAutomaticColor(class'UIUtilities_Colors'.const.NORMAL_HTML_COLOR, class'UIUtilities_Colors'.const.BLACK_HTML_COLOR);
 	
 	MC.BeginFunctionOp("populateData");
 	MC.QueueString("");

@@ -9,6 +9,12 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
+
+
+
+
+
+
 // Cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Localization
@@ -20,9 +26,12 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // Polish MCM
 // More Stuff configurable, if there is anything
 
-// TODO: Display banner after DD select screen is closed
+
+// TODO: Display concealment break info on resource bar
 // TODO: fix DD Deploy targeting sending camera to hell
 // TODO: Add a popup after Psi Gate research is completed?
+
+DigitalUplink - increase range of DD deploy cast
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
