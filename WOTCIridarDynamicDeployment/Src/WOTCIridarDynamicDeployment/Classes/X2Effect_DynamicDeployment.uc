@@ -5,11 +5,6 @@ var protected X2Condition_Visibility VisibilityCondition;
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
-// TODO: Resolve reveal AI issue
-// TODO: Replace matinee animations for soldiers
-// TODO: Some skyranger intros appear to be broken (only with SPARKs-only DD?)
-// TODO: SPARKs land feet halfway into the ground
-
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
 	local array<XComGameState_Unit>			UnitStates;

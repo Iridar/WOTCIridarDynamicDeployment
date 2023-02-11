@@ -9,16 +9,6 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
-
-
-MV_RunFwd_StopStandA
-ParticleSystem'IRIDynamicDeployment.PFX.PS_Teleport'
-IRI_DD_TeleportDeployment
-
-// If teleport is available, we're not tied to Skyranger.
-	if (class'Help'.static.ShouldUseTeleportDeployment())
-		return ELR_NoInterrupt;
-
 // Cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Localization

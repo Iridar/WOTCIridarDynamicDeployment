@@ -70,7 +70,7 @@ static final function TakeAndHold_Removed_Flyover_PostBuildVisualization(XComGam
 		ActionMetadata = MoveEnd.Metadata;
 		
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyover'.static.AddToVisualizationTree(ActionMetadata, Context, false, MoveEnd));
-		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, Template.LocFriendlyName, '', eColor_Bad, "img:///IRIDynamicDeployment_UI.DynamicDeployment"); // TODO: Icon here
+		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, Template.LocFriendlyName, '', eColor_Bad, "img:///IRIDynamicDeployment_UI.UIPerk_TakeAndHold");
 	}
 	else
 	{
@@ -79,7 +79,7 @@ static final function TakeAndHold_Removed_Flyover_PostBuildVisualization(XComGam
 		ActionMetadata.VisualizeActor = `XCOMHISTORY.GetVisualizer(Context.InputContext.SourceObject.ObjectID);
 
 		SoundAndFlyOver = X2Action_PlaySoundAndFlyOver(class'X2Action_PlaySoundAndFlyover'.static.AddToVisualizationTree(ActionMetadata, Context, false));
-		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, Template.LocFriendlyName, '', eColor_Bad, "img:///IRIDynamicDeployment_UI.DynamicDeployment"); // TODO: Icon here
+		SoundAndFlyOver.SetSoundAndFlyOverParameters(None, Template.LocFriendlyName, '', eColor_Bad, "img:///IRIDynamicDeployment_UI.UIPerk_TakeAndHold");
 	}
 }
 

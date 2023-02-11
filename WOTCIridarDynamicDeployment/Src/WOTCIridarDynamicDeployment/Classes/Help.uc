@@ -78,8 +78,16 @@ static final function bool SquadStartsConcealed()
 
 static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit UnitState)
 {
-	//local array<name> ExcludedTemplates;
-	// TODO: This
+	local array<name>ExclusionList;
+
+	ExclusionList = `GetConfigArrayName("IRI_DD_SoldierClasses_DisallowDD");
+	if (ExclusionList.Find(UnitState.GetSoldierClassTemplateName()) != INDEX_NONE)
+		return false;
+
+	ExclusionList = `GetConfigArrayName("IRI_DD_CharacterTemplates_DisallowDD");
+	if (ExclusionList.Find(UnitState.GetMyTemplateName()) != INDEX_NONE)
+		return false;
+
 	return UnitState.IsSoldier();
 }
 
