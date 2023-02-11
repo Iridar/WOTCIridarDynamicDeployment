@@ -22,7 +22,6 @@ IRI_DD_TeleportDeployment
 // Cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Localization
-
 // TODO: Modpreview
 // TODO: Mod description
 // TODO: comments
@@ -30,8 +29,6 @@ IRI_DD_TeleportDeployment
 
 // Polish MCM
 // More Stuff configurable, if there is anything
-
-// Select/Deploy ability template visibility
 
 Allow DD on missions with fixed evac?
 XComGameState_EvacZone.bMissionPlaced, toggle in MCM, may or may not work with Request Evac

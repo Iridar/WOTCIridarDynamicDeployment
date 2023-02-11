@@ -145,7 +145,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	//Template.OverrideAbilityAvailabilityFn = SparkFall_OverrideAbilityAvailability;
+	Template.OverrideAbilityAvailabilityFn = DDSelect_OverrideAbilityAvailability;
 
 	Template.bDisplayInUITacticalText = false;
 	Template.bHideOnClassUnlock = true;
@@ -225,7 +225,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	//Template.OverrideAbilityAvailabilityFn = SparkFall_OverrideAbilityAvailability;
+	Template.OverrideAbilityAvailabilityFn = DDDeploy_OverrideAbilityAvailability;
 
 	Template.bDisplayInUITacticalText = false;
 	Template.bHideOnClassUnlock = true;
@@ -289,6 +289,68 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	
 	return Template;
 }
+
+static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
+{
+	local XComGameState_DynamicDeployment DDObject;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none) // Special handle first deployment of the campaign.
+	{
+		`AMLOG("DDObject no exist, show");
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+		return;
+	}
+
+	if (!DDObject.CanSelectMoreSoldiers() ||		// Can't deploy any more soldiers
+		DDObject.IsAnyUnitSelected() && DDObject.bPendingDeployment) // Already have some soldiers selected for deployment
+	{
+		`AMLOG("Can't select more soldiers:" @ !DDObject.CanSelectMoreSoldiers());
+		`AMLOG("Any unit selected:" @ DDObject.IsAnyUnitSelected());
+		`AMLOG("Pending deployment:" @ DDObject.bPendingDeployment);
+
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+		return;
+	}
+
+	// Display when on cooldown.
+	if (Action.AvailableCode == 'AA_CoolingDown')
+	{
+		`AMLOG("Show when on cooldown");
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	}
+	else
+	{	
+		// Otherwise display when other condiitons succeed.
+		`AMLOG("Other conditions");
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
+	}
+}
+
+static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
+{
+	local XComGameState_DynamicDeployment DDObject;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none ||						// Shouldn't happen
+		!DDObject.IsAnyUnitSelected() || !DDObject.bPendingDeployment) // No unit selected for deployment
+	{
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+		return;
+	}
+
+	// Display when on cooldown.
+	if (Action.AvailableCode == 'AA_CoolingDown')
+	{
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
+	}
+	else
+	{	
+		// Otherwise display when other condiitons succeed.
+		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
+	}
+}
+
 //	========================================
 //				COMMON CODE
 //	========================================

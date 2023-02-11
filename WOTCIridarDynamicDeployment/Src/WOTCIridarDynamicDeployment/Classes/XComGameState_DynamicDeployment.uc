@@ -35,7 +35,7 @@ final function ToggleUnitSelection(const int UnitObjectID)
 		SelectedUnitIDs.AddItem(UnitObjectID);
 	}
 
-	if (IsAnyUnitSelected())
+	if (SelectedUnitIDs.Length > 0)
 	{
 		bPendingDeployment = true;
 	}
@@ -47,7 +47,7 @@ final function ToggleUnitSelection(const int UnitObjectID)
 
 final function bool IsAnyUnitSelected()
 {
-	return SelectedUnitIDs.Length > 0;
+	return GetNumSelectedUnits() > 0;
 }
 
 final function DeselectAllUnits()
@@ -59,7 +59,11 @@ final function DeselectAllUnits()
 
 final function int GetNumSelectedUnits()
 {
-	return SelectedUnitIDs.Length;
+	if (bPendingDeployment)
+	{
+		return SelectedUnitIDs.Length;
+	}
+	return 0;
 }
 
 final function int GetDeployDelay()
@@ -185,10 +189,6 @@ final function array<XComGameState_Unit> GetPrecisionDropUnits()
 		}
 	}
 	return PrecisionDropUnits;
-}
-
-static final function IsUnitPrecisionDrop(const XComGameState_Unit UnitState)
-{
 }
 
 static final function SavePrecisionDropTiles_SubmitGameState(const out array<XComGameState_Unit> PrecisionDropUnits, const out array<TTile> NewTiles)
@@ -368,7 +368,7 @@ final function bool CanSelectMoreSoldiers()
 
 		CurrentSquadSize++;
 	}
-	return CurrentSquadSize + SelectedUnitIDs.Length < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
+	return CurrentSquadSize + GetNumSelectedUnits() < class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
 }
 
 DefaultProperties
