@@ -128,6 +128,7 @@ static private function X2AbilityTemplate CreatePassiveDDUnlock(const name Templ
 	
 	// State and Vis
 	Template.Hostility = eHostility_Neutral;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	
 	return Template;
 }
@@ -298,13 +299,47 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.CustomFireAnim = 'FF_Grenade';
 	Template.ActivationSpeech = 'InDropPosition';
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
-	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.BuildVisualizationFn = DynamicDeployment_Deploy_BuildVisualization;
 	//Template.FrameAbilityCameraType = eCameraFraming_Never; // Using custom camera work in X2Effect_DD instead.
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
 	
 	return Template;
+}
+
+// Neuter Exit/Enter cover when used by SPARKs.
+static final function DynamicDeployment_Deploy_BuildVisualization(XComGameState VisualizeGameState)
+{
+	local XComGameStateVisualizationMgr		VisMgr;	
+	local XComGameState_Unit				UnitState;
+	local X2Action_EnterCover				EnterCover;
+	local X2Action_ExitCover				ExitCover;
+	local XComGameStateContext_Ability		AbilityContext;
+
+	TypicalAbility_BuildVisualization(VisualizeGameState);
+
+	`AMLOG("Running");
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+	UnitState = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(AbilityContext.InputContext.SourceObject.ObjectID));
+
+	if (UnitState == none || !class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
+		return;
+
+	ExitCover = X2Action_ExitCover(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ExitCover',, UnitState.ObjectID));
+	if (ExitCover != none)
+	{
+		`AMLOG("Nuking Exit Cover");
+		ExitCover.bSkipExitCoverVisualization = true;
+	}
+	EnterCover = X2Action_EnterCover(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_EnterCover',, UnitState.ObjectID));
+	if (EnterCover != none)
+	{
+		`AMLOG("Nuking Enter Cover");
+		EnterCover.bSkipEnterCover = true;	
+	}
 }
 
 static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)

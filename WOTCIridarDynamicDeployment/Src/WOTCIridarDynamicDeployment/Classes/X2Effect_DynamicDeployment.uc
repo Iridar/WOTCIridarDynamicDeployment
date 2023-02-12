@@ -528,7 +528,6 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local int								MaxZ;
 	local bool								bAtLeastOneUnitIsSparkLike;
 	local X2Action_UnstreamMap				UnstreamMap;
-	local X2Action_TimedWait				CameraArrive;
 	local array<X2Action>					StreamActions;
 	local X2Action							WaitForEffect;
 
@@ -557,7 +556,6 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
 	// TODO: Uncomment.
-	// TODO: replace grenade flying mesh with green one and get rid of red beeps,
 	// and preserve trail somehow.
 	// TODO: Add your own socket for the grenade?
 

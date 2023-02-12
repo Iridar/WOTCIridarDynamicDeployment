@@ -103,3 +103,50 @@ static private function PatchCharTemplates()
 		}
 	}
 }
+
+
+static function string DLCAppendSockets(XComUnitPawn Pawn)
+{
+	local XComGameState_Unit		UnitState;
+	local array<SkeletalMeshSocket> NewSockets;
+
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(Pawn.ObjectID));
+	if (UnitState == none || !UnitState.IsSoldier())
+		return "";
+
+	if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
+	{
+		NewSockets.AddItem(CreateSocket('IRI_DD_DeployFlare', 'LHand', 12.676726f, 2.216607f, 3.509641f, 0, 0, 0));
+	}
+	else 
+	{
+		NewSockets.AddItem(CreateSocket('IRI_DD_DeployFlare', 'GrenadeClip', 0, 0, 0, 0, 0, 0));
+	}
+
+	Pawn.Mesh.AppendSockets(NewSockets, true);
+	return "";
+}
+
+
+static private function SkeletalMeshSocket CreateSocket(const name SocketName, const name BoneName, optional const float X, optional const float Y, optional const float Z, optional const float dRoll, optional const float dPitch, optional const float dYaw, optional float ScaleX = 1.0f, optional float ScaleY = 1.0f, optional float ScaleZ = 1.0f)
+{
+	local SkeletalMeshSocket NewSocket;
+
+	NewSocket = new class'SkeletalMeshSocket';
+    NewSocket.SocketName = SocketName;
+    NewSocket.BoneName = BoneName;
+
+    NewSocket.RelativeLocation.X = X;
+    NewSocket.RelativeLocation.Y = Y;
+    NewSocket.RelativeLocation.Z = Z;
+
+    NewSocket.RelativeRotation.Roll = dRoll * DegToUnrRot;
+    NewSocket.RelativeRotation.Pitch = dPitch * DegToUnrRot;
+    NewSocket.RelativeRotation.Yaw = dYaw * DegToUnrRot;
+
+	NewSocket.RelativeScale.X = ScaleX;
+	NewSocket.RelativeScale.Y = ScaleY;
+	NewSocket.RelativeScale.Z = ScaleZ;
+    
+	return NewSocket;
+}
