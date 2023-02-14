@@ -8,6 +8,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 	Templates.AddItem(IRI_DynamicDeployment_Select());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
+	Templates.AddItem(IRI_DynamicDeployment_Deploy_Spark());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
@@ -180,6 +181,8 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
 
 	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy');
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
+	
 	
 	return Template;
 }
@@ -226,16 +229,15 @@ static final function DynamicDeployment_Select_BuildVisualization(XComGameState 
 }
 
 
-static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
+static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional name TemplateName = 'IRI_DynamicDeployment_Deploy')
 {
 	local X2AbilityTemplate					Template;
-	local X2AbilityCooldown_Global			GlobalCooldown;
 	local X2AbilityCost_ActionPoints		ActionPointCost;
 	local X2AbilityTarget_Cursor			CursorTarget;
 	local X2AbilityMultiTarget_Radius		RadiusMultiTarget;
 	local X2Effect_AerialScout				AerialScout;
 
-	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Deploy');
+	`CREATE_X2ABILITY_TEMPLATE(Template, TemplateName);
 
 	// Icon Setup
 	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicDeploy";
@@ -248,11 +250,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.bHideOnClassUnlock = true;
 	Template.bDisplayInUITooltip = false;
 
-	// Cost and Cooldown
-	GlobalCooldown = new class'X2AbilityCooldown_Global';
-	GlobalCooldown.iNumTurns = `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN);
-	Template.AbilityCooldown = GlobalCooldown;
-
+	// Cost
 	ActionPointCost = new class'X2AbilityCost_ActionPoints';
 	ActionPointCost.iNumPoints = 1;
 	ActionPointCost.bFreeCost = `GETMCMVAR(DD_DEPLOY_IS_FREE_ACTION);
@@ -265,6 +263,12 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.AddShooterEffectExclusions();
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
+
+	// I'm lazy, leave me alone
+	if (TemplateName == 'IRI_DynamicDeployment_Deploy')
+	{
+		Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotSparkLike');
+	}
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;
@@ -298,14 +302,28 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.ActionFireClass = class'X2Action_Fire_Deployment';
 	Template.CustomFireAnim = 'FF_Grenade';
 	Template.ActivationSpeech = 'InDropPosition';
+	Template.bHideWeaponDuringFire = true;
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
-	Template.BuildVisualizationFn = DynamicDeployment_Deploy_BuildVisualization;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
 	//Template.FrameAbilityCameraType = eCameraFraming_Never; // Using custom camera work in X2Effect_DD instead.
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
 	
 	return Template;
+}
+
+// Separate version for SPARKs so they can use a different version of PerkContent, otherwise identical.
+static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
+{
+	local X2AbilityTemplate Template;
+
+	Template = IRI_DynamicDeployment_Deploy('IRI_DynamicDeployment_Deploy_Spark');
+
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkLike');
+
+	return Template;
+
 }
 
 // Neuter Exit/Enter cover when used by SPARKs.

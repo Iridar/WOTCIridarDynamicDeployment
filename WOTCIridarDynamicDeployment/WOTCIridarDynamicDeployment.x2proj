@@ -152,6 +152,12 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_NotSparkLike.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_SparkLike.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2DLCInfo_WOTCIridarDynamicDeployment.uc" />
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\Help.uc" />
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\ConfigEngine.uc" />

@@ -11,6 +11,13 @@ LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will m
 LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
 LocFlyOverText="Holo Targeting"
 
+[IRI_DynamicDeployment_Deploy_Spark X2AbilityTemplate]
+LocFriendlyName="Dynamic Deploy"
+LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
+LocFlyOverText="Holo Targeting"
+
+
 [IRI_DynamicDeployment_GTS_Unlock X2SoldierAbilityUnlockTemplate]
 DisplayName = "Dynamic Deployment"
 Summary = "Allows soldiers to Dynamic Deployment."

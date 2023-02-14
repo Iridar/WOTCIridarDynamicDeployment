@@ -14,14 +14,14 @@ function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 	if (MissionData != EmptyData)
 	{
 		// Can't use DD on certain missions at all.
-		ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment");
+		ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment", true);
 		if (ExcludedMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE)
 		{
 			return false;
 		}
 		
 		// On some missions, can use only teleport DD
-		TeleportMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly");
+		TeleportMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly", true);
 		if (TeleportMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE && !class'Help'.static.ShouldUseTeleportDeployment())
 		{
 			return false;

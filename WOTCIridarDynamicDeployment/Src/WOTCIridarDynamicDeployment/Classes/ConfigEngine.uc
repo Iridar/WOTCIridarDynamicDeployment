@@ -92,7 +92,7 @@ struct ConfigStruct
 };
 var private config array<ConfigStruct> Configs;
 
-static final function ConfigStruct GetConfig(const coerce string ConfigName)
+static final function ConfigStruct GetConfig(const coerce string ConfigName, optional bool bCanBeNull)
 {
 	local ConfigStruct ReturnConfig;
 	local ConfigStruct CycleConfig;
@@ -110,7 +110,7 @@ static final function ConfigStruct GetConfig(const coerce string ConfigName)
 		}
 	}
 
-	if (ReturnConfig == EmptyConfig)
+	if (ReturnConfig == EmptyConfig && !bCanBeNull)
 	{
 		`AMLOG("WARNING :: Failed to find Config with N name:" @ ConfigName);
 		`AMLOG(GetScriptTrace());
@@ -180,13 +180,13 @@ static final function array<float> GetConfigArrayFloat(const coerce string Confi
 	return ReturnArray;
 }
 
-static final function array<name> GetConfigArrayName(const coerce string ConfigName)
+static final function array<name> GetConfigArrayName(const coerce string ConfigName, optional bool bCanBeNull)
 {
 	local array<string>	StringArray;
 	local array<name>	ReturnArray;
 	local int			Index;
 
-	StringArray = GetConfig(ConfigName).VA;
+	StringArray = GetConfig(ConfigName, bCanBeNull).VA;
 	for (Index = 0; Index < StringArray.Length; Index++)
 	{
 		ReturnArray.AddItem(name(StringArray[Index]));

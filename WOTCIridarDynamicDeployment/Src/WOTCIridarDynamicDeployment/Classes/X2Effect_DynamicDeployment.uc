@@ -33,9 +33,6 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		PlayerState = XComGameState_Player(History.GetGameStateForObjectID(CastingUnit.ControllingPlayer.ObjectID));
 		PlayerState = XComGameState_Player(NewGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
 	}
-		
-	// Put DD Soldier Select on cooldown.
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 
 	DDObject = XComGameState_DynamicDeployment(History.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
@@ -101,6 +98,11 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	//	`AMLOG("Triggering Lightning Strike");
 	//	EventMgr.TriggerEvent('StartOfMatchConcealment', PlayerState, PlayerState, NewGameState);
 	//}
+
+	// Put DD abilities cooldown.
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 

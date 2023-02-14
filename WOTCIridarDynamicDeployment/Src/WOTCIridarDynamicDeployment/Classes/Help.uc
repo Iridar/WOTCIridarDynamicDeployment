@@ -72,11 +72,11 @@ static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit
 {
 	local array<name> ExclusionList;
 
-	ExclusionList = `GetConfigArrayName("IRI_DD_SoldierClasses_DisallowDD");
+	ExclusionList = `GetConfigArrayName("IRI_DD_SoldierClasses_DisallowDD", true);
 	if (ExclusionList.Find(UnitState.GetSoldierClassTemplateName()) != INDEX_NONE)
 		return false;
 
-	ExclusionList = `GetConfigArrayName("IRI_DD_CharacterTemplates_DisallowDD");
+	ExclusionList = `GetConfigArrayName("IRI_DD_CharacterTemplates_DisallowDD", true);
 	if (ExclusionList.Find(UnitState.GetMyTemplateName()) != INDEX_NONE)
 		return false;
 
@@ -99,11 +99,11 @@ static final function bool IsCharTemplateSparkLike(const X2CharacterTemplate Cha
 {
 	local array<name> NameList;
 
-	NameList = `GetConfigArrayName("IRI_DD_SoldierClasses_SparkLike");
+	NameList = `GetConfigArrayName("IRI_DD_SoldierClasses_SparkLike", true);
 	if (NameList.Find(CharTemplate.DataName) != INDEX_NONE)
 		return true;
 
-	NameList = `GetConfigArrayName("IRI_DD_CharacterTemplates_NOT_SparkLike");
+	NameList = `GetConfigArrayName("IRI_DD_CharacterTemplates_NOT_SparkLike", true);
 	if (NameList.Find(CharTemplate.DataName) != INDEX_NONE)
 		return false;
 
