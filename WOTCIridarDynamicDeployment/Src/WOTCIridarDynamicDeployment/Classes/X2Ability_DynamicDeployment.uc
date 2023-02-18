@@ -295,16 +295,14 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 	AerialScout.TargetConditions.AddItem(new class'X2Condition_AerialScout');
 	Template.AddShooterEffect(AerialScout);
 
-	//Template.AddMultiTargetEffect(new class'X2Effect_TriggerEvent');
-
 	// State and Vis
 	Template.bAllowUnderhandAnim = true;
 	Template.Hostility = eHostility_Neutral;
 	Template.bSkipExitCoverWhenFiring = false;
 	Template.ActionFireClass = class'X2Action_Fire_Deployment';
-	//Template.CustomFireAnim = 'FF_Grenade';
+	Template.CustomFireAnim = 'FF_Grenade';
 	Template.ActivationSpeech = 'InDropPosition';
-	Template.bHideWeaponDuringFire = false;
+	Template.bHideWeaponDuringFire = true;
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
 	//Template.ModifyNewContextFn = Deploy_ModifyNewContext;
@@ -315,43 +313,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 	
 	return Template;
 }
-/*
-static private function Deploy_ModifyNewContext(XComGameStateContext Context)
-{
-	local XComGameStateContext_Ability AbilityContext;
-	local PathingInputData MovementPath;
-	local array<XComGameState_Unit> UnitStates;
-	local XComGameState_Unit UnitState;
-	local XComGameState_DynamicDeployment DDObject;
-	local int i;
-
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none)
-		return;
-
-	UnitStates = DDObject.GetUnitsToDeploy();
-	if (UnitStates.Length == 0)
-		return;
-
-	AbilityContext = XComGameStateContext_Ability(Context); 
-
-	foreach UnitStates(UnitState)
-	{
-		MovementPath.MovingUnitRef = UnitState.GetReference();
-
-		
-	}
-
-	
-	
-
-	
-
-	//for (i = 0; i < AbilityContext.InputContext.MultiTargets.Length; i++)
-	//{
-	//	AbilityContext.ResultContext.MultiTargetEffectResults[i] = eHit_Success;
-	//}
-}*/
 
 
 // Separate version for SPARKs so they can use a different version of PerkContent, otherwise identical.

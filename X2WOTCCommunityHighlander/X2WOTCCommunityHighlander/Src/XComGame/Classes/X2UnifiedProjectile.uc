@@ -73,35 +73,35 @@ struct native ProjectileSpreadValues
 var() instanced editinline array<X2UnifiedProjectileElement> ProjectileElements <ToolTip="Each element of this array defines distinct visual pieces of a firing projectile">;
 
 //Runtime data
-var private AnimNotify_FireWeaponVolley VolleyNotify;   //Reference to the animation notify that created us, if any
-var private X2Action_Fire FireAction;                   //Reference to the fire action we are a part of. This is the actor that created us
-var private XComGameStateContext_Ability SourceAbility; //Reference to the game state ability context being visualized by X2Action_Fire
-var private EAbilityHitResult AbilityContextHitResult;
-var private vector AbilityContextTargetLocation;
-var private int AbilityContextPrimaryTargetID;
-var private int AbilityContextAbilityRefID;
-var private bool bWasHit;                               //Tracks whether the ability that created this projectile hit the target or not. Some abilities have different looking hit / miss effects
-var private bool bIsASuppressionEffect;                 //Track if this is a suppression effect.  This flag is set and cached during the projectile's setup.
-var private XComWeapon SourceWeapon;                    //Reference to the weapon firing this projectile volley
-var private array<ProjectileSpreadValues> RandomSpreadValues; //We want each volley to have its own random trajectory, but within each volley the different projectile elements should take the same path
-var private X2WeaponTemplate WeaponTemplate;
-var private AbilityInputContext StoredInputContext;     //Keeps the input context for the ability responsible for these projectiles
-var private AbilityResultContext StoredResultContext;   //Keeps the result context for the ability responsible for these projectiles
+var /*private*/ AnimNotify_FireWeaponVolley VolleyNotify;   //Reference to the animation notify that created us, if any
+var /*private*/ X2Action_Fire FireAction;                   //Reference to the fire action we are a part of. This is the actor that created us
+var /*private*/ XComGameStateContext_Ability SourceAbility; //Reference to the game state ability context being visualized by X2Action_Fire
+var /*private*/ EAbilityHitResult AbilityContextHitResult;
+var /*private*/ vector AbilityContextTargetLocation;
+var /*private*/ int AbilityContextPrimaryTargetID;
+var /*private*/ int AbilityContextAbilityRefID;
+var /*private*/ bool bWasHit;                               //Tracks whether the ability that created this projectile hit the target or not. Some abilities have different looking hit / miss effects
+var /*private*/ bool bIsASuppressionEffect;                 //Track if this is a suppression effect.  This flag is set and cached during the projectile's setup.
+var /*private*/ XComWeapon SourceWeapon;                    //Reference to the weapon firing this projectile volley
+var /*private*/ array<ProjectileSpreadValues> RandomSpreadValues; //We want each volley to have its own random trajectory, but within each volley the different projectile elements should take the same path
+var /*private*/ X2WeaponTemplate WeaponTemplate;
+var /*private*/ AbilityInputContext StoredInputContext;     //Keeps the input context for the ability responsible for these projectiles
+var /*private*/ AbilityResultContext StoredResultContext;   //Keeps the result context for the ability responsible for these projectiles
 
 
-var private bool bCosmetic;                             //Indicates that this projectile is just for show
-var private Actor CosmeticSource;                       //If the projectile is cosmetic, this actor represents the source
-var private vector CosmeticSourceLocation;              // If the projectile is cosmetic, location represents the source. This will be ignored if the CosmeticSource is not none.
-var private Actor CosmeticTarget;                       //If the projectile is cosmetic, this location represents the target
-var private vector CosmeticTargetLocation;              // If the projectile is cosmetic, location represents the target. This will be ignored if the CosmeticTarget is not none.
-var private bool bCosmeticShouldHitTarget;              // Usually a cosmetic projectile does not have to hit the target, this ensures it does
+var /*private*/ bool bCosmetic;                             //Indicates that this projectile is just for show
+var /*private*/ Actor CosmeticSource;                       //If the projectile is cosmetic, this actor represents the source
+var /*private*/ vector CosmeticSourceLocation;              // If the projectile is cosmetic, location represents the source. This will be ignored if the CosmeticSource is not none.
+var /*private*/ Actor CosmeticTarget;                       //If the projectile is cosmetic, this location represents the target
+var /*private*/ vector CosmeticTargetLocation;              // If the projectile is cosmetic, location represents the target. This will be ignored if the CosmeticTarget is not none.
+var /*private*/ bool bCosmeticShouldHitTarget;              // Usually a cosmetic projectile does not have to hit the target, this ensures it does
 
-var private array<ProjectileElementInstance> Projectiles;//Holds a list of projectile instances and their supporting data
-var private bool bSetupVolley;                           //Lets the cleanup process know that projectile initialization has occurred and it is safe to destroy this object.
-var private bool bPlayedMetaHitEffect;                   //A latch for making sure the Meta Effect only plays once
-var private name OrdnanceType;
+var /*private*/ array<ProjectileElementInstance> Projectiles;//Holds a list of projectile instances and their supporting data
+var /*private*/ bool bSetupVolley;                           //Lets the cleanup process know that projectile initialization has occurred and it is safe to destroy this object.
+var /*private*/ bool bPlayedMetaHitEffect;                   //A latch for making sure the Meta Effect only plays once
+var /*private*/ name OrdnanceType;
 var bool bFirstShotInVolley;							//Indicate this is the first shot in the volley
-var private bool bProjectileFired;						//Indicate that at least a shot has been fired;
+var /*private*/ bool bProjectileFired;						//Indicate that at least a shot has been fired;
 var array<AnimNodeSequence> PlayingSequences;			//Used to remove anim sequences we started
 
 cpptext

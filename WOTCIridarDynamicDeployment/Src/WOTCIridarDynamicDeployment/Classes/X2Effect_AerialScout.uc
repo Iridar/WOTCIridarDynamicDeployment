@@ -60,3 +60,10 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	NewEffectState.CreatedObjectReference = ViewerState.GetReference();
 }
 
+simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, name EffectApplyResult)
+{
+	if (EffectApplyResult == 'AA_Success')
+	{
+		super.AddX2ActionsForVisualization(VisualizeGameState, ActionMetadata, EffectApplyResult);
+	}
+}

@@ -18,6 +18,8 @@
     <Folder Include="ContentForCook\" />
     <Folder Include="Src\ModConfigMenuAPI\" />
     <Folder Include="Src\ModConfigMenuAPI\Classes\" />
+    <Folder Include="Src\WOTCIridarDynamicDeployment2" />
+    <Folder Include="Src\WOTCIridarDynamicDeployment2\Classes" />
     <Folder Include="Src\WOTCIridarDynamicDeployment\" />
     <Folder Include="Src\WOTCIridarDynamicDeployment\Classes\" />
   </ItemGroup>
@@ -104,6 +106,9 @@
     <Content Include="Src\ModConfigMenuAPI\MCM_API_Includes.uci">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment2\Classes\X2UnifiedProjectile_DynamicDeployment.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DeployLocationActor.uc">
       <SubType>Content</SubType>
     </Content>
@@ -185,7 +190,7 @@
     <ScriptsDir>$(SolutionRoot).scripts\\</ScriptsDir>
     <BuildCommonRoot>$(ScriptsDir)X2ModBuildCommon\</BuildCommonRoot>
   </PropertyGroup>
-    <PropertyGroup>
+  <PropertyGroup>
     <SolutionRoot>$(MSBuildProjectDirectory)\..\</SolutionRoot>
     <ScriptsDir>$(SolutionRoot).scripts\</ScriptsDir>
     <BuildCommonRoot>$(ScriptsDir)X2ModBuildCommon\</BuildCommonRoot>

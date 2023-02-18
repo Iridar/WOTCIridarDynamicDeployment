@@ -4,6 +4,8 @@ function Init()
 {
 	super.Init();
 
+	`AMLOG("Before patching:" @ AnimParams.AnimName);
+
 	// TODO: Or unit has digital uplink upgrade
 	if (class'Help'.static.ShouldUseTeleportDeployment())
 	{
@@ -34,6 +36,8 @@ function Init()
 			}
 		}
 	}
+
+	`AMLOG("After patching:" @ AnimParams.AnimName);
 }
 /*
 function CompleteAction()
