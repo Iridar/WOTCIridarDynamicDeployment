@@ -18,8 +18,10 @@
     <Folder Include="ContentForCook\" />
     <Folder Include="Src\ModConfigMenuAPI\" />
     <Folder Include="Src\ModConfigMenuAPI\Classes\" />
+    <Folder Include="Src\WOTCIridarDynamicDeployment3" />
     <Folder Include="Src\WOTCIridarDynamicDeployment2" />
     <Folder Include="Src\WOTCIridarDynamicDeployment2\Classes" />
+    <Folder Include="Src\WOTCIridarDynamicDeployment3\Classes" />
     <Folder Include="Src\WOTCIridarDynamicDeployment\" />
     <Folder Include="Src\WOTCIridarDynamicDeployment\Classes\" />
   </ItemGroup>
@@ -109,6 +111,12 @@
     <Content Include="Src\WOTCIridarDynamicDeployment2\Classes\X2UnifiedProjectile_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment3\Classes\ConfigEngine.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment3\Classes\Help.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DeployLocationActor.uc">
       <SubType>Content</SubType>
     </Content>
@@ -164,8 +172,6 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2DLCInfo_WOTCIridarDynamicDeployment.uc" />
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\Help.uc" />
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\ConfigEngine.uc" />
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_AerialScout.uc">
       <SubType>Content</SubType>
     </Content>

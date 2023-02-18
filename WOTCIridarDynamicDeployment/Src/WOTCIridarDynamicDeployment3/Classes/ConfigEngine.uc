@@ -112,8 +112,8 @@ static final function ConfigStruct GetConfig(const coerce string ConfigName, opt
 
 	if (ReturnConfig == EmptyConfig && !bCanBeNull)
 	{
-		`AMLOG("WARNING :: Failed to find Config with N name:" @ ConfigName);
-		`AMLOG(GetScriptTrace());
+		`redscreen("WARNING :: Failed to find Config with N name:" @ ConfigName);
+		`redscreen(GetScriptTrace());
 	}
 
 	return ReturnConfig;

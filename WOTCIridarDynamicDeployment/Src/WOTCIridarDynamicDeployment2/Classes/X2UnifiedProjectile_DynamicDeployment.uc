@@ -555,7 +555,7 @@ function SetupVolley()
 		{
 			// ADDED
 			// Skip certain projectile elements depending on whether we want to use the smoke flare or teleport beacon
-			if (true != ProjectileElementIndex > 0)
+			if (class'Help'.static.ShouldUseTeleportDeployment() != ProjectileElementIndex > 0)
 			{
 				continue;
 			}
