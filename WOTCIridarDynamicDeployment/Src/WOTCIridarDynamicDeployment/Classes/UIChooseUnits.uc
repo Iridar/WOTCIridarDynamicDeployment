@@ -305,6 +305,8 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 99, SourceUnit.ControllingPlayer.ObjectID, NewGameState); // Set huge cooldown for now, actual cooldown will be set by the deploy abiltiy
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
+	
 
 	// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
 	if (class'Help'.static.IsModActive('RequestEvac'))

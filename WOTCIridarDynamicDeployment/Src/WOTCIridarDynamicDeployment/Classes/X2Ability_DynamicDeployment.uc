@@ -9,11 +9,13 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Select());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Spark());
+	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', "img:///IRIDynamicDeployment_UI.UIPerk_FastDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout")); // TODO: Uplink image
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
 	
@@ -182,7 +184,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
 
 	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy');
 	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
-	
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Uplink');
 	
 	return Template;
 }
@@ -259,7 +261,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 
 	// Shooter Conditions
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-	//Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkFall');
 	Template.AddShooterEffectExclusions();
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
@@ -268,6 +269,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 	if (TemplateName == 'IRI_DynamicDeployment_Deploy')
 	{
 		Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotSparkLike');
+		Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotDigitalUplink');
 	}
 
 	// Targeting and Triggering
@@ -323,10 +325,78 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 	Template = IRI_DynamicDeployment_Deploy('IRI_DynamicDeployment_Deploy_Spark');
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkLike');
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotDigitalUplink');
 
 	return Template;
-
 }
+
+// Separate version with different perk content, used by both sparks and soldiers.
+static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
+{
+	local X2AbilityTemplate Template;
+	local X2AbilityTarget_Cursor CursorTarget;
+
+	Template = IRI_DynamicDeployment_Deploy('IRI_DynamicDeployment_Deploy_Uplink');
+
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DigitalUplink');
+
+	// Anywhere within squad's vision
+	CursorTarget = new class'X2AbilityTarget_Cursor';
+	CursorTarget.bRestrictToSquadsightRange = true;
+	Template.AbilityTargetStyle = CursorTarget;
+
+	Template.TargetingMethod = class'X2TargetingMethod_DigitalUplink';
+
+	Template.BuildVisualizationFn = DigitalUplink_BuildVisualization;
+
+	return Template;
+}
+
+// TODO: This needs to be a typical build vis wrapper
+static private function DigitalUplink_BuildVisualization(XComGameState VisualizeGameState)
+{
+	local XComGameStateHistory			History;
+	local XComGameStateContext_Ability  Context;
+	local StateObjectReference          InteractingUnitRef;	
+	local XComGameState_Ability         Ability;
+	local VisualizationActionMetadata   EmptyTrack;
+	local VisualizationActionMetadata   ActionMetadata;
+	local X2Action_PlaySoundAndFlyOver	SoundAndFlyOver;
+	local X2Action_CameraLookAt			LookAtAction;
+	local X2Action_TimedWait			WaitAction;
+	local X2Action_PlayEffect			PlayEffect;
+
+	History = `XCOMHISTORY;
+
+	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
+	InteractingUnitRef = Context.InputContext.SourceObject;
+
+	//Configure the visualization track for the shooter
+	//****************************************************************************************
+	ActionMetadata = EmptyTrack;
+	ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(InteractingUnitRef.ObjectID,  eReturnType_Reference,  VisualizeGameState.HistoryIndex - 1);
+	ActionMetadata.StateObject_NewState = VisualizeGameState.GetGameStateForObjectID(InteractingUnitRef.ObjectID);
+	ActionMetadata.VisualizeActor = History.GetVisualizer(InteractingUnitRef.ObjectID);
+
+	//	move the camera to the soldier
+	LookAtAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
+	LookAtAction.LookAtActor = ActionMetadata.VisualizeActor;
+
+
+	//	start playing the hacking animation
+	class'X2Action_DigitalUplink'.static.AddToVisualizationTree(ActionMetadata,  Context,  false,  LookAtAction);
+
+	//	hold the camera on the hacker for a bit
+	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, LookAtAction));
+	WaitAction.DelayTimeSec = 2.5f;
+
+	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, Context, false, WaitAction));
+	PlayEffect.EffectName = "IRIDynamicDeployment.PS_DigitalUplink";
+	PlayEffect.EffectLocation = Context.InputContext.TargetLocations[0];
+}
+
+
+
 
 // Neuter Exit/Enter cover when used by SPARKs.
 static final function DynamicDeployment_Deploy_BuildVisualization(XComGameState VisualizeGameState)

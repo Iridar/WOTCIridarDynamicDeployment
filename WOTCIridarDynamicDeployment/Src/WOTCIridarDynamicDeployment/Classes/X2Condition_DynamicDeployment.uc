@@ -22,7 +22,7 @@ function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 		
 		// On some missions, can use only teleport DD
 		TeleportMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly", true);
-		if (TeleportMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE && !class'Help'.static.ShouldUseTeleportDeployment())
+		if (TeleportMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE && class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
 		{
 			return false;
 		}

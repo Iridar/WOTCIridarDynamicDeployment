@@ -157,7 +157,7 @@ static private function EventListenerReturn OnFirstTurn(Object EventData, Object
 	local XComGameState_Player PlayerState;
 
 	// If teleport is available, we're not tied to Skyranger.
-	if (class'Help'.static.ShouldUseTeleportDeployment())
+	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
 		return ELR_NoInterrupt;
 
 	PlayerState = XComGameState_Player(EventSource);
@@ -195,7 +195,7 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
 
 	// If teleport is available, we're not tied to Skyranger.
-	if (class'Help'.static.ShouldUseTeleportDeployment())
+	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
 		return ELR_NoInterrupt;
 
 	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);

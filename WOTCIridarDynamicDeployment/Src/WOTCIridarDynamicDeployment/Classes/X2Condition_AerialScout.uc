@@ -11,7 +11,7 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 	`AMLOG("Running");
 
 	// No scouting when we're not deploying via parachute.
-	if (class'Help'.static.IsUndergroundPlot() || class'Help'.static.ShouldUseTeleportDeployment())
+	if (class'Help'.static.GetDeploymentType() == `eDT_Flare)
 	{
 		`AMLOG("Underground or teleporting, condition fails.");
 		return 'AA_AbilityUnavailable';

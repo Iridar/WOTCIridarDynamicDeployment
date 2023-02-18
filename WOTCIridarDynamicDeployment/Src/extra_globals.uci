@@ -19,3 +19,7 @@
 
 `define YELLOW(VarName) class'UIUtilities_Text'.static.GetColoredText(`VarName, eUIState_Warning)
 `define GREEN(VarName) class'UIUtilities_Text'.static.GetColoredText(`VarName, eUIState_Good)
+
+`define eDT_Flare 0
+`define eDT_SeismicBeacon 1
+`define eDT_TeleportBeacon 2

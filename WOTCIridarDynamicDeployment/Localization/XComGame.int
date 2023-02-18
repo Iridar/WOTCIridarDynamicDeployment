@@ -17,6 +17,13 @@ LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will m
 LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
 LocFlyOverText="Holo Targeting"
 
+[IRI_DynamicDeployment_Deploy_Uplink X2AbilityTemplate]
+LocFriendlyName="Dynamic Deploy Uplink"
+LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
+LocFlyOverText="Holo Targeting"
+
+
 
 [IRI_DynamicDeployment_GTS_Unlock X2SoldierAbilityUnlockTemplate]
 DisplayName = "Dynamic Deployment"
@@ -58,4 +65,10 @@ LocFriendlyName="Hit The Ground Running"
 LocLongDescription="Gain mobility bonus for one turn after deployment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 LocFlyOverText="Hit The Ground Running"
+
+[IRI_DDUnlock_DigitalUplink X2AbilityTemplate]
+LocFriendlyName="Digital Uplink"
+LocLongDescription="Gain mobility bonus for one turn after deployment."
+LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+LocFlyOverText="Digital Uplink"
 

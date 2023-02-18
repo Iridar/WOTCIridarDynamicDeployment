@@ -144,6 +144,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DeployGremlin.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DigitalUplink.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
@@ -162,7 +165,13 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_AerialScout.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_DigitalUplink.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_DynamicDeployment.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_NotDigitalUplink.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Condition_NotSparkLike.uc">
@@ -182,6 +191,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2EventListener_DynamicDeployment.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2TargetingMethod_DigitalUplink.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2TargetingMethod_DynamicDeployment.uc">

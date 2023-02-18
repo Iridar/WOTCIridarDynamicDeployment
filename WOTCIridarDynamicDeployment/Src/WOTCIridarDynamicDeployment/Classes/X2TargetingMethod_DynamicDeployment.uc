@@ -45,7 +45,7 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
-	bCheckMaxZ = !class'Help'.static.ShouldUseTeleportDeployment();
+	bCheckMaxZ = class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon;
 
 	PrecisionDropUnitStates = DDObject.GetPrecisionDropUnits();
 	if (PrecisionDropUnitStates.Length > 0)
@@ -432,7 +432,7 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 
 // Grenade targeting
 
-static function bool UseGrenadePath() { return !class'Help'.static.ShouldUseTeleportDeployment(); }
+static function bool UseGrenadePath() { return true; }
 
 function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathData WeaponPrecomputedPathData)
 {

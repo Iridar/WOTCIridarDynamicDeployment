@@ -8,9 +8,27 @@ class Help extends Object abstract;
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
 
+static final function int GetDeploymentType()
+{
+	if (ShouldUseTeleportDeployment())
+	{
+		return `eDT_TeleportBeacon;
+	}
+	if (IsUndergroundPlot())
+	{
+		return `eDT_SeismicBeacon;
+	}
+	return `eDT_Flare;
+}
+
+static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)
+{
+	return IsDDAbilityUnlocked(SourceUnit, 'IRI_DDUnlock_DigitalUplink');
+}
+
 // Teleport deployment has a different visualization, but also different rules:
 // no concealment break for spark-like units, no Aerial Scout.
-static final function bool ShouldUseTeleportDeployment()
+static private function bool ShouldUseTeleportDeployment()
 {
 	return `XCOMHQ.IsTechResearched(`GetConfigName("IRI_DD_TechRequiredToUnlockTeleport"));
 }

@@ -72,7 +72,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		if (class'Help'.static.IsCharTemplateSparkLike(NewUnitState.GetMyTemplate()))
 		{
 			// Break concealment for spark-like units deploying other than through teleport.
-			if (!class'Help'.static.ShouldUseTeleportDeployment() && 
+			if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon && 
 				!class'Help'.static.IsDDAbilityUnlocked(NewUnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
 			{
 				EventMgr.TriggerEvent('EffectBreakUnitConcealment', NewUnitState, NewUnitState, NewGameState);
@@ -105,6 +105,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 
@@ -206,17 +207,18 @@ static final protected function XComGameState_AIGroup GetPlayerGroup()
 
 simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
-	if (class'Help'.static.ShouldUseTeleportDeployment())
+	switch (class'Help'.static.GetDeploymentType())
 	{
-		TeleportDeploymentVisualization(VisualizeGameState, ActionMetadata);
-	}
-	else if (class'Help'.static.IsUndergroundPlot())
-	{
-		UndergroundDeploymentVisualization(VisualizeGameState, ActionMetadata);
-	}
-	else
-	{
-		SkyrangerDeploymentVisualization(VisualizeGameState, ActionMetadata);
+		case `eDT_SeismicBeacon:
+			UndergroundDeploymentVisualization(VisualizeGameState, ActionMetadata);
+			break;
+		case `eDT_TeleportBeacon:
+			TeleportDeploymentVisualization(VisualizeGameState, ActionMetadata);
+			break;
+		case `eDT_Flare:
+		default:
+			SkyrangerDeploymentVisualization(VisualizeGameState, ActionMetadata);
+			break;
 	}
 }
 
