@@ -56,6 +56,18 @@ private function AddUnitsToMatinee()
 	}
 }
 
+// Override original to prevent 'accessed none' spam.
+function AddUnitToMatinee(name GroupName, XComGameState_Unit GameStateUnit)
+{
+	if (GameStateUnit == none)
+	{
+		BindUnitToMatineeGroup(GroupName, none);
+		return;
+	}
+
+	super.AddUnitToMatinee(GroupName, GameStateUnit);
+}
+
 //We never time out
 function bool IsTimedOut()
 {

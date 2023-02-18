@@ -12,6 +12,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
 
+	`AMLOG("X2Effect_AerialScout running");
+
 	// #1. Calculate radius
 	History = `XCOMHISTORY;
 

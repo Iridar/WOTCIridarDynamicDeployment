@@ -35,3 +35,15 @@ function Init()
 		}
 	}
 }
+/*
+function CompleteAction()
+{
+	local XComWeapon WeaponEntity;
+
+	WeaponEntity = WeaponVisualizer.GetEntity();
+
+	WeaponEntity.Destroy();
+	WeaponVisualizer.Destroy();
+
+	super.CompleteAction();
+}*/

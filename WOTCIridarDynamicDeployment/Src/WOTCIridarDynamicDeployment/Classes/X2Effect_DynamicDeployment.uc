@@ -38,7 +38,9 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	if (DDObject == none || !DDObject.bPendingDeployment)
 		return;
 
+	`AMLOG("Preloading assets");
 	DDObject.PreloadAssets();
+	`AMLOG("Preloaded");
 
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	UnitStates = DDObject.GetUnitsToDeploy();
@@ -780,6 +782,8 @@ defaultproperties
 	bRemoveWhenSourceDies = false
 	bIgnorePlayerCheckOnTick = false
 	WatchRule = eGameRule_PlayerTurnEnd
+	EffectName = "IRI_DD_X2Effect_DynamicDeployment"
+	DuplicateResponse = eDupe_Allow
 
     Begin Object Class=X2Condition_Visibility Name=DefaultVisibilityCondition
         bNoEnemyViewers = true

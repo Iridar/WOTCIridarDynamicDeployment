@@ -14,7 +14,7 @@
 `define GetConfigString(VarName) class'ConfigEngine'.static.GetConfigString(`VarName)
 `define GetConfigArrayInt(VarName) class'ConfigEngine'.static.GetConfigArrayInt(`VarName)
 `define GetConfigArrayFloat(VarName) class'ConfigEngine'.static.GetConfigArrayFloat(`VarName)
-`define GetConfigArrayName(VarName) class'ConfigEngine'.static.GetConfigArrayName(`VarName)
+`define GetConfigArrayName(VarName, SecVarName) class'ConfigEngine'.static.GetConfigArrayName(`VarName, `SecVarName)
 
 
 `define YELLOW(VarName) class'UIUtilities_Text'.static.GetColoredText(`VarName, eUIState_Warning)

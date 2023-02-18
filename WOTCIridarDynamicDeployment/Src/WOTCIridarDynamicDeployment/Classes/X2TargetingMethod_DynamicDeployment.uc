@@ -448,6 +448,8 @@ function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathDa
 		if (Weapon != none)
 		{
 			WeaponEntity = FiringUnit.GetPawn().Spawn(class'XComWeapon', FiringUnit.GetPawn(), , , , Weapon);
+			//WeaponEntity.Mesh.SetHidden(false);
+			`AMLOG("Spawning perk weapon:" @ PathName(WeaponEntity));
 			break;
 		}
 	}	
