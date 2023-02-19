@@ -12,17 +12,6 @@ static function array<X2DataTemplate> CreateTemplates()
 	return Templates;
 }
 
-/*
-'AbilityActivated', AbilityState, SourceUnitState, NewGameState
-'PlayerTurnBegun', PlayerState, PlayerState, NewGameState
-'PlayerTurnEnded', PlayerState, PlayerState, NewGameState
-'UnitDied', UnitState, UnitState, NewGameState
-'KillMail', UnitState, Killer, NewGameState
-'UnitTakeEffectDamage', UnitState, UnitState, NewGameState
-'OnUnitBeginPlay', UnitState, UnitState, NewGameState
-'OnTacticalBeginPlay', X2TacticalGameRuleset, none, NewGameState
-*/
-
 static private function CHEventListenerTemplate Create_ListenerTemplate_Strategy()
 {
 	local CHEventListenerTemplate Template;
@@ -33,11 +22,32 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Strategy
 	Template.RegisterInStrategy = true;
 
 	Template.AddCHEvent('OnArmoryMainMenuUpdate', UpdateArmoryMainMenu, ELD_Immediate);
+	Template.AddCHEvent('OnResearchReport', OnOnResearchReport, ELD_Immediate);
 
 	return Template;
 }
 
+// Display a popup that Teleportation Deployment is available when requisite research is complete.
+static private function EventListenerReturn OnOnResearchReport(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComGameState_Tech	TechState;
+	local TDialogueBoxData		kDialogData;
 
+	TechState = XComGameState_Tech(EventData);
+	if (TechState != none && TechState.GetMyTemplateName() == `GetConfigName("IRI_DD_TechRequiredToUnlockTeleport") && `XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
+	{
+		kDialogData.strTitle = `GetLocalizedString("IRI_DD_TeleportDeployment_Title");
+		kDialogData.strText = `GetLocalizedString("IRI_DD_TeleportDeployment_Text");
+		kDialogData.eType = eDialog_Normal;
+		kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericOK;
+
+		`PRESBASE.UIRaiseDialog(kDialogData);
+	}
+
+	return ELR_NoInterrupt;
+}
+
+// Insert the Dynamic Deployment button into Armory main menu.
 static private function EventListenerReturn UpdateArmoryMainMenu(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local UIList				Menu;
@@ -61,14 +71,7 @@ static private function EventListenerReturn UpdateArmoryMainMenu(Object EventDat
 	if (Menu == none) 
 		return ELR_NoInterrupt;
 
-	if (UnitState.IsRobotic())
-	{
-		strLabel = `CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel_Robotic"));
-	}
-	else
-	{
-		strLabel = `CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel"));
-	}
+	strLabel = `CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel"));
 
 	DDButton = Menu.Spawn(class'UIListItemString', Menu.ItemContainer).InitListItem(strLabel); 
 	DDButton.MCName = 'ArmoryMainMenu_DDButton';
@@ -78,7 +81,6 @@ static private function EventListenerReturn UpdateArmoryMainMenu(Object EventDat
 
 	return ELR_NoInterrupt;
 }
-
 static private function MoveMenuItemIntoPosition(UIList Menu, UIPanel Item, int iPosition)
 {
 	local int StartingIndex, ItemIndex;
@@ -106,7 +108,6 @@ static private function MoveMenuItemIntoPosition(UIList Menu, UIPanel Item, int 
 	if (StartingIndex == Menu.SelectedIndex && Menu.OnSelectionChanged != none)
 		Menu.OnSelectionChanged(Menu, Menu.SelectedIndex);
 }
-
 static private function OnDDButtonClicked(UIButton kButton)
 {
 	local XComHQPresentationLayer		HQPres;
@@ -137,7 +138,6 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.RegisterInStrategy = false;
 
 	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
-	//Template.AddCHEvent('EvacZonePlaced', OnEvacZonePlaced, ELD_OnStateSubmitted);
 
 	// This event probably isn't triggered by anything other Request Evac, but better safe than sorry,
 	// since if the event is triggered, but Request Evac isn't present, we're gonna hard crash the game.
@@ -171,7 +171,6 @@ static private function EventListenerReturn OnFirstTurn(Object EventData, Object
 
 	return ELR_NoInterrupt;
 }
-
 static private function bool IsFirstTurn()
 {
 	local XComGameStateHistory		History;
@@ -209,23 +208,15 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 	return ELR_NoInterrupt;
 }
 
-//static private function EventListenerReturn OnEvacZonePlaced(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
-//{
-//	local StateObjectReference PlayerStateRef;
-//
-//	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
-//
-//	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 3, PlayerStateRef.ObjectID); 
-//
-//	return ELR_NoInterrupt;
-//}
-
-
+// Toggle unit status for soldiers selected for dynamic deployment on the Choose Units screen.
 static private function EventListenerReturn OnOverridePersonnelStatus(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local XComLWTuple						OverrideTuple;
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
+
+	if (!`SCREENSTACK.IsInStack(class'UIChooseUnits'))
+		return ELR_NoInterrupt;
 
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none)
@@ -237,7 +228,7 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 	{
 		OverrideTuple = XComLWTuple(EventData);
 		OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
-		OverrideTuple.Data[4].i = eUIState_Warning;
+		OverrideTuple.Data[4].i = eUIState_Warning; // Yellow
 	}
 
 	return ELR_NoInterrupt;

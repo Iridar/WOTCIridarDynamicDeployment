@@ -11,14 +11,14 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Spark());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
 
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', "img:///IRIDynamicDeployment_UI.UIPerk_FastDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout")); // TODO: Uplink image
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
 	
+	//Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
 	//Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
 	//Templates.AddItem(IRI_DynamicDeployment_BlackOps());
 
@@ -231,7 +231,7 @@ static final function DynamicDeployment_Select_BuildVisualization(XComGameState 
 }
 
 
-static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional name TemplateName = 'IRI_DynamicDeployment_Deploy')
+static private function X2AbilityTemplate CreateDeploymentAbility(const name TemplateName)
 {
 	local X2AbilityTemplate					Template;
 	local X2AbilityCost_ActionPoints		ActionPointCost;
@@ -265,13 +265,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
 
-	// I'm lazy, leave me alone
-	if (TemplateName == 'IRI_DynamicDeployment_Deploy')
-	{
-		Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotSparkLike');
-		Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotDigitalUplink');
-	}
-
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;
 
@@ -301,18 +294,32 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy(optional 
 	Template.bAllowUnderhandAnim = true;
 	Template.Hostility = eHostility_Neutral;
 	Template.bSkipExitCoverWhenFiring = false;
-	Template.ActionFireClass = class'X2Action_Fire_Deployment';
-	Template.CustomFireAnim = 'FF_Grenade';
 	Template.ActivationSpeech = 'InDropPosition';
 	Template.bHideWeaponDuringFire = true;
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
-	//Template.ModifyNewContextFn = Deploy_ModifyNewContext;
 	//Template.FrameAbilityCameraType = eCameraFraming_Never; // Using custom camera work in X2Effect_DD instead.
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
 	
+	return Template;
+}
+
+static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
+{
+	local X2AbilityTemplate Template;
+
+	Template = CreateDeploymentAbility('IRI_DynamicDeployment_Deploy');
+
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotSparkLike');
+	Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotDigitalUplink');
+
+	Template.ActionFireClass = class'X2Action_Fire_Deployment';
+	Template.CustomFireAnim = 'FF_Grenade';
+
+	Template.ConcealmentRule = eConceal_Never;
+
 	return Template;
 }
 
@@ -322,10 +329,15 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 {
 	local X2AbilityTemplate Template;
 
-	Template = IRI_DynamicDeployment_Deploy('IRI_DynamicDeployment_Deploy_Spark');
+	Template = CreateDeploymentAbility('IRI_DynamicDeployment_Deploy_Spark');
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_SparkLike');
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_NotDigitalUplink');
+
+	Template.ActionFireClass = class'X2Action_Fire_Deployment';
+	Template.CustomFireAnim = 'FF_Grenade';
+
+	Template.ConcealmentRule = eConceal_Never;
 
 	return Template;
 }
@@ -336,13 +348,13 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 	local X2AbilityTemplate Template;
 	local X2AbilityTarget_Cursor CursorTarget;
 
-	Template = IRI_DynamicDeployment_Deploy('IRI_DynamicDeployment_Deploy_Uplink');
+	Template = CreateDeploymentAbility('IRI_DynamicDeployment_Deploy_Uplink');
 
 	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DigitalUplink');
 
 	// Anywhere within squad's vision
 	CursorTarget = new class'X2AbilityTarget_Cursor';
-	CursorTarget.bRestrictToSquadsightRange = true;
+	CursorTarget.bRestrictToSquadsightRange = `GETMCMVAR(SQUAD_MUST_SEE_TILE);
 	Template.AbilityTargetStyle = CursorTarget;
 
 	Template.TargetingMethod = class'X2TargetingMethod_DigitalUplink';
@@ -350,7 +362,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 	Template.AbilityShooterEffects.InsertItem(0, new class'X2Effect_ParticleEffect');
 
 	Template.CustomFireAnim = 'FF_Deploy_Uplink';
-	Template.ActionFireClass = class'X2Action_Fire';
 
 	return Template;
 }

@@ -9,19 +9,6 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
-
-Ты делал финишные штрихи моду, и прошёлся по файлам влоть до X2Ability_DynamicDeployment не включительно,
-потом решил сделать анимацию броска шашки для вызова подкрепления, но сделал только половину.
-
-У бойцов работает анимация дальнего броска, но не ближнего.
-У Спарков есть анимация ближнего броска, но она ещё не работает - из-за удаления Exit/Enter Cover, сбрасывается активное оружия.
-Возможно, получится это починить в кастомном X2Action_Fire. 
-
-Если поставить флаг bSkipExitCoverWhenFiring то анимация тоже не работает, можно покопать в этом направлении.
-
-Анимацию для дальнего броска предстоит доделать.
-
-
 // Cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Localization
@@ -30,24 +17,15 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: comments
 // TODO: Figure out the squad viewer redscreen
 // TODO: debug console commands for removing and adding DD unlocks
+// TODO: Pretty configs
+// TODO: Test everything with redscreens and check logs
 
 // Polish MCM
 // More Stuff configurable, if there is anything
 
 // Preload assets on turn start when deploy is available
-// TODO: Display concealment break info on resource bar
 // TODO: fix DD Deploy targeting sending camera to hell
-// TODO: Add a popup after Psi Gate research is completed?
-// TODO: Test everything with redscreens and check logs
-// Add an option to skip log warning about missing Configs for these:
 
-"IRI_DD_MissionsAllowTeleportOnly"
-"IRI_DD_SoldierClasses_DisallowDD"
-"IRI_DD_CharacterTemplates_DisallowDD"
-"IRI_DD_SoldierClasses_SparkLike"
-"IRI_DD_CharacterTemplates_NOT_SparkLike"
-
-DigitalUplink - increase range of DD deploy cast
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

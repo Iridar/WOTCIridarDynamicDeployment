@@ -56,7 +56,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	foreach UnitStates(UnitState, iNumUnit)
 	{
-		`AMLOG(iNumUnit @ "Deploying unit:" @ UnitState.GetFullName());
+		`AMLOG(iNumUnit @ "Deploying unit:" @ UnitState.GetFullName() @ "removed from play:" @ UnitState.bRemovedFromPlay);
 
 		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 
@@ -67,27 +67,19 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		AddStrategyUnitToBoard(NewUnitState, NewGameState, SpawnLocation);
 
 		NewUnitState.ActionPoints = default.AFTER_SPAWN_ACTION_POINTS;
-		XComHQ.Squad.AddItem(NewUnitState.GetReference());
-
-		if (class'Help'.static.IsCharTemplateSparkLike(NewUnitState.GetMyTemplate()))
+		if (XComHQ.Squad.Find('ObjectID', NewUnitState.ObjectID) == INDEX_NONE)
 		{
-			// Break concealment for spark-like units deploying other than through teleport.
-			if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon && 
-				!class'Help'.static.IsDDAbilityUnlocked(NewUnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
-			{
-				EventMgr.TriggerEvent('EffectBreakUnitConcealment', NewUnitState, NewUnitState, NewGameState);
-			}
+			XComHQ.Squad.AddItem(NewUnitState.GetReference());
 		}
-		else
+
+		// If unit has Phantom and is unseen during the landing, /*and the squad hasn't broken concealment yet, */
+		// they will enter concealment.
+		if (/*PlayerState.bSquadIsConcealed &&	*/	
+			class'Help'.static.ShouldUseDigitalUplink(CastingUnit) &&
+			VisibilityCondition.MeetsCondition(NewUnitState) == 'AA_Success' &&
+			NewUnitState.HasAnyOfTheAbilitiesFromAnySource(class'X2AbilityTemplateManager'.default.AbilityProvidesStartOfMatchConcealment))
 		{
-			// If unit has Phantom and is unseen during the landing, and the squad hasn't broken concealment yet, 
-			// they will enter concealment.
-			if (PlayerState.bSquadIsConcealed &&		
-				VisibilityCondition.MeetsCondition(NewUnitState) == 'AA_Success' &&
-				NewUnitState.HasAnyOfTheAbilitiesFromAnySource(class'X2AbilityTemplateManager'.default.AbilityProvidesStartOfMatchConcealment))
-			{
-				NewUnitState.EnterConcealmentNewGameState(NewGameState);
-			}
+			NewUnitState.EnterConcealmentNewGameState(NewGameState);
 		}
 	
 		EventMgr.TriggerEvent('ObjectMoved', NewUnitState, NewUnitState, NewGameState);
@@ -101,12 +93,21 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	//	EventMgr.TriggerEvent('StartOfMatchConcealment', PlayerState, PlayerState, NewGameState);
 	//}
 
-	// Put DD abilities cooldown.
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-
+	// Put DD abilities cooldown, unless teleporting
+	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
+	{
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 0, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', 0, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', 0, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', 0, PlayerState.ObjectID, NewGameState);
+	}
+	else
+	{
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+	}
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 
 	`AMLOG("Deployment complete");
@@ -130,59 +131,73 @@ static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGa
 	local XComGameState_Unit			CosmeticUnit;
 	local XComGameState_AIGroup			Group, PreviousGroupState;
 	local TTile							CosmeticUnitTile;
+	local bool							bWasEvacedFromThisMission;
+
+	// Needed to allow redeploying evacuated units
+	if (Unit.bRemovedFromPlay)
+	{
+		bWasEvacedFromThisMission = true;
+		Unit.ClearRemovedFromPlayFlag();
+	}
 	
 	Unit.bSpawnedFromAvenger = true; //tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 	
-	// assign the new unit to the human team -LEB
-	History = `XCOMHISTORY;
-	foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
+	// No need to do this stuff if the unit was already on this mission.
+	if (!bWasEvacedFromThisMission)
 	{
-		if (PlayerState.GetTeam() == eTeam_XCom)
+		// assign the new unit to the human team -LEB
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
 		{
-			Unit.SetControllingPlayer(PlayerState.GetReference());
-			break;
+			if (PlayerState.GetTeam() == eTeam_XCom)
+			{
+				Unit.SetControllingPlayer(PlayerState.GetReference());
+				break;
+			}
 		}
-	}
-	//	set AI Group for the new unit so it can be controlled by the player properly
-	Group = GetPlayerGroup();
-	if (Unit != none && Group != none)
-	{
-		PreviousGroupState = Unit.GetGroupMembership(NewGameState);
-		if (PreviousGroupState != none) 
+		//	set AI Group for the new unit so it can be controlled by the player properly
+		Group = GetPlayerGroup();
+		if (Unit != none && Group != none)
 		{
-			PreviousGroupState = XComGameState_AIGroup(NewGameState.ModifyStateObject(PreviousGroupState.Class, PreviousGroupState.ObjectID));
-			PreviousGroupState.RemoveUnitFromGroup(Unit.ObjectID, NewGameState);
+			PreviousGroupState = Unit.GetGroupMembership(NewGameState);
+			if (PreviousGroupState != none) 
+			{
+				PreviousGroupState = XComGameState_AIGroup(NewGameState.ModifyStateObject(PreviousGroupState.Class, PreviousGroupState.ObjectID));
+				PreviousGroupState.RemoveUnitFromGroup(Unit.ObjectID, NewGameState);
+			}
+
+			Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(Group.Class, Group.ObjectID));
+			Group.AddUnitToGroup(Unit.ObjectID, NewGameState);
 		}
 
-		Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(Group.Class, Group.ObjectID));
-		Group.AddUnitToGroup(Unit.ObjectID, NewGameState);
+		// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
+		foreach Unit.InventoryItems(ItemReference)
+		{
+			ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
+			ItemState.BeginTacticalPlay(NewGameState);   // this needs to be called explicitly since we're adding an existing state directly into tactical
+
+			// add any cosmetic items that might exists
+			ItemState.CreateCosmeticItemUnit(NewGameState);
+			CosmeticUnit = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ItemState.CosmeticUnitRef.ObjectID));
+			if (CosmeticUnit != none)
+			{
+				CosmeticUnitTile = Unit.GetDesiredTileForAttachedCosmeticUnit();
+				CosmeticUnitTile.Z += Unit.UnitHeight - 2;
+				CosmeticUnit.SetVisibilityLocation(CosmeticUnitTile);
+			}
+		}
+
+		// add abilities -LEB
+		// Must happen after items are added, to do ammo merging properly. -LEB
+		`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
 	}
 
 	Unit.SetVisibilityLocationFromVector(SpawnLocation);
 
-	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
-	foreach Unit.InventoryItems(ItemReference)
+	if (!bWasEvacedFromThisMission)
 	{
-		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
-		ItemState.BeginTacticalPlay(NewGameState);   // this needs to be called explicitly since we're adding an existing state directly into tactical
-
-		// add any cosmetic items that might exists
-		ItemState.CreateCosmeticItemUnit(NewGameState);
-		CosmeticUnit = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ItemState.CosmeticUnitRef.ObjectID));
-		if (CosmeticUnit != none)
-		{
-			CosmeticUnitTile = Unit.GetDesiredTileForAttachedCosmeticUnit();
-			CosmeticUnitTile.Z += Unit.UnitHeight - 2;
-			CosmeticUnit.SetVisibilityLocation(CosmeticUnitTile);
-		}
+		Unit.BeginTacticalPlay(NewGameState); 
 	}
-
-	// add abilities -LEB
-	// Must happen after items are added, to do ammo merging properly. -LEB
-	`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
-
-	//	I assume this triggers the unit's abilities that activate at "UnitPostBeginPlay"
-	Unit.BeginTacticalPlay(NewGameState); 
 
 	return Unit;
 }
@@ -386,6 +401,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	local TTile								SpawnTile;
 	local int								MaxZ;
 	local X2Action_TimedWait				CameraArrive;
+	local XComGameState_Unit				CastingUnit;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -397,6 +413,9 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	UnitStates = DDObject.GetUnitsToDeploy(VisualizeGameState);
 	if (UnitStates.Length == 0)
 		return;
+
+	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
+
 
 	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
 
@@ -441,7 +460,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 
 		if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
 		{
-			if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
+			if (class'Help'.static.ShouldUseDigitalUplink(CastingUnit))
 			{
 				AnimationAction.Params.AnimName = 'HL_DynamicDeploymentSilent_Underground';
 			}
@@ -536,6 +555,7 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local X2Action_UnstreamMap				UnstreamMap;
 	local array<X2Action>					StreamActions;
 	local X2Action							WaitForEffect;
+	local XComGameState_Unit				CastingUnit;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -558,12 +578,11 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	}
 
 	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
-
+	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
 	// TODO: Uncomment.
 	// and preserve trail somehow.
-	// TODO: Add your own socket for the grenade?
 
 	// Move camera to deployment location
 	//LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
@@ -626,7 +645,7 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 
 		if (class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
 		{
-			if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_SparkRetainConcealment'))
+			if (class'Help'.static.ShouldUseDigitalUplink(CastingUnit))
 			{
 				AnimationAction.Params.AnimName = 'HL_DynamicDeploymentSilent';
 			}

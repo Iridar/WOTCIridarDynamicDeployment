@@ -1,9 +1,9 @@
 
 [IRI_DynamicDeployment_Select X2AbilityTemplate]
-LocFriendlyName="Dynamic Select"
-LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocFriendlyName="Request Reinforcements"
+LocLongDescription="Contact the Avenger to request reinforcements for this mission."
 LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
-LocFlyOverText="Holo Targeting"
+LocFlyOverText="Request Reinforcements"
 
 [IRI_DynamicDeployment_Deploy X2AbilityTemplate]
 LocFriendlyName="Dynamic Deploy"
@@ -13,7 +13,8 @@ LocFlyOverText="Holo Targeting"
 
 [IRI_DynamicDeployment_Deploy_Spark X2AbilityTemplate]
 LocFriendlyName="Dynamic Deploy"
-LocLongDescription="Any directed <Ability:WeaponName/> shot, hit or miss, will mark the target, increasing your squad's aim by +<Ability:HOLOTARGETAIMBONUS/> against this target."
+LocLongDescriptionWhenConcealed = "Breaks concealment"
+LocLongDescription="Breaks concealment"
 LocHelpText="Shooting at a target grants bonus Aim to allies against that target"
 LocFlyOverText="Holo Targeting"
 
@@ -29,10 +30,7 @@ LocFlyOverText="Holo Targeting"
 DisplayName = "Dynamic Deployment"
 Summary = "Allows soldiers to Dynamic Deployment."
 
-[IRI_DDUnlock_SparkRetainConcealment X2AbilityTemplate]
-LocFriendlyName="\"Whisper\" Jets"
-LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
-LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
+
 
 [IRI_DDUnlock_SparkOverdrive X2AbilityTemplate]
 LocFriendlyName="Spark Overdrive"
@@ -72,3 +70,8 @@ LocLongDescription="Gain mobility bonus for one turn after deployment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 LocFlyOverText="Digital Uplink"
 
+
+;[IRI_DDUnlock_SparkRetainConcealment X2AbilityTemplate]
+;LocFriendlyName="\"Whisper\" Jets"
+;LocLongDescription="This unit will no longer break concealment when Dynamically Deployed."
+;LocHelpText="This unit will no longer break concealment when Dynamically Deployed."

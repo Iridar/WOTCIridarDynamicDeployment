@@ -28,6 +28,9 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	DDObject = class'XComGameState_DynamicDeployment'.static.GetOrCreate();
 	DDObject.GetUnitStatesEligibleForDynamicDeployment(UnitStates);
 
+	// There's no good time for us to deselect units at any point after deployment,
+	// so it before entering screen instead.
+	DeselectAllUnits();
 	XComHQ = `XCOMHQ;
 
 	super.InitScreen(InitController, InitMovie, InitName);
@@ -389,14 +392,18 @@ private function OnConfirmPayCostDialogCallback(Name eAction)
 
 simulated function OnCancel()
 {
+	DeselectAllUnits();
+	CloseScreen();
+}
+
+private function DeselectAllUnits()
+{
 	local XComGameState NewGameState;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Dynamic Deployment deselect all units");
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	DDObject.DeselectAllUnits();
 	`GAMERULES.SubmitGameState(NewGameState);
-
-	CloseScreen();
 }
 
 // ================================= CLEANUP ==============================================

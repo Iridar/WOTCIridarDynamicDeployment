@@ -103,9 +103,11 @@ static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit
 
 static final function bool IsUnitEligibleForDynamicDeployment(const XComGameState_Unit UnitState)
 {
-	if (`XCOMHQ.Squad.Find('ObjectID', UnitState.ObjectID) != INDEX_NONE) return false;
+	// Unit will still be in squad if they were evacuated.
+	// So disallow only units that were not evacuated that are in squad.
+	if (!UnitState.bRemovedFromPlay && `XCOMHQ.Squad.Find('ObjectID', UnitState.ObjectID) != INDEX_NONE) return false;
 	if (!IsUnitEligibleForDDAbilities(UnitState)) return false;
-	if (UnitState.IsDead()) return false;
+	//if (UnitState.IsDead()) return false; // Checked by CanGoOnMission()
 	if (!UnitState.CanGoOnMission()) return false;
 
 	return true;

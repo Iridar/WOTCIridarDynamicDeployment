@@ -1,5 +1,7 @@
 class X2Effect_ParticleEffect extends X2Effect;
 
+// Used by Uplink Deployment to play a particle effect at the center of the deployment area.
+
 simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
 	local X2Action_PlayEffect PlayEffectAction;
@@ -14,9 +16,4 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		PlayEffectAction.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
 	}
 	super.AddX2ActionsForVisualization(VisualizeGameState, ActionMetadata, EffectApplyResult);
-}
-
-defaultproperties
-{
-	
 }

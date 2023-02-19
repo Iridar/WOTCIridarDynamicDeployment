@@ -1,5 +1,4 @@
 [Help]
-IRI_DynamicDeployment_ArmoryLabel_Robotic = "Dynamic Deployment"
 IRI_DynamicDeployment_ArmoryLabel = "Dynamic Deployment"
 IRI_DynamicDeployment_UnlockLabel = "UNLOCK"
 
@@ -17,6 +16,9 @@ IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will co
 IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
 IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n%Cost%\n\nThe cost will be paid immediately."
 
+IRI_DD_TeleportDeployment_Title = "Teleportation Deployment Available"
+IRI_DD_TeleportDeployment_Text = "Commander, now that we have installed and analyzed the aliens' psionic gate, we are able to teleport soldiers into combat without having to rely on Skyranger to deliver them to the area of operations.\n\nTeleportation allows us to deploy soldiers to indoors locations, but it also means they will be unable to perform aerial scouting.\n\n(Aerial Scouting will no longer work. Using Dynamic Deployment no longer incurs cooldown on Request Evac and vice versa. You can now select deployment locations inside buildings.)"
+
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"
@@ -29,60 +31,60 @@ EndLabel = "Created by Iridar | www.patreon.com/Iridar"
 EndLabel_Tip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me at Patreon so I can afford the time to make more awesome mods <3"
 
 DD_OVER_SQUAD_SIZE_OFFSET_Label = "Allowed soldiers above Squad Size"
-DD_OVER_SQUAD_SIZE_OFFSET_Tip = "How many soldiers above current Squad Size can be deployed via Dynamic Deployment."
+DD_OVER_SQUAD_SIZE_OFFSET_Tip = "How many soldiers above maximum Squad Size can be deployed via Dynamic Deployment."
 
 DD_MISSION_START_DELAY_TURNS_Label = "Mission start delay, turns"
-DD_MISSION_START_DELAY_TURNS_Tip = "Number of turns from the start of the mission that must pass before you can use Dynamic Deployment for the first time."
+DD_MISSION_START_DELAY_TURNS_Tip = "Number of turns from the start of the mission that must pass before you can use Dynamic Deployment for the first time. Does not apply to Teleportation Deployment."
 
 DD_AFTER_DEPLOY_COOLDOWN_Label = "Dynamic Deployment cooldown"
-DD_AFTER_DEPLOY_COOLDOWN_Tip = "The number of turns that must pass before you can use Dynamic Deployment again."
+DD_AFTER_DEPLOY_COOLDOWN_Tip = "The number of turns that must pass before you can use Dynamic Deployment again. Teleportation Deployment does not have this cooldown."
 
 DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Label = "Deploy delay flat, turns"
-DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Tip = "The number of turns that must pass between you selecting a unit to deploy, and you being able to drop that unit on the battlefield."
+DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Tip = "After selecting any number of soldiers to deploy, you will have to wait for this many turns before you can deploy them."
 
 DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Label = "Deploy delay per unit, turns"
-DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Tip = "The number of turns that must pass between you selecting a unit to deploy, and you being able to drop that unit on the battlefield."
+DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Tip = "After selecting which soldiers to deploy, you will have to wait for this many turns before you can deploy them, multiplied by number of soldiers selected."
 
 
 COUNT_DEAD_SOLDIERS_Label = "Count dead soldiers"
-COUNT_DEAD_SOLDIERS_Tip = ""
+COUNT_DEAD_SOLDIERS_Tip = "Whether soldiers killed on the mission should count towards maximum Squad Size."
 
 COUNT_CAPTURED_SOLDIERS_Label = "Count captured soldiers"
-COUNT_CAPTURED_SOLDIERS_Tip = ""
+COUNT_CAPTURED_SOLDIERS_Tip = "Whether soldiers captured during the mission should count towards maximum Squad Size."
 
 COUNT_UNCONSCIOUS_SOLDIERS_Label = "Count unconscious soldiers"
-COUNT_UNCONSCIOUS_SOLDIERS_Tip = ""
+COUNT_UNCONSCIOUS_SOLDIERS_Tip = "Whether soldiers that are currently unconscious should count towards maximum Squad Size."
 
 COUNT_BLEEDING_OUT_SOLDIERS_Label = "Count bleeding out soldiers"
-COUNT_BLEEDING_OUT_SOLDIERS_Tip = ""
+COUNT_BLEEDING_OUT_SOLDIERS_Tip = "Whether soldiers that are currently bleeding out should count towards maximum Squad Size."
 
 COUNT_EVACED_SOLDIERS_Label = "Count evacuated soldiers"
-COUNT_EVACED_SOLDIERS_Tip = ""
+COUNT_EVACED_SOLDIERS_Tip = "Whether soldiers that were evacuated from the mission should count towards maximum Squad Size."
 
 
 SQUAD_MUST_SEE_TILE_Label = "Squad must see selected tile"
-SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in squad must see the selected location for deployment, i.e. you will not be able to deploy a unit into fog of war."
+SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in squad must see the selected location for deployment, i.e. you will not be able to select the deployment area inside the fog of war."
 
 DEPLOY_CAST_RANGE_TILES_Label = "Deploy range, tiles"
-DEPLOY_CAST_RANGE_TILES_Tip = "The maximum tile distance from the soldier calling for the deployment and the deployment location."
+DEPLOY_CAST_RANGE_TILES_Tip = "Throw range for the deployment flare or beacon. With Digital Uplink, maximum range is always 18 tiles."
 
-DD_SOLDIER_SELECT_IS_FREE_ACTION_Label = "SPARK Fall is a free action"
-DD_SOLDIER_SELECT_IS_FREE_ACTION_Tip = "If enabled, using SPARK Fall will not cost any action points."
+DD_SOLDIER_SELECT_IS_FREE_ACTION_Label = "Selecting soldiers is a free action"
+DD_SOLDIER_SELECT_IS_FREE_ACTION_Tip = "If enabled, selecting soldiers for Dynamic Deployment will not cost any action points."
 
-DD_SOLDIER_SELECT_ENDS_TURN_Label = "SPARK Fall ends turn"
-DD_SOLDIER_SELECT_ENDS_TURN_Tip = "If enabled, using SPARK Fall will end soldier's turn, consuming all their remaining action points."
+DD_SOLDIER_SELECT_ENDS_TURN_Label = "Selecting soldiers ends turn"
+DD_SOLDIER_SELECT_ENDS_TURN_Tip = "If enabled, selecting soldiers for Dynamic Deployment will end the soldier's turn."
 
-DD_DEPLOY_IS_FREE_ACTION_Label = "Deploy is a free action"
-DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, choosing a location to deploy a unit will not cost any action points."
+DD_DEPLOY_IS_FREE_ACTION_Label = "Deploying soldiers is a free action"
+DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, selecting a location for Dynamic Deployment will not cost any action points."
 
-DD_DEPLOY_ENDS_TURN_Label = "Deploy ends turn"
-DD_DEPLOY_ENDS_TURN_Tip = "If enabled, choosing a deployment location will end soldier's turn, consuming all their remaining action points."
+DD_DEPLOY_ENDS_TURN_Label = "Deploying soldiers ends turn"
+DD_DEPLOY_ENDS_TURN_Tip = "If enabled, selecting a location for Dynamic Deployment will end the soldier's turn."
 
 DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Label = "Disallow if Evac Zone exists"
-DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Tip = "If enabled, choosing a deployment location will end soldier's turn, consuming all their remaining action points."
+DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Tip = "If enabled, you will not be allowed to request Dynamic Deployment while Skyranger is occupied by hovering over an Evac Zone. Does not apply to Teleportation Deployment"
 
 ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Label = "Allow if Evac Zone is mission-placed"
-ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Tip = "If enabled, choosing a deployment location will end soldier's turn, consuming all their remaining action points."
+ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Tip = "If enabled, you will be allowed to request Dynamic Deployment if the Evac Zone is placed by the mission automatically."
 
 DEBUG_LOGGING_Label = "Enable debug logging"
-DEBUG_LOGGING_Tip = "If enabled, choosing a deployment location will end soldier's turn, consumin"
+DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log file, located at:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"
