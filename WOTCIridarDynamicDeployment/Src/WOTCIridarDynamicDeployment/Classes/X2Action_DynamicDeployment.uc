@@ -1,14 +1,18 @@
-class X2Action_DynamicDeployment extends X2Action_PlayMatinee config(GameData);
+class X2Action_DynamicDeployment extends X2Action_PlayMatinee;
 
+// A version of Skyranger Drop Action
+
+// Input data
 var array<XComGameState_Unit>	UnitStates;
+
+// Internal data
+
 var private XComGameState_Unit	UnitState;
-
 var private DeployLocationActor MatineeBaseActor;
-var private vector TargetLocation;
-
-var private int DropshipSlotCount;
-var private array<string>	PossibleMatinees;
-var private string			SelectedMatinee;
+var private vector				TargetLocation;
+var private int					DropshipSlotCount;
+var private array<string>		PossibleMatinees;
+var private string				SelectedMatinee;
 
 function Init()
 {
@@ -74,6 +78,7 @@ function bool IsTimedOut()
 	return false;
 }
 
+/*
 simulated function SelectMatineeByTag(string TagPrefix)
 {
 	local array<SequenceObject> FoundMatinees;
@@ -121,7 +126,8 @@ simulated function SelectMatineeByTag(string TagPrefix)
 		`Redscreen("X2Action_PlayMatinee::SelectMatineeByTag(): Could not find Matinee for tag " $ TagPrefix);
 		return;
 	}
-}
+}*/
+
 
 private function GetAllIntroSlotPrefixes(out array<string> IntroPrefixes)
 {
@@ -193,18 +199,6 @@ function CompleteAction()
 	//{
 	//	`MAPS.RemoveStreamingMapByName("CIN_SkyrangerIntros_Spark", false);
 	//}
-}
-
-private function bool UnitIsDynamicDeployment(XComGameState_Unit CheckUnitState)
-{
-	local XComGameState_Unit CompareUnitState;
-
-	foreach UnitStates(CompareUnitState)
-	{
-		if (CompareUnitState.ObjectID == CheckUnitState.ObjectID)
-			return true;
-	}
-	return false;
 }
 
 DefaultProperties

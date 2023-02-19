@@ -1,4 +1,10 @@
 class X2UnifiedProjectile_DynamicDeployment extends X2UnifiedProjectile;
+
+// Custom version of the projectile archetype. Two new things:
+// 1. Make grenade path trajectory start from the specific socket on the soldier's body.
+// Otherwise it defaulted to something else, could be gun_fire on primary weapon, or could be unit's center mass, not sure.
+// 2. Use different projectile elements depending on the deployment type.
+
 /*
 This file has to be in a separate script package, because otherwise the chain gets broken somewhere along the path of 
 Perk Content Archetype -> Weapon Archetype -> Projectile Archetype

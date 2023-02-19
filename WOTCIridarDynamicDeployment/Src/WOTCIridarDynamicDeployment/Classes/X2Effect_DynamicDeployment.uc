@@ -1,9 +1,11 @@
 class X2Effect_DynamicDeployment extends X2Effect_Persistent config(DynamicDeployment);
 
-var protected config array<name> AFTER_SPAWN_ACTION_POINTS;
-var protected X2Condition_Visibility VisibilityCondition;
+var private config array<name> OVERRIDE_AFTER_SPAWN_ACTION_POINTS;
+var private X2Condition_Visibility VisibilityCondition;
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
+
+// ============================ STATE CHANGES ==============================================================
 
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
@@ -38,9 +40,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	if (DDObject == none || !DDObject.bPendingDeployment)
 		return;
 
-	`AMLOG("Preloading assets");
+	// Issue async requests to load soldier assets
 	DDObject.PreloadAssets();
-	`AMLOG("Preloaded");
 
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	UnitStates = DDObject.GetUnitsToDeploy();
@@ -52,21 +53,20 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	`AMLOG("Units to deploy:" @ UnitStates.Length);
 
 	EventMgr = `XEVENTMGR;
-	DDObject.GetSpawnLocations(ApplyEffectParameters.AbilityInputContext.TargetLocations[0], UnitStates, SpawnLocations);
+	DDObject.GenerateSpawnLocations(ApplyEffectParameters.AbilityInputContext.TargetLocations[0], UnitStates, SpawnLocations);
 
 	foreach UnitStates(UnitState, iNumUnit)
 	{
+		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 		`AMLOG(iNumUnit @ "Deploying unit:" @ UnitState.GetFullName() @ "removed from play:" @ UnitState.bRemovedFromPlay);
 
-		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-
 		SpawnLocation = SpawnLocations[iNumUnit];
-
 		`AMLOG("SpawnLocation:" @ SpawnLocation);
 
 		AddStrategyUnitToBoard(NewUnitState, NewGameState, SpawnLocation);
 
-		NewUnitState.ActionPoints = default.AFTER_SPAWN_ACTION_POINTS;
+		// Add unit to squad, if they're not there already - 
+		// might be the case for redeploying units evaced this mission
 		if (XComHQ.Squad.Find('ObjectID', NewUnitState.ObjectID) == INDEX_NONE)
 		{
 			XComHQ.Squad.AddItem(NewUnitState.GetReference());
@@ -75,7 +75,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		// If unit has Phantom and is unseen during the landing, /*and the squad hasn't broken concealment yet, */
 		// they will enter concealment.
 		if (/*PlayerState.bSquadIsConcealed &&	*/	
-			class'Help'.static.ShouldUseDigitalUplink(CastingUnit) &&
+			/*class'Help'.static.ShouldUseDigitalUplink(CastingUnit) &&*/
 			VisibilityCondition.MeetsCondition(NewUnitState) == 'AA_Success' &&
 			NewUnitState.HasAnyOfTheAbilitiesFromAnySource(class'X2AbilityTemplateManager'.default.AbilityProvidesStartOfMatchConcealment))
 		{
@@ -85,13 +85,6 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		EventMgr.TriggerEvent('ObjectMoved', NewUnitState, NewUnitState, NewGameState);
 		EventMgr.TriggerEvent('UnitMoveFinished', NewUnitState, NewUnitState, NewGameState);
 	}
-
-	// If we spawned at least one unit
-	//if (NewUnitState != none)
-	//{
-	//	`AMLOG("Triggering Lightning Strike");
-	//	EventMgr.TriggerEvent('StartOfMatchConcealment', PlayerState, PlayerState, NewGameState);
-	//}
 
 	// Put DD abilities cooldown, unless teleporting
 	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
@@ -108,21 +101,13 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 	}
+
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 
 	`AMLOG("Deployment complete");
 }
 
-
-/*
-static private function bool NoEnemySeesUnit(const out XComGameState_Unit UnitState)
-{
-	return default.VisibilityCondition.MeetsCondition(UnitState) == 'AA_Success';
-}*/
-
-
-//	Used in Step 5 to spawn the specified unit into tactical mission
-static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState, Vector SpawnLocation)
+static private protected function XComGameState_Unit AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState, const vector SpawnLocation)
 {
 	local XComGameStateHistory			History;
 	local XComGameState_Player			PlayerState;
@@ -139,8 +124,9 @@ static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGa
 		bWasEvacedFromThisMission = true;
 		Unit.ClearRemovedFromPlayFlag();
 	}
-	
-	Unit.bSpawnedFromAvenger = true; //tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
+
+	//tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
+	Unit.bSpawnedFromAvenger = true; 
 	
 	// No need to do this stuff if the unit was already on this mission.
 	if (!bWasEvacedFromThisMission)
@@ -192,6 +178,8 @@ static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGa
 		`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
 	}
 
+	// This causes redscreens about having to clamp the tile location, but I'm pretty sure it's schitzofrenic
+	// I've copied the clamping code and there was no difference between tiles.
 	Unit.SetVisibilityLocationFromVector(SpawnLocation);
 
 	if (!bWasEvacedFromThisMission)
@@ -199,10 +187,18 @@ static final protected function XComGameState_Unit AddStrategyUnitToBoard(XComGa
 		Unit.BeginTacticalPlay(NewGameState); 
 	}
 
+	if (default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS.Length > 0)
+	{
+		Unit.ActionPoints = default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS;
+	}
+	else 
+	{
+		Unit.GiveStandardActionPoints();
+	}
+
 	return Unit;
 }
-
-static final protected function XComGameState_AIGroup GetPlayerGroup()
+static private protected function XComGameState_AIGroup GetPlayerGroup()
 {
 	local XComGameStateHistory History;
 	local XComGameState_AIGroup AIGroupState;
@@ -219,6 +215,7 @@ static final protected function XComGameState_AIGroup GetPlayerGroup()
 	return none;
 }
 
+// ============================ VISUALIZATION ==============================================================
 
 simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata, const name EffectApplyResult)
 {
@@ -723,6 +720,8 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	}
 }
 
+// ============================ EVENTS ==============================================================
+
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
 	local X2EventManager	EventMgr;
@@ -794,7 +793,7 @@ static private function RemovePodReveal_PostBuildVisualization(XComGameState Vis
 	}
 }
 
-
+// -----------------------------------------------------------------------------------
 
 defaultproperties
 {

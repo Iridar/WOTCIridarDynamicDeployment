@@ -1,6 +1,7 @@
 class X2Action_SelectUnits extends X2Action;
 
 // Adjusted copy of the X2Action_ShowTutorialPopup.
+// Just displays the specified screen as X2Action.
 
 var XComPresentationLayerBase Pres;
 

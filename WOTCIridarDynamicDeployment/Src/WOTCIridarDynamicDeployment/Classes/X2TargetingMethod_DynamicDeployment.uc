@@ -31,10 +31,12 @@ var private array<XComUnitPawn>				PrecisionDropPawns;
 var private array<TTile>					PrecisionDropTiles;
 var private transient array<XComEmitter>	BeamEmitters;
 
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 function Init(AvailableAction InAction, int NewTargetIndex)
 {
-	local XComGameState_DynamicDeployment DDObject;
+	local XComGameState_DynamicDeployment	DDObject;
+	local XComContentManager				ContentMgr;
 
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
@@ -52,14 +54,18 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	{
 		PrecisionDropTiles.Length = PrecisionDropUnitStates.Length;
 		PawnMgr = `PRESBASE.GetUIPawnMgr();
-		HoloMITV = MaterialInstanceTimeVarying(`CONTENT.RequestGameArchetype("FX_Mimic_Beacon_Hologram.M_Mimic_Activate_MITV"));
-		YeloMITV = MaterialInstanceTimeVarying(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.Materials.PlacingTarget_MITV"));
-		BeamEmitterPS = ParticleSystem(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.PS_BeamEmitter"));
+		ContentMgr = `CONTENT;
+		HoloMITV = MaterialInstanceTimeVarying(ContentMgr.RequestGameArchetype("FX_Mimic_Beacon_Hologram.M_Mimic_Activate_MITV"));
+		YeloMITV = MaterialInstanceTimeVarying(ContentMgr.RequestGameArchetype("IRIDynamicDeployment.Materials.PlacingTarget_MITV"));
+		BeamEmitterPS = ParticleSystem(ContentMgr.RequestGameArchetype("IRIDynamicDeployment.PS_BeamEmitter"));
 
 		`AMLOG("Got this many unit states:" @ PrecisionDropUnitStates.Length @ "HoloMITV loaded:" @ HoloMITV != none @ "BeamEmitterPS loaded:" @ BeamEmitterPS != none);
 		Pres = `PRES;
 		Pres.m_kTacticalHUD.Movie.Stack.SubscribeToOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
 	}
+
+	bRestrictToSquadsightRange = `GETMCMVAR(SQUAD_MUST_SEE_TILE);
+
 	super.Init(InAction, NewTargetIndex);
 }
 
@@ -461,108 +467,7 @@ function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathDa
 	// WeaponPrecomputedPathData kept to default values, common for all grenades.
 }
 
-// Teleport
-/*
-function Init(AvailableAction InAction, int NewTargetIndex)
-{
-	local XGBattle Battle;
-
-	super.Init(InAction, NewTargetIndex);
-
-	Battle = `BATTLE;
-
-	InvalidTileActor = Battle.Spawn(class'X2Actor_InvalidTarget');
-	ExplosionEmitter.SetHidden(true);
-
-	IconManager = `PRES.GetActionIconMgr();
-	IconManager.UpdateCursorLocation(true);
-}
-
-function Canceled()
-{
-	super.Canceled();
-
-	// clean up the ui
-	InvalidTileActor.Destroy();
-
-	IconManager.ShowIcons(false);
-}
-
-function Update(float DeltaTime)
-{
-	local vector NewTargetLocation;
-	local array<vector> TargetLocations;
-	local array<TTile> Tiles;
-	local XComWorldData World;
-	local TTile TeleportTile;
-	
-	NewTargetLocation = Cursor.GetCursorFeetLocation();
-
-	if (NewTargetLocation != CachedTargetLocation)
-	{
-		TargetLocations.AddItem(Cursor.GetCursorFeetLocation());
-		if( ValidateTargetLocations(TargetLocations) == 'AA_Success' )
-		{
-			// The current tile the cursor is on is a valid tile
-			// Show the ExplosionEmitter
-			ExplosionEmitter.ParticleSystemComponent.ActivateSystem();
-			InvalidTileActor.SetHidden(true);
-
-			World = `XWORLD;
-		
-			TeleportTile = World.GetTileCoordinatesFromPosition(TargetLocations[0]);
-			Tiles.AddItem(TeleportTile);
-			DrawAOETiles(Tiles);
-			IconManager.UpdateCursorLocation(, true);
-		}
-		else
-		{
-			DrawInvalidTile();
-		}
-	}
-
-	super.UpdateTargetLocation(DeltaTime);
-}
-
-simulated protected function DrawInvalidTile()
-{
-	local Vector Center;
-
-	Center = GetSplashRadiusCenter();
-
-	// Hide the ExplosionEmitter
-	ExplosionEmitter.ParticleSystemComponent.DeactivateSystem();
-	
-	InvalidTileActor.SetHidden(false);
-	InvalidTileActor.SetLocation(Center);
-}
-
-function name ValidateTargetLocations(const array<Vector> TargetLocations)
-{
-	local name AbilityAvailability;
-	local TTile TeleportTile;
-	local XComWorldData World;
-	local bool bFoundFloorTile;
-
-	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
-	if( AbilityAvailability == 'AA_Success' )
-	{
-		// There is only one target location and visible by squadsight
-		World = `XWORLD;
-		
-		`assert(TargetLocations.Length == 1);
-		bFoundFloorTile = World.GetFloorTileForPosition(TargetLocations[0], TeleportTile);
-		if( bFoundFloorTile && !World.CanUnitsEnterTile(TeleportTile) )
-		{
-			AbilityAvailability = 'AA_TileIsBlocked';
-		}
-	}
-
-	return AbilityAvailability;
-}*/
-
 defaultproperties
 {
 	bCheckMaxZ = true
-	bRestrictToSquadsightRange = true;
 }

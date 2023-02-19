@@ -8,6 +8,7 @@ function Init()
 
 	super.Init();
 
+	// Pick different firing animation for SPARKs
 	if (class'Help'.static.IsCharTemplateSparkLike(SourceUnitState.GetMyTemplate()))
 	{
 		if (AnimParams.AnimName == 'FF_GrenadeUnderhand')
@@ -20,20 +21,25 @@ function Init()
 		}
 	}
 
-	AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
-	FiringUnit = XGUnit(History.GetVisualizer(AbilityState.OwnerStateObject.ObjectID));
-	WeaponEntity = FiringUnit.CurrentPerkAction.GetPerkWeapon();
-	
+	// Override the weapon mesh for the duration of the throw animation dependiong on the deployment type	
 	switch (class'Help'.static.GetDeploymentType())
 	{
 		case `eDT_SeismicBeacon:
+			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+			FiringUnit = XGUnit(History.GetVisualizer(AbilityState.OwnerStateObject.ObjectID));
+			WeaponEntity = FiringUnit.CurrentPerkAction.GetPerkWeapon();
 			SkeletalMeshComponent(WeaponEntity.Mesh).SetSkeletalMesh(SkeletalMesh(`CONTENT.RequestGameArchetype("UltrasonicLure.Meshes.SM_UltraSonicLure")));
 			`AMLOG("Overriding mesh to seismic beacon");
 			break;
+
 		case `eDT_TeleportBeacon:
+			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
+			FiringUnit = XGUnit(History.GetVisualizer(AbilityState.OwnerStateObject.ObjectID));
+			WeaponEntity = FiringUnit.CurrentPerkAction.GetPerkWeapon();
 			SkeletalMeshComponent(WeaponEntity.Mesh).SetSkeletalMesh(SkeletalMesh(`CONTENT.RequestGameArchetype("IRIDynamicDeployment_Perks.Meshes.SM_Teleport_Beacon")));
 			`AMLOG("Overriding mesh to teleport beacon");
 			break;
+
 		case `eDT_Flare:
 		default:
 			`AMLOG("Not overriding mesh");
@@ -41,16 +47,3 @@ function Init()
 	}
 }
 
-
-/*
-function CompleteAction()
-{
-	local XComWeapon WeaponEntity;
-
-	WeaponEntity = WeaponVisualizer.GetEntity();
-
-	WeaponEntity.Destroy();
-	WeaponVisualizer.Destroy();
-
-	super.CompleteAction();
-}*/

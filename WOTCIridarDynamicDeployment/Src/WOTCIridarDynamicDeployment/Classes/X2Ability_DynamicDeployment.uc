@@ -83,7 +83,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 	SetSelfTarget_WithEventTrigger(Template, class'Help'.default.DDEventName, ELD_OnStateSubmitted, eFilter_Player, 50);
 
 	// Shooter Conditions
-	// Incase you get dead'ed by overwatch or something
+	// In case you get dead'ed by overwatch or something
 	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
 	
 	// Effects
@@ -306,6 +306,12 @@ static private function X2AbilityTemplate CreateDeploymentAbility(const name Tem
 	return Template;
 }
 
+// Fancy abilities set up in a complicated way.
+// Perk Content adds perk weapon XComWeapon to this ability.
+// Depending on deployment method,
+// The visible mesh of the weapon during the fire animation is swapped by the custom fire action
+// while the projectile mesh is covered by the custom projectile archetype.
+
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 {
 	local X2AbilityTemplate Template;
@@ -324,7 +330,8 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 }
 
 
-// Separate version for SPARKs so they can use a different version of PerkContent, otherwise identical.
+// Separate version for SPARKs so they can use a different version of PerkContent for the sake of different shooter animations
+// otherwise identical.
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 {
 	local X2AbilityTemplate Template;
@@ -342,7 +349,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 	return Template;
 }
 
-// Separate version with different perk content, used by both sparks and soldiers.
+// Separate version with no perk content, used by both sparks and soldiers.
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 {
 	local X2AbilityTemplate Template;
@@ -364,40 +371,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 	Template.CustomFireAnim = 'FF_Deploy_Uplink';
 
 	return Template;
-}
-
-// Neuter Exit/Enter cover when used by SPARKs.
-static final function DynamicDeployment_Deploy_BuildVisualization(XComGameState VisualizeGameState)
-{
-	local XComGameStateVisualizationMgr		VisMgr;	
-	local XComGameState_Unit				UnitState;
-	local X2Action_EnterCover				EnterCover;
-	local X2Action_ExitCover				ExitCover;
-	local XComGameStateContext_Ability		AbilityContext;
-
-	TypicalAbility_BuildVisualization(VisualizeGameState);
-
-	`AMLOG("Running");
-
-	VisMgr = `XCOMVISUALIZATIONMGR;
-	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
-	UnitState = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(AbilityContext.InputContext.SourceObject.ObjectID));
-
-	if (UnitState == none || !class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
-		return;
-
-	ExitCover = X2Action_ExitCover(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_ExitCover',, UnitState.ObjectID));
-	if (ExitCover != none)
-	{
-		`AMLOG("Nuking Exit Cover");
-		ExitCover.bSkipExitCoverVisualization = true;
-	}
-	EnterCover = X2Action_EnterCover(VisMgr.GetNodeOfType(VisMgr.BuildVisTree, class'X2Action_EnterCover',, UnitState.ObjectID));
-	if (EnterCover != none)
-	{
-		`AMLOG("Nuking Enter Cover");
-		EnterCover.bSkipEnterCover = true;	
-	}
 }
 
 static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)

@@ -2,16 +2,16 @@ class XComGameState_DynamicDeployment extends XComGameState_BaseObject;
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
+var bool bPendingDeployment;	// If true, a unit was selected for deployment, but was not deployed yet.	
+
 struct PrecisionDropTileStorageStruct
 {
 	var int		UnitObjectID;
 	var TTile	DropTile;
 };
+var privatewrite array<PrecisionDropTileStorageStruct> PrecisionDropTileStorages;
 
 var private array<int> SelectedUnitIDs;	// Holds the ID of the unit selected for deployment.
-var bool bPendingDeployment;	// If true, a unit was selected for deployment, but was not deployed yet.	
-
-var privatewrite array<PrecisionDropTileStorageStruct> PrecisionDropTileStorages;
 
 final function bool IsUnitSelected(const int UnitObjectID)
 {
@@ -96,8 +96,6 @@ final function PreloadAssets()
 		PreloadAssetsForUnit(SelectedUnitID);
 	}
 }
-
-
 static private function PreloadAssetsForUnit(const int UnitObjectID)
 {
 	local XComGameState_Unit			SpawnUnit;
@@ -120,7 +118,7 @@ static private function PreloadAssetsForUnit(const int UnitObjectID)
 	SpawnUnit.RequestResources(Resources);
 	foreach Resources(Resource)
 	{
-		Content.RequestGameArchetype(Resource,,, true);
+		Content.RequestGameArchetype(Resource,,, true); // Async requests
 	}
 
 	foreach SpawnUnit.InventoryItems(ItemReference)
@@ -214,7 +212,7 @@ static final function SavePrecisionDropTiles_SubmitGameState(const out array<XCo
 }
 
 
-final function GetSpawnLocations(const vector DesiredLocation, const out array<XComGameState_Unit> DeployingUnits, out array<vector> SpawnLocations)
+final function GenerateSpawnLocations(const vector DesiredLocation, const out array<XComGameState_Unit> DeployingUnits, out array<vector> SpawnLocations)
 {
 	local array<TTile>	TilePossibilities;
 	local array<TTile>	TilePossibilitiesClearedMaxZ;
@@ -381,5 +379,6 @@ DefaultProperties
 	// Nuke this state object during tactical -> strategy transition.
 	bTacticalTransient = true
 
+	// There can be only one. dramatic_backdrop.mp3
 	bSingletonStateType = true
 }
