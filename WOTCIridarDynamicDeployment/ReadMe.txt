@@ -14,18 +14,9 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Localization
 // TODO: Modpreview
 // TODO: Mod description
-// TODO: comments
-// TODO: Figure out the squad viewer redscreen
-// TODO: debug console commands for removing and adding DD unlocks
-// TODO: Pretty configs
+
 // TODO: Test everything with redscreens and check logs
-
-// Polish MCM
-// More Stuff configurable, if there is anything
-
-// Preload assets on turn start when deploy is available
 // TODO: fix DD Deploy targeting sending camera to hell
-
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

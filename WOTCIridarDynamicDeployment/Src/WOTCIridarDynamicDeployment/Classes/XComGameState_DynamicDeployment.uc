@@ -241,15 +241,20 @@ final function GenerateSpawnLocations(const vector DesiredLocation, const out ar
 
 	World.GetSpawnTilePossibilities(SpawnTile, Width, Width, 1, TilePossibilities);
 	`AMLOG("Got this many tile possibilities:" @ TilePossibilities.Length);
-	foreach TilePossibilities(SpawnTile)
+
+	if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
 	{
-		SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
-		if (World.HasOverheadClearance(SpawnLocation, MaxZ))
+		foreach TilePossibilities(SpawnTile)
 		{
-			TilePossibilitiesClearedMaxZ.AddItem(SpawnTile);
+			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+			if (World.HasOverheadClearance(SpawnLocation, MaxZ))
+			{
+				TilePossibilitiesClearedMaxZ.AddItem(SpawnTile);
+			}
 		}
+		TilePossibilities = TilePossibilitiesClearedMaxZ;
 	}
-	TilePossibilities = TilePossibilitiesClearedMaxZ;
+
 	TilePossibilities.RandomizeOrder();
 
 	foreach DeployingUnits(DeployingUnit)

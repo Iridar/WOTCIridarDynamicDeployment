@@ -41,7 +41,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		return;
 
 	// Issue async requests to load soldier assets
-	DDObject.PreloadAssets();
+	//DDObject.PreloadAssets(); // Done on turn start.
 
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 	UnitStates = DDObject.GetUnitsToDeploy();

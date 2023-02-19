@@ -10,6 +10,10 @@ var privatewrite name DDEventName;
 
 static final function int GetDeploymentType()
 {
+	if (class'X2DLCInfo_Debug'.default.DeployTypeOverride != 0)
+	{
+		return class'X2DLCInfo_Debug'.default.DeployTypeOverride - 1;
+	}
 	if (ShouldUseTeleportDeployment())
 	{
 		return `eDT_TeleportBeacon;
@@ -28,7 +32,7 @@ static final function bool ShouldUseDigitalUplink(const XComGameState_Unit Sourc
 
 // Teleport deployment has a different visualization, but also different rules:
 // no concealment break for spark-like units, no Aerial Scout.
-static private function bool ShouldUseTeleportDeployment()
+static final function bool ShouldUseTeleportDeployment()
 {
 	return `XCOMHQ.IsTechResearched(`GetConfigName("IRI_DD_TechRequiredToUnlockTeleport"));
 }
@@ -132,7 +136,7 @@ static final function bool IsCharTemplateSparkLike(const X2CharacterTemplate Cha
 
 static final function name GetAbilityUnitValue(const name AbilityName)
 {
-	return name("IRI_" $ AbilityName $ "_JPUnlock");
+	return name("IRI_DD_Unlock_" $ AbilityName);
 }
 
 // Whether a unit has a DD Unlock is stored as a unit value,

@@ -17,7 +17,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	// #1. Calculate radius
 	History = `XCOMHISTORY;
 
-	ViewRadius = `GetConfigInt("IRI_DD_MinRank_AerialScout_InitialRadius_Tiles");
+	ViewRadius = `GetConfigInt("IRI_DD_AerialScout_InitialRadius_Tiles");
 
 	DDObject = XComGameState_DynamicDeployment(History.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	UnitStates = DDObject.GetUnitsToDeploy();
@@ -28,8 +28,8 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	{
 		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_AerialScout'))
 		{
-			ViewRadius += `GetConfigInt("IRI_DD_MinRank_AerialScout_PerUnitRadius_Tiles");
-			`AMLOG(UnitState.GetFullName() @ "has unlock, increasing area by:" @ `GetConfigInt("IRI_DD_MinRank_AerialScout_PerUnitRadius_Tiles"));
+			ViewRadius += `GetConfigInt("IRI_DD_AerialScout_PerUnitRadius_Tiles");
+			`AMLOG(UnitState.GetFullName() @ "has unlock, increasing area by:" @ `GetConfigInt("IRI_DD_AerialScout_PerUnitRadius_Tiles"));
 		}
 	}
 

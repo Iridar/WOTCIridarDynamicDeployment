@@ -70,6 +70,10 @@ LocLongDescription="Gain mobility bonus for one turn after deployment."
 LocHelpText="This unit will no longer break concealment when Dynamically Deployed."
 LocFlyOverText="Digital Uplink"
 
+[IRI_DD_NoDeploymentSitRep X2SitRepTemplate]
+FriendlyName = "No Deployment Zone"
+Description = "Dynamic Deployment will not be available during this mission."
+
 
 ;[IRI_DDUnlock_SparkRetainConcealment X2AbilityTemplate]
 ;LocFriendlyName="\"Whisper\" Jets"

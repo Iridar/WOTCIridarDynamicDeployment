@@ -150,3 +150,115 @@ static private function SkeletalMeshSocket CreateSocket(const name SocketName, c
     
 	return NewSocket;
 }
+
+exec function DDGiveUnlockToSelectedUnit(const name DDUnlock)
+{
+	local XComGameStateHistory				History;
+	local UIArmory							Armory;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local name								SoldierClassName;
+	local int								i, RankUps, NewRank;
+	
+	Armory = UIArmory(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory'));
+	if (Armory == none)
+	{
+		class'Helpers'.static.OutputMsg("No unit selected, go to Armory.");
+		return;
+	}
+
+	UnitRef = Armory.GetUnitRef();
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
+	if (UnitState == none)
+	{
+		class'Helpers'.static.OutputMsg("No unit selected, go to Armory.");
+		return;
+	}
+	
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Adding DD Unlock");
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+
+	UnitState.SetUnitFloatValue(class'Help'.static.GetAbilityUnitValue(DDUnlock), 1.0f, eCleanup_Never);
+
+	class'Helpers'.static.OutputMsg("Attempting to add DD unlock:" @ DDUnlock);
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	Armory.PopulateData();
+}
+
+exec function DDRemoveUnlockFromSelectedUnit(const name DDUnlock)
+{
+	local XComGameStateHistory				History;
+	local UIArmory							Armory;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local name								SoldierClassName;
+	local int								i, RankUps, NewRank;
+	
+	Armory = UIArmory(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory'));
+	if (Armory == none)
+	{
+		class'Helpers'.static.OutputMsg("No unit selected, go to Armory.");
+		return;
+	}
+
+	UnitRef = Armory.GetUnitRef();
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
+	if (UnitState == none)
+	{
+		class'Helpers'.static.OutputMsg("No unit selected, go to Armory.");
+		return;
+	}
+	
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Removing DD Unlock");
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(class'XComGameState_Unit', UnitState.ObjectID));
+
+	UnitState.ClearUnitValue(class'Help'.static.GetAbilityUnitValue(DDUnlock));
+
+	class'Helpers'.static.OutputMsg("Attempting to remove DD unlock:" @ DDUnlock);
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	Armory.PopulateData();
+}
+
+// If we know for sure DD won't be available on a certain mission, add a sitrep for player information.
+// Sitrep has no gameplay effects.
+static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, optional XComGameState_BaseObject SourceObject)
+{
+	//local XComGameState_MissionSite MissionState;
+	local array<name> ExcludedMissions;
+
+	// Prevent affecting TQL / Multiplayer / Main Menu
+	If (`HQGAME  == none || `HQPC == None || `HQPRES == none)
+		return;
+
+	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
+		return;
+
+	ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment");
+	if (ExcludedMissions.Find(GeneratedMission.Mission.MissionName) != INDEX_NONE)
+	{
+		GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
+		return;
+	}
+
+	if (!class'Help'.static.ShouldUseTeleportDeployment())
+	{
+		ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly");
+		if (ExcludedMissions.Find(GeneratedMission.Mission.MissionName) != INDEX_NONE)
+		{
+			GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
+			return;
+		}
+	}
+
+	//MissionState = XComGameState_MissionSite(SourceObject); //iForceLevel = MissionState.SelectedMissionData.ForceLevel;
+	//if (MissionState == none || !MissionState.Available)
+	//	return;
+}

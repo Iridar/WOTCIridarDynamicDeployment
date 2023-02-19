@@ -117,6 +117,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment3\Classes\Help.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment3\Classes\X2DLCInfo_Debug.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DeployLocationActor.uc">
       <SubType>Content</SubType>
     </Content>
@@ -191,6 +194,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2EventListener_DynamicDeployment.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2SitRep_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2TargetingMethod_DigitalUplink.uc">

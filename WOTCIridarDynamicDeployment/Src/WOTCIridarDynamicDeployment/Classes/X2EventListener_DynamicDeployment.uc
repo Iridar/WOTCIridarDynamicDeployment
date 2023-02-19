@@ -146,15 +146,16 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 		Template.AddCHEvent('EvacSpawnerCreated', OnEvacSpawnerCreated, ELD_OnStateSubmitted);
 	}
 
-	Template.AddCHEvent('PlayerTurnBegun', OnFirstTurn, ELD_OnStateSubmitted);
+	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
 
 	return Template;
 }
 
 // Set DD on cooldown on mission start.
-static private function EventListenerReturn OnFirstTurn(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
+static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
-	local XComGameState_Player PlayerState;
+	local XComGameState_Player				PlayerState;
+	local XComGameState_DynamicDeployment	DDObject;
 
 	// If teleport is available, we're not tied to Skyranger.
 	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
@@ -167,6 +168,15 @@ static private function EventListenerReturn OnFirstTurn(Object EventData, Object
 	if (IsFirstTurn())
 	{
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
+	}
+	else if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
+	{
+		// Preload soldier assets at the beginning of the turn when Deploy is available.
+		DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+		if (DDObject != none && DDObject.bPendingDeployment)
+		{
+			DDObject.PreloadAssets();
+		}
 	}
 
 	return ELR_NoInterrupt;
