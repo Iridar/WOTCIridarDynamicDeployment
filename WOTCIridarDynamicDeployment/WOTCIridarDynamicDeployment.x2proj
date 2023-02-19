@@ -144,9 +144,6 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DeployGremlin.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DigitalUplink.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Action_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
@@ -185,6 +182,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_DynamicDeployment.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_ParticleEffect.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\X2Effect_TakeAndHold.uc">

@@ -347,59 +347,13 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 
 	Template.TargetingMethod = class'X2TargetingMethod_DigitalUplink';
 
+	Template.AbilityShooterEffects.InsertItem(0, new class'X2Effect_ParticleEffect');
+
 	Template.CustomFireAnim = 'FF_Deploy_Uplink';
-	//Template.BuildVisualizationFn = DigitalUplink_BuildVisualization;
+	Template.ActionFireClass = class'X2Action_Fire';
 
 	return Template;
 }
-
-// TODO: This needs to be a typical build vis wrapper
-static private function DigitalUplink_BuildVisualization(XComGameState VisualizeGameState)
-{
-	local XComGameStateHistory			History;
-	local XComGameStateContext_Ability  Context;
-	local StateObjectReference          InteractingUnitRef;	
-	local XComGameState_Ability         Ability;
-	local VisualizationActionMetadata   EmptyTrack;
-	local VisualizationActionMetadata   ActionMetadata;
-	local X2Action_PlaySoundAndFlyOver	SoundAndFlyOver;
-	local X2Action_CameraLookAt			LookAtAction;
-	local X2Action_TimedWait			WaitAction;
-	local X2Action_PlayEffect			PlayEffect;
-
-	TypicalAbility_BuildVisualization(VisualizeGameState);
-
-	History = `XCOMHISTORY;
-
-	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
-	InteractingUnitRef = Context.InputContext.SourceObject;
-
-	//Configure the visualization track for the shooter
-	//****************************************************************************************
-	ActionMetadata = EmptyTrack;
-	ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(InteractingUnitRef.ObjectID,  eReturnType_Reference,  VisualizeGameState.HistoryIndex - 1);
-	ActionMetadata.StateObject_NewState = VisualizeGameState.GetGameStateForObjectID(InteractingUnitRef.ObjectID);
-	ActionMetadata.VisualizeActor = History.GetVisualizer(InteractingUnitRef.ObjectID);
-
-	//	move the camera to the soldier
-	LookAtAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, Context, false, ActionMetadata.LastActionAdded));
-	LookAtAction.LookAtActor = ActionMetadata.VisualizeActor;
-
-
-	//	start playing the hacking animation
-	class'X2Action_DigitalUplink'.static.AddToVisualizationTree(ActionMetadata,  Context,  false,  LookAtAction);
-
-	//	hold the camera on the hacker for a bit
-	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, LookAtAction));
-	WaitAction.DelayTimeSec = 2.5f;
-
-	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, Context, false, WaitAction));
-	PlayEffect.EffectName = "IRIDynamicDeployment.PS_DigitalUplink";
-	PlayEffect.EffectLocation = Context.InputContext.TargetLocations[0];
-}
-
-
-
 
 // Neuter Exit/Enter cover when used by SPARKs.
 static final function DynamicDeployment_Deploy_BuildVisualization(XComGameState VisualizeGameState)
