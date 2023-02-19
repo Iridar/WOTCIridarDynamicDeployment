@@ -347,7 +347,8 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 
 	Template.TargetingMethod = class'X2TargetingMethod_DigitalUplink';
 
-	Template.BuildVisualizationFn = DigitalUplink_BuildVisualization;
+	Template.CustomFireAnim = 'FF_Deploy_Uplink';
+	//Template.BuildVisualizationFn = DigitalUplink_BuildVisualization;
 
 	return Template;
 }
@@ -365,6 +366,8 @@ static private function DigitalUplink_BuildVisualization(XComGameState Visualize
 	local X2Action_CameraLookAt			LookAtAction;
 	local X2Action_TimedWait			WaitAction;
 	local X2Action_PlayEffect			PlayEffect;
+
+	TypicalAbility_BuildVisualization(VisualizeGameState);
 
 	History = `XCOMHISTORY;
 

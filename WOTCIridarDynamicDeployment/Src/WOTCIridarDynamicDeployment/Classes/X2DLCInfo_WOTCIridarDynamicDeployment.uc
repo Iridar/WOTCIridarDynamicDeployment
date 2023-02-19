@@ -121,6 +121,7 @@ static function string DLCAppendSockets(XComUnitPawn Pawn)
 	else 
 	{
 		NewSockets.AddItem(CreateSocket('IRI_DD_DeployFlare', 'GrenadeClip', 0, 0, 0, 0, 0, 0));
+		NewSockets.AddItem(CreateSocket('IRI_DD_DigitalUplink', 'Inven_R_Hand', 0, 0, 0, 0, 0, 0));
 	}
 
 	Pawn.Mesh.AppendSockets(NewSockets, true);

@@ -1,6 +1,17 @@
 class X2Action_DigitalUplink extends X2Action_Hack;
 
-//just changing the default settings to visualize it as if the AI is doing the hacking
+simulated function SetupScreenMaterial()
+{
+	local MaterialInstanceConstant ScreenMaterial;
+
+	// set the movie to render to the hack screen
+	ScreenMaterial = MaterialInstanceConstant(GremlinLCD.GetMaterial(0));
+
+	if( ScreenMaterial != None )
+	{
+		ScreenMaterial.SetTextureParameterValue('Diffuse', HackMovie.RenderTexture);
+	}
+}
 
 defaultproperties
 {

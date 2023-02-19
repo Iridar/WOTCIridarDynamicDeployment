@@ -28,6 +28,7 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Modpreview
 // TODO: Mod description
 // TODO: comments
+// TODO: Figure out the squad viewer redscreen
 // TODO: debug console commands for removing and adding DD unlocks
 
 // Polish MCM
