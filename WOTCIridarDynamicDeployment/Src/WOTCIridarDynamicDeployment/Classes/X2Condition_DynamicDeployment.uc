@@ -1,4 +1,4 @@
-class X2Condition_DynamicDeployment extends X2Condition;
+class X2Condition_DynamicDeployment extends X2Condition
 
 function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 {

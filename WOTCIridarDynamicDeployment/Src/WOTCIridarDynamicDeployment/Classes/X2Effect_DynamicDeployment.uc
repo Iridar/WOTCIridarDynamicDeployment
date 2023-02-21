@@ -89,17 +89,11 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	// Put DD abilities cooldown, unless teleporting
 	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
 	{
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', 0, PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', 0, PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', 0, PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', 0, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetDynamicDeploymentCooldown(0, PlayerState.ObjectID, NewGameState);
 	}
 	else
 	{
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', `GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetDynamicDeploymentCooldown(`GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
 	}
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);

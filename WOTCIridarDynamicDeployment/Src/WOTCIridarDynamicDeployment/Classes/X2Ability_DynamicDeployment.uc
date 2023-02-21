@@ -88,7 +88,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 	
 	// Effects
 	TakeAndHold = new class'X2Effect_TakeAndHold';
-	TakeAndHold.BuildPersistentEffect(2, false, true, false, eGameRule_PlayerTurnBegin);
+	TakeAndHold.BuildPersistentEffect(`GetConfigInt("IRI_DD_TakeAndHold_DurationTurns"), false, true, false, eGameRule_PlayerTurnBegin);
 	TakeAndHold.SetDisplayInfo(ePerkBuff_Bonus, Template.LocFriendlyName, Template.GetMyLongDescription(), Template.IconImage, true,, Template.AbilitySourceName);
 	TakeAndHold.AddPersistentStatChange(eStat_Offense, `GetConfigInt("IRI_DD_TakeAndHold_AimBonus")); 
 	TakeAndHold.AddPersistentStatChange(eStat_Defense, `GetConfigInt("IRI_DD_TakeAndHold_DefenseBonus"));
@@ -413,7 +413,7 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 	}
 
 	// Hide jf already have some soldiers selected for deployment
-	if (DDObject.IsAnyUnitSelected() && DDObject.bPendingDeployment) 
+	if (DDObject.bPendingDeployment) 
 	{
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 		return;

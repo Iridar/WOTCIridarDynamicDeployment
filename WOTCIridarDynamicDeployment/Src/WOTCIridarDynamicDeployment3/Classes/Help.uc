@@ -68,27 +68,45 @@ static final function bool IsUndergroundPlot()
 static final function SetGlobalCooldown(const name AbilityName, const int Cooldown, const int SourcePlayerID, optional XComGameState UseGameState)
 {
 	local XComGameState			NewGameState;
-	local XComGameStateHistory	History;
 	local XComGameState_Player	PlayerState;
-
-	History = `XCOMHISTORY;
-	PlayerState = XComGameState_Player(History.GetGameStateForObjectID(SourcePlayerID));
-	if (PlayerState == none)
-		return;
 
 	if (UseGameState != none)
 	{
-		PlayerState = XComGameState_Player(UseGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
-		PlayerState.SetCooldown(AbilityName, Cooldown);
+		PlayerState = XComGameState_Player(UseGameState.GetGameStateForObjectID(SourcePlayerID));
+		if (PlayerState == none)
+		{
+			PlayerState = XComGameState_Player(`XCOMHISTORY.GetGameStateForObjectID(SourcePlayerID));
+			if (PlayerState == none) return;
+
+			PlayerState = XComGameState_Player(UseGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
+			PlayerState.SetCooldown(AbilityName, Cooldown);
+		}
+		else
+		{
+			PlayerState.SetCooldown(AbilityName, Cooldown);
+		}
 	}
 	else
-	{	
+	{
+		PlayerState = XComGameState_Player(`XCOMHISTORY.GetGameStateForObjectID(SourcePlayerID));
+		if (PlayerState == none) return;
+
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState(AbilityName @ "set global cooldown:" @ Cooldown);
 		PlayerState = XComGameState_Player(NewGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
 		PlayerState.SetCooldown(AbilityName, Cooldown);
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
 }
+
+
+static final function SetDynamicDeploymentCooldown(const int Cooldown, const int SourcePlayerID, optional XComGameState UseGameState)
+{
+	SetGlobalCooldown('IRI_DynamicDeployment_Select', Cooldown, SourcePlayerID, UseGameState);
+	SetGlobalCooldown('IRI_DynamicDeployment_Deploy', Cooldown, SourcePlayerID, UseGameState);
+	SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', Cooldown, SourcePlayerID, UseGameState);
+	SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', Cooldown, SourcePlayerID, UseGameState);
+}
+
 
 static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit UnitState)
 {

@@ -153,14 +153,10 @@ static private function SkeletalMeshSocket CreateSocket(const name SocketName, c
 
 exec function DDGiveUnlockToSelectedUnit(const name DDUnlock)
 {
-	local XComGameStateHistory				History;
 	local UIArmory							Armory;
 	local StateObjectReference				UnitRef;
 	local XComGameState_Unit				UnitState;
 	local XComGameState						NewGameState;
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local name								SoldierClassName;
-	local int								i, RankUps, NewRank;
 	
 	Armory = UIArmory(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory'));
 	if (Armory == none)
@@ -191,14 +187,10 @@ exec function DDGiveUnlockToSelectedUnit(const name DDUnlock)
 
 exec function DDRemoveUnlockFromSelectedUnit(const name DDUnlock)
 {
-	local XComGameStateHistory				History;
 	local UIArmory							Armory;
 	local StateObjectReference				UnitRef;
 	local XComGameState_Unit				UnitState;
 	local XComGameState						NewGameState;
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local name								SoldierClassName;
-	local int								i, RankUps, NewRank;
 	
 	Armory = UIArmory(`SCREENSTACK.GetFirstInstanceOf(class'UIArmory'));
 	if (Armory == none)
@@ -261,4 +253,45 @@ static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, op
 	//MissionState = XComGameState_MissionSite(SourceObject); //iForceLevel = MissionState.SelectedMissionData.ForceLevel;
 	//if (MissionState == none || !MissionState.Available)
 	//	return;
+}
+
+
+
+static function bool AbilityTagExpandHandler_CH(string InString, out string OutString, Object ParseObj, Object StrategyParseOb, XComGameState GameState)
+{
+	switch (InString)
+	{
+
+	case "IRI_DD_AerialScout_PerUnitRadius_Tiles":
+	case "IRI_DD_TakeAndHold_DurationTurns":
+	case "IRI_DD_TakeAndHold_DefenseBonus":
+	case "IRI_DD_TakeAndHold_AimBonus":
+	case "IRI_DD_HitGroundRunning_MobilityBonus":
+
+	case "IRI_BH_DoublePayload_NumBonusCharges":
+	case "IRI_BH_BurstFire_Cooldown":
+	case "IRI_BH_UnrelentingPressure_CooldownReduction":
+	case "IRI_BH_UnrelentingPressure_CooldownReductionPassive":
+	case "IRI_BH_BlindingFire_DurationTurns":
+	case "IRI_BH_Terminate_Charges":
+	case "IRI_BH_ShadowTeleport_Charges":
+	case "IRI_BH_NamedBullet_Charges":
+	case "IRI_BH_BurstFire_AmmoCost":
+	case "IRI_BH_BurstFire_NumShots":
+	case "IRI_BH_Untraceable_CooldownReduction":
+	case "IRI_BH_HomingMine_Charges":
+		OutString = DDColor(`GetConfigInt(name(InString)));
+		return true;
+
+	// ----------------------------------------------------------------------------------------------------------------------
+	default:
+		break;
+	}
+
+	return false;
+}
+
+static private function string DDColor(coerce string strInput)
+{
+	return "<font color='#00ffb4'>" $ strInput $ "</font>"; // mint green
 }

@@ -11,12 +11,10 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 
 // Cooking maps breaks the SPARK deployment for some reason.
 
-// TODO: Localization
 // TODO: Modpreview
 // TODO: Mod description
-
 // TODO: Test everything with redscreens and check logs
-// TODO: fix DD Deploy targeting sending camera to hell
+// TODO: fix DD Deploy camera work
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

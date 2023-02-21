@@ -151,25 +151,23 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	return Template;
 }
 
-// Set DD on cooldown on mission start.
+// Set DD on cooldown on mission start and preload assets if deployment is ready.
 static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_Player				PlayerState;
 	local XComGameState_DynamicDeployment	DDObject;
 
-	// If teleport is available, we're not tied to Skyranger.
-	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
-		return ELR_NoInterrupt;
-
 	PlayerState = XComGameState_Player(EventSource);
 	if (PlayerState == none || PlayerState.GetTeam() != eTeam_XCom)
 		return ELR_NoInterrupt;
 		
-	if (IsFirstTurn())
+	// If teleport is available, we're not tied to Skyranger.
+	if (IsFirstTurn() && class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
 	{
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
 	}
-	else if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
+	
+	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
 	{
 		// Preload soldier assets at the beginning of the turn when Deploy is available.
 		DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
@@ -202,6 +200,7 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 {
 	local StateObjectReference PlayerStateRef;
 	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
+	local XComGameState_DynamicDeployment	DDObject;
 
 	// If teleport is available, we're not tied to Skyranger.
 	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
@@ -213,7 +212,21 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 	if (RequestEvacState == none)
 		return ELR_NoInterrupt;
 
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown + class'XComGameState_RequestEvac'.default.TurnsBeforeEvacExpires, PlayerStateRef.ObjectID);
+	// Can't select more soldiers until the Skyranger arrives, then leaves, then returns to Avenger.
+	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown + class'XComGameState_RequestEvac'.default.TurnsBeforeEvacExpires + `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerStateRef.ObjectID);
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none)
+		return ELR_NoInterrupt;
+
+	// Can't deploy previously selected soldiers until Skyranger arrives.
+	if (DDObject.bPendingDeployment)
+	{
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
+	}
+
 
 	return ELR_NoInterrupt;
 }
