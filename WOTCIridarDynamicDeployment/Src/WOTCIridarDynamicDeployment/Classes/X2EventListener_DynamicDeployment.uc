@@ -196,7 +196,7 @@ static private function bool IsFirstTurn()
 }
 
 // Set DD on cooldown when Evac is requested via Request Evac mod.
-static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
 	local StateObjectReference PlayerStateRef;
 	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
@@ -222,9 +222,9 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 	// Can't deploy previously selected soldiers until Skyranger arrives.
 	if (DDObject.bPendingDeployment)
 	{
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', RequestEvacState.Countdown, PlayerState.ObjectID, NewGameState);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
+		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
 	}
 
 

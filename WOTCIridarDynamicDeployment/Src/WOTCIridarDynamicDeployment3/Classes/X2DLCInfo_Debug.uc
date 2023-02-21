@@ -6,3 +6,5 @@ exec function DDOverrideDeploymentType(const int iOverride)
 {
 	class'X2DLCInfo_Debug'.default.DeployTypeOverride = iOverride;
 }
+
+// TODO: Delete this file.
