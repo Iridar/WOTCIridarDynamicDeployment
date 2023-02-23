@@ -251,6 +251,7 @@ private function TeleportDeploymentVisualization(XComGameState VisualizeGameStat
 	local TTile								GremlinTile;
 	local XComWorldData						World;
 	local X2Action							CommonParent;
+	local X2Action_CameraRemove				RemoveCamera;
 
 	World = `XWORLD;
 
@@ -266,8 +267,11 @@ private function TeleportDeploymentVisualization(XComGameState VisualizeGameStat
 
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
+
 	// Move camera to deployment location
-	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
 
@@ -295,8 +299,6 @@ private function TeleportDeploymentVisualization(XComGameState VisualizeGameStat
 		WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CommonParent));
 		WaitAction.DelayTimeSec = (iNumUnit + FRand()) / 2;
 
-		// Normally, Show Unit -> Play Animation makes the unit appear for split second at the spawn location, and then DD animation plays.
-		// Stroke of genius: show the unit at the ceiling, and use DesiredEndingAtoms to rubberband the unit into the intended spot.
 		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
 		ShowUnitAction.ChangeTimeoutLength(10.0f);
 
@@ -393,6 +395,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	local int								MaxZ;
 	local X2Action_TimedWait				CameraArrive;
 	local XComGameState_Unit				CastingUnit;
+	local X2Action_CameraRemove				RemoveCamera;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -412,8 +415,11 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
+
 	// Move camera to deployment location
-	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
 
@@ -548,6 +554,7 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local X2Action							WaitForEffect;
 	local XComGameState_Unit				CastingUnit;
 	local X2Action_CameraLookAt				LookAtTargetAction;
+	local X2Action_CameraRemove				RemoveCamera;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -573,13 +580,15 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
-	// TODO: preserve trail somehow.
+	// Get rid of the normal ability framing camera that focuses on the midpoint between the shooter and target location.
+	// It's done its job at this point.
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
 
 	// Move camera to deployment location
-	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
-	
 	
 	WaitForEffect = class'X2Action_WaitForAbilityEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded);
 

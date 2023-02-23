@@ -14,7 +14,6 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Modpreview
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
-// TODO: fix DD Deploy camera work
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
