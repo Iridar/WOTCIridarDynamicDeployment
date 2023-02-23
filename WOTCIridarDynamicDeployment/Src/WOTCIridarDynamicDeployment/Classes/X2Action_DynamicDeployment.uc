@@ -184,6 +184,8 @@ Begin:
 	until (Matinees.Length == 0 || MatineeSkipped); // the matinee list will be cleared when they are finished
 
 	EndMatinee();
+
+
 	CompleteAction();
 }
 

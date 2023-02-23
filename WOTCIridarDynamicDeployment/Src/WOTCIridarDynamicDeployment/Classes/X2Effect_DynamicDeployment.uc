@@ -399,6 +399,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	local X2Action_TimedWait				CameraArrive;
 	local XComGameState_Unit				CastingUnit;
 	local X2Action_CameraRemove				RemoveCamera;
+	local X2Action_PlayNarrative			NarrativeAction;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -426,6 +427,10 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
 
+	// Firebrand voiceline
+	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
+	NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
+		
 	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
 	CameraArrive.DelayTimeSec = 1.5f;
 
@@ -558,6 +563,7 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local XComGameState_Unit				CastingUnit;
 	local X2Action_CameraLookAt				LookAtTargetAction;
 	local X2Action_CameraRemove				RemoveCamera;
+	local X2Action_PlayNarrative			NarrativeAction;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -612,6 +618,10 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 		StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 		StreamActions.AddItem(StreamMap);
 	}
+
+	// Make Firebrand play the "In the drop position" voiceline.
+	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
+	NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
 		
 	// Begin playing once camera arrives
 	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));

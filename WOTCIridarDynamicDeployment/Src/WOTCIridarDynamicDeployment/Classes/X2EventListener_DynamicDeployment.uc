@@ -257,7 +257,7 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 
 	// TODO: Localization here
 
-	if (Unit.GetUnitValue(class'Help'.default.UnitEvacuatedValue, UV))
+	if (UnitState.GetUnitValue(class'Help'.default.UnitEvacuatedValue, UV))
 	{
 		if (DDObject.IsUnitSelected(UnitState.ObjectID))
 		{

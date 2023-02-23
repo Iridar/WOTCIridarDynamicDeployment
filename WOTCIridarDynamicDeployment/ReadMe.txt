@@ -3,11 +3,39 @@ Edit .scripts\build.ps1 if you want to enable cooking.
  
 Enjoy making your mod, and may the odds be ever in your favor. 
  
- 
 Created with Enhanced Mod Project Template v1.0 
  
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
+
+
+Intro script: a small squad is stuck in trench warfare against superior enemy force, idle suppression shots flying everywhere. 
+Officer yells: "Jenkins, go for a flank!"
+Jenking goes for a flank, heroically pulls another enemy pod, gets shot and dies. 
+The squad is under even more fire.
+Officer (with an implied facepalm in his voice) yells into the radio: "We need reinforcements!"
+
+Next very brief shot: soldiers running into Skyranger. Then the camera shows the Skyranger flying by.\
+We see the interior of the Skyranger with soldiers sitting inside (standard loadscreen)
+Some funny text could replace the mission briefing.
+Fortunate Son starts playing. 
+Camera shows several shots of the Skyranger flying by, including through a Lost city.
+
+Finally skyranger arrives (I might be able to find a fitting Firebrand audio cue), the officer throws the deploy flare, and reinforcements drop in,
+looking all bossy in 'Nam-esque cosmetics.
+Fade out, end. Approximate video length: one minute.
+Required voicelines:
+
+- Jenkins, go for a flank! (commanding)
+- We need reinforcements (frustrated)
+
+ in idle suppression, one of them goes for a flank, pulls a pod, gets shot, 
+squad is getting hammered even more. 
+
+Officer yells: we need reinforcements!
+
+Investigate the reality of making a "soldiers running towards skyranger with sirens blasting" cinematic when soldiers are chosen
+as well as "show deployed soldiers" matinee (would need MCM toggle probably)
 
 // Cooking maps breaks the SPARK deployment for some reason.
 
