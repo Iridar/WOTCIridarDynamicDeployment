@@ -308,6 +308,9 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 	class'Help'.static.SetDynamicDeploymentCooldown(DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 	
 	// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
+	// TODO: Adjust this. You should be able to select soldiers you want deployed and *then* request evac.
+	// And if you do, the Skyranger arrival should be equalized to the deployment delay of the soldiers.
+	// Overall, there needs to be some kind of equalization here.
 	if (class'Help'.static.IsModActive('RequestEvac'))
 	{
 		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);

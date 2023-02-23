@@ -58,7 +58,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	foreach UnitStates(UnitState, iNumUnit)
 	{
 		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-		`AMLOG(iNumUnit @ "Deploying unit:" @ UnitState.GetFullName() @ "removed from play:" @ UnitState.bRemovedFromPlay);
+		`AMLOG(iNumUnit @ "Deploying unit:" @ UnitState.GetFullName());
 
 		SpawnLocation = SpawnLocations[iNumUnit];
 		`AMLOG("SpawnLocation:" @ SpawnLocation);
@@ -111,16 +111,14 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	local XComGameState_AIGroup			Group, PreviousGroupState;
 	local TTile							CosmeticUnitTile;
 	local bool							bWasEvacedFromThisMission;
+	local UnitValue						UV;
 
 	// Needed to allow redeploying evacuated units
-	if (Unit.bRemovedFromPlay)
-	{
-		bWasEvacedFromThisMission = true;
-		Unit.ClearRemovedFromPlayFlag();
-	}
+	bWasEvacedFromThisMission = Unit.GetUnitValue(class'Help'.default.UnitEvacuatedValue, UV);
 
 	//tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 	Unit.bSpawnedFromAvenger = true; 
+	//Unit.ClearRemovedFromPlayFlag();
 	
 	// No need to do this stuff if the unit was already on this mission.
 	if (!bWasEvacedFromThisMission)
@@ -179,6 +177,11 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	if (!bWasEvacedFromThisMission)
 	{
 		Unit.BeginTacticalPlay(NewGameState); 
+	}
+	else
+	{
+		// So that soldier doesn't appear as "in skyranger" on the soldier select screen.
+		Unit.ClearUnitValue(class'Help'.default.UnitEvacuatedValue);
 	}
 
 	if (default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS.Length > 0)

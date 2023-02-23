@@ -147,6 +147,8 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	}
 
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
+	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
+	
 
 	return Template;
 }
@@ -220,6 +222,7 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 		return ELR_NoInterrupt;
 
 	// Can't deploy previously selected soldiers until Skyranger arrives.
+	// TODO: This may actually REDUCE the deployment delay if you selected more soldiers than the delay for skyranger to arrive via RequestEvac
 	if (DDObject.bPendingDeployment)
 	{
 		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
@@ -237,6 +240,7 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 	local XComLWTuple						OverrideTuple;
 	local XComGameState_Unit				UnitState;
 	local XComGameState_DynamicDeployment	DDObject;
+	local UnitValue							UV;
 
 	if (!`SCREENSTACK.IsInStack(class'UIChooseUnits'))
 		return ELR_NoInterrupt;
@@ -246,13 +250,40 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 		return ELR_NoInterrupt;
 
 	UnitState = XComGameState_Unit(EventSource);
+	if (UnitState == none)
+		return ELR_NoInterrupt;
+		
+	OverrideTuple = XComLWTuple(EventData);
 
-	if (UnitState != none && DDObject.IsUnitSelected(UnitState.ObjectID))
+	// TODO: Localization here
+
+	if (Unit.GetUnitValue(class'Help'.default.UnitEvacuatedValue, UV))
 	{
-		OverrideTuple = XComLWTuple(EventData);
-		OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
-		OverrideTuple.Data[4].i = eUIState_Warning; // Yellow
+		if (DDObject.IsUnitSelected(UnitState.ObjectID))
+		{
+			// In Skyranger - Deploying
+			OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
+			OverrideTuple.Data[4].i = eUIState_Warning; // Yellow
+		}
+		else
+		{
+			// In Skyranger
+			OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
+			OverrideTuple.Data[4].i = eUIState_Warning; // Yellow
+		}
 	}
+	else
+	{
+		if (DDObject.IsUnitSelected(UnitState.ObjectID))
+		{
+			// On Avenger - Deploying
+			OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
+			OverrideTuple.Data[4].i = eUIState_Warning; // Yellow
+		}
+	}
+
+	
+	
 
 	return ELR_NoInterrupt;
 }
@@ -268,3 +299,22 @@ static private function EventListenerReturn OnOverridePersonnelStatus(Object Eve
 	eUIState_Psyonic,
 	eUIState_Warning2,
 	eUIState_TheLost*/
+
+// Mark evacuated units with a unit value so that we know not to reinit their abilities if we're gonna redeploy them again in the same mission.
+static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+{
+	local XComGameState_Unit	UnitState;
+	local XComGameState			NewGameState;
+
+	UnitState = XComGameState_Unit(EventData);
+	if (UnitState == none)
+		return ELR_NoInterrupt;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark evaced unit:" @ UnitState.GetFullName());
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+	UnitState.SetUnitFloatValue(class'Help'.default.UnitEvacuatedValue, 1.0f, eCleanup_BeginTactical);
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	return ELR_NoInterrupt;
+}
+	

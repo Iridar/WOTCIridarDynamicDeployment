@@ -7,6 +7,7 @@ class Help extends Object abstract;
 
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
+var privatewrite name UnitEvacuatedValue;
 
 static final function int GetDeploymentType()
 {
@@ -208,4 +209,5 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DynamicDeployment_Triggered_Event"
+	UnitEvacuatedValue = "IRI_DynamicDeployment_UnitEvaced_Value"
 }

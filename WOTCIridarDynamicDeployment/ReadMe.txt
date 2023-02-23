@@ -15,6 +15,17 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
+Add "in avenger" status for soldiers that were just evacuated? so they can be redeployed without delay
+
+add one turn minimum delay after selecting soldiers so you don't get instant reinforcements with paratrooper sodleirs'
+
+make a uiscreen for selecting which soldiers will remain in skyranger upon deployment
+
+make tile targeting leak onto lowerZ floor tiles as long as they're within XY plane
+
+TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
+Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.
+
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
 Extraction Team: After the objective is completed, XCOM may deploy up to two additional soldiers near the evac zone. (Appears on fixed evac missions)
