@@ -547,6 +547,7 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	local array<X2Action>					StreamActions;
 	local X2Action							WaitForEffect;
 	local XComGameState_Unit				CastingUnit;
+	local X2Action_CameraLookAt				LookAtTargetAction;
 
 	World = `XWORLD;
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
@@ -572,14 +573,13 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
-	// TODO: Uncomment.
-	// and preserve trail somehow.
+	// TODO: preserve trail somehow.
 
 	// Move camera to deployment location
-	//LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
-	//LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
-	//LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
-	//
+	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
+	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+	
 	
 	WaitForEffect = class'X2Action_WaitForAbilityEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded);
 
