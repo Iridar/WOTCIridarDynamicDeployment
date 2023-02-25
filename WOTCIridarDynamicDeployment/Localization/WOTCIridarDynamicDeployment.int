@@ -80,11 +80,5 @@ DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, designating a deployment area for Dy
 DD_DEPLOY_ENDS_TURN_Label = "Deploying soldiers ends turn"
 DD_DEPLOY_ENDS_TURN_Tip = "If enabled, designating a deployment area for Dynamic Deployment will end the soldier's turn."
 
-DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Label = "Disallow if Evac Zone exists"
-DISALLOW_DD_IF_EVAC_ZONE_EXISTS_Tip = "If enabled, you will not be able to request Dynamic Deployment while the Skyranger is occupied by hovering over an Evac Zone. Teleportation Deployment does not have this restriction, regardless of the setting."
-
-ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Label = "Allow if Evac Zone is mission-placed"
-ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED_Tip = "If enabled, you will be allowed to request Dynamic Deployment if the Evac Zone is automatically placed by the mission."
-
 DEBUG_LOGGING_Label = "Enable debug logging"
 DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log file, located at:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"

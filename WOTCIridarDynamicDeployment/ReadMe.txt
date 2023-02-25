@@ -43,6 +43,11 @@ as well as "show deployed soldiers" matinee (would need MCM toggle probably)
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
+TODO: Think what to do about teleport deployment if the evacced units are in Skyranger -- Teleport deployment needs to be a separate ability
+
+If evac zone is placed, you can DD only on the evac zone and you can't select units from Avenger
+And deploying is free action
+
 BUG: Save game, select soldier, kill game, load save - soldiers are selected?!
 
 Add "in avenger" status for soldiers that were just evacuated? so they can be redeployed without delay

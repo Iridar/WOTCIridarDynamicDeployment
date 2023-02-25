@@ -20,12 +20,6 @@ final function bool IsUnitSelected(const int UnitObjectID)
 
 final function ToggleUnitSelection(const int UnitObjectID)
 {
-	// If we've already deployed units previously, clear the list so we're not offered to deploy the same units again.
-	if (!bPendingDeployment)
-	{
-		SelectedUnitIDs.Length = 0;
-		PrecisionDropTileStorages.Length = 0;
-	}
 	if (IsUnitSelected(UnitObjectID))
 	{
 		SelectedUnitIDs.RemoveItem(UnitObjectID);
@@ -77,7 +71,8 @@ final function int GetDeployDelay()
 	UnitStates = GetUnitsToDeploy();
 	foreach UnitStates(UnitState)
 	{
-		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FastDrop'))
+		if (class'Help'.static.IsUnitInSkyranger(UnitState) || 
+			class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FastDrop'))
 		{
 			continue;
 		}
@@ -313,9 +308,11 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 	local XComGameStateHistory				History;
 	local StateObjectReference				UnitReference;
 	local XComGameState_Unit				UnitState;
+	local bool								bCanSelectUnitsFromAvenger;
 	
 	History = `XCOMHISTORY;
 	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+	bCanSelectUnitsFromAvenger = class'Help'.static.CanSelectUnitsFromAvenger();
 
 	foreach XComHQ.Crew(UnitReference)
 	{
@@ -324,7 +321,11 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 
 		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitReference.ObjectID));
 
-		if (UnitState == none || !class'Help'.static.IsUnitEligibleForDynamicDeployment(UnitState)) continue;
+		if (UnitState == none) continue;
+
+		if (!bCanSelectUnitsFromAvenger && !class'Help'.static.IsUnitInSkyranger(UnitState)) continue;
+
+		if (!class'Help'.static.IsUnitEligibleForDynamicDeployment(UnitState)) continue;
 
 		//	If we're still in the cycle then this unit has passed all checks and is eligible to be spawned
 		EligbleUnits.AddItem(UnitState);

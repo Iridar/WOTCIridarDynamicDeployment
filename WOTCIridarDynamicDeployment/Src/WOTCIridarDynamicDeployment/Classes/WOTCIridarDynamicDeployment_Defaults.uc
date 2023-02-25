@@ -20,7 +20,4 @@ var config bool COUNT_UNCONSCIOUS_SOLDIERS;
 var config bool COUNT_BLEEDING_OUT_SOLDIERS;
 var config bool COUNT_EVACED_SOLDIERS;
 
-var config bool DISALLOW_DD_IF_EVAC_ZONE_EXISTS;
-var config bool ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED;
-
 var config bool DEBUG_LOGGING;

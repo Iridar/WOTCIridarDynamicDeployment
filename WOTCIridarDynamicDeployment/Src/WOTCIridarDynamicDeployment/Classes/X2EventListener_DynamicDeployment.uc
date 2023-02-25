@@ -170,7 +170,7 @@ static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, 
 	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
 	{
 		// Preload soldier assets at the beginning of the turn when Deploy is available.
-		DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+		DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
 		if (DDObject != none && DDObject.bPendingDeployment)
 		{
 			DDObject.PreloadAssets();
@@ -242,10 +242,7 @@ static private function EventListenerReturn OnUnitEvacuated(Object EventData, Ob
 	if (UnitState == none)
 		return ELR_NoInterrupt;
 
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark evaced unit:" @ UnitState.GetFullName());
-	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-	UnitState.SetUnitFloatValue(class'Help'.default.UnitInSkyrangerValue, 1.0f, eCleanup_BeginTactical);
-	`GAMERULES.SubmitGameState(NewGameState);
+	class'Help'.static.MarkUnitInSkyranger(UnitState);
 
 	return ELR_NoInterrupt;
 }

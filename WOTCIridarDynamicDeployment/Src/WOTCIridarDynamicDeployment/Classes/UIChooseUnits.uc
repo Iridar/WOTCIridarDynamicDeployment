@@ -29,7 +29,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	DDObject.GetUnitStatesEligibleForDynamicDeployment(UnitStates);
 
 	// There's no good time for us to deselect units at any point after deployment,
-	// so it before entering screen instead.
+	// so do it before entering screen instead.
 	DeselectAllUnits();
 	XComHQ = `XCOMHQ;
 
@@ -179,18 +179,12 @@ private function UpdateListItemData(UIPersonnel_SoldierListItem kItem)
 {
 	local XComGameState_Unit Unit;
 	local string UnitLoc, status, statusTimeLabel, statusTimeValue, classIcon, rankIcon, flagIcon, mentalStatus;	
-	local int iTimeNum;
 	local X2SoldierClassTemplate SoldierClass;
 	//local XComGameState_ResistanceFaction FactionState; //Issue #1134, not needed
 	local SoldierBond BondData;
 	local StateObjectReference BondmateRef;
-	local XComGameState_Unit Bondmate;
 	local int BondLevel; 
-	local StackedUIIconData StackedClassIcon; // Variable for issue #1134
-	local UnitValue UV;
 
-	local StackedUIIconData EmptyIconInfo; // Single variable for Issue #295
-	
 	Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(kItem.UnitRef.ObjectID));
 	
 	SoldierClass = Unit.GetSoldierClassTemplate();
@@ -485,11 +479,23 @@ private function OnConfirmButtonClicked(UIButton Button)
 
 private function FinalizeSelectionAndClose()
 {
-	local XComGameState	NewGameState;
-	local XGUnit		GameUnit;
+	local XComGameState			NewGameState;
+	local XGUnit				GameUnit;
+	local XComGameState_Unit	UnitState;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set Global Cooldowns");
+
+	// Put the deploy ability on cooldown
 	SetGlobalCooldowns(NewGameState);
+	
+	// Then mark deploying units as in Skyranger. So that if the player calls for evac
+	// before deploying the units, they still can deploy them on the evac zone.
+	// Needs to be done in that order, because units in Skyranger do not impose a delay.
+	UnitStates = DDObject.GetUnitsToDeploy();
+	foreach UnitStates(UnitState)
+	{
+		class'Help'.static.MarkUnitInSkyranger(UnitState);
+	}
 	`GAMERULES.SubmitGameState(NewGameState);
 	
 	CloseScreen();
@@ -536,13 +542,7 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 	class'Help'.static.SetDynamicDeploymentCooldown(DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 	
 	// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
-	// TODO: Adjust this. You should be able to select soldiers you want deployed and *then* request evac.
-	// And if you do, the Skyranger arrival should be equalized to the deployment delay of the soldiers.
-	// Overall, there needs to be some kind of equalization here.
-	if (class'Help'.static.IsModActive('RequestEvac'))
-	{
-		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
-	}
+	class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 }
 
 private function CalculateTotalCost()

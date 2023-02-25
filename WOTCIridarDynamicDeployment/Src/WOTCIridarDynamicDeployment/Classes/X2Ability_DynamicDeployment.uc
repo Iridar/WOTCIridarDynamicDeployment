@@ -375,27 +375,9 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 
 static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
 {
-	local XComGameState_DynamicDeployment	DDObject;
-	local XComGameState_EvacZone			EvacZone;
+	local XComGameState_DynamicDeployment DDObject;
 
 	`AMLOG("Running");
-
-	// 1. Hide if Evac Zone is placed.
-	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
-	if (EvacZone != none && `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS))
-	{
-		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
-		{
-			`AMLOG("Evac Zone is mission-placed and MCM setting allows DD.");
-			// Do nothing.
-		}
-		else
-		{
-			`AMLOG("Evac zone is placed and MCM setting does not allow DD.");
-			Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-			return;
-		}
-	}
 
 	// Special handle first deployment of the mission.
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
@@ -433,24 +415,7 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 
 static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
 {
-	local XComGameState_DynamicDeployment	DDObject;
-	local XComGameState_EvacZone			EvacZone;
-
-	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone(); // TODO: Problem, this state exists even after evac zone created by Request Evac expires.
-	if (EvacZone != none && `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS))
-	{
-		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
-		{
-			`AMLOG("Evac Zone is mission-placed and MCM setting allows DD.");
-			// Do nothing.
-		}
-		else
-		{
-			`AMLOG("Evac zone is placed and MCM setting does not allow DD.");
-			Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-			return;
-		}
-	}
+	local XComGameState_DynamicDeployment DDObject;
 
 	// Hide if no unit selected for deployment
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));

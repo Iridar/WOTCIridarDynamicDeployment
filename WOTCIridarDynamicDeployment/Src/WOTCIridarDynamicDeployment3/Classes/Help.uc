@@ -26,11 +26,38 @@ static final function int GetDeploymentType()
 	return `eDT_Flare;
 }
 
+static final function MarkUnitInSkyranger(XComGameState_Unit UnitState, optional XComGameState UseGameState)
+{
+	local XComGameState_Unit	NewUnitState;
+	local XComGameState			NewGameState;
+
+	if (UseGameState != none)
+	{
+		NewUnitState = XComGameState_Unit(UseGameState.GetGameStateForObjectID(UnitState.ObjectID));
+		if (NewUnitState == none)
+		{	
+			NewUnitState = XComGameState_Unit(UseGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+		}
+		NewUnitState.SetUnitFloatValue(default.UnitInSkyrangerValue, 1.0f, eCleanup_BeginTactical);
+	}
+	else
+	{
+		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark evaced unit:" @ UnitState.GetFullName());
+		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+		UnitState.SetUnitFloatValue(default.UnitInSkyrangerValue, 1.0f, eCleanup_BeginTactical);
+		`GAMERULES.SubmitGameState(NewGameState);
+	}
+}
+
 static final function bool IsUnitInSkyranger(const XComGameState_Unit UnitState)
 {
 	local UnitValue UV;
 
 	return UnitState.GetUnitValue(default.UnitInSkyrangerValue, UV);
+}
+static final function bool CanSelectUnitsFromAvenger()
+{
+	return class'XComGameState_EvacZone'.static.GetEvacZone() == none;
 }
 
 static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)

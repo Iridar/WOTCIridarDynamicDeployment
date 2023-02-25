@@ -111,7 +111,6 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	local XComGameState_AIGroup			Group, PreviousGroupState;
 	local TTile							CosmeticUnitTile;
 	local bool							bWasEvacedFromThisMission;
-	local UnitValue						UV;
 
 	// Needed to allow redeploying evacuated units
 	bWasEvacedFromThisMission = class'Help'.static.IsUnitInSkyranger(Unit);

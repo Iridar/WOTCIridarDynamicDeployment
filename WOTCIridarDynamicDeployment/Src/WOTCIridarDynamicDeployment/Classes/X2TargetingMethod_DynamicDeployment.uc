@@ -10,6 +10,8 @@ class X2TargetingMethod_DynamicDeployment extends X2TargetingMethod_VoidRift;
 // Consecutive clicks pick deployment destinations for precision dropped units.
 // Picking the location for the final precision drop unit activates the ability.
 
+// If an evac zone exists, targeting is force locked to it.
+
 //var private X2Actor_InvalidTarget InvalidTileActor;
 //var private XComActionIconManager IconManager;
 
@@ -24,6 +26,9 @@ var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
 var private int								MaxZ;
 var private bool							bCheckMaxZ;
+
+var private XComGameState_EvacZone			EvacZone;
+var private X2Camera_LookAtLocation			LookatCamera;
 
 // Parallel arrays
 var private array<XComGameState_Unit>		PrecisionDropUnitStates;
@@ -46,6 +51,19 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	}
 
 	World = `XWORLD;
+
+	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
+	if (EvacZone != none)
+	{
+		LookatCamera = new class'X2Camera_LookAtLocation';
+		LookatCamera.UseTether = false;
+		LookatCamera.LookAtLocation = World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
+		`CAMERASTACK.AddCamera(LookatCamera);
+
+		bRestrictToSquadsightRange = false;
+	}
+
+	
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
 	bCheckMaxZ = class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon;
 
@@ -63,8 +81,6 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 		Pres = `PRES;
 		Pres.m_kTacticalHUD.Movie.Stack.SubscribeToOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
 	}
-
-	bRestrictToSquadsightRange = `GETMCMVAR(SQUAD_MUST_SEE_TILE);
 
 	super.Init(InAction, NewTargetIndex);
 }
@@ -383,6 +399,10 @@ function Canceled()
 	DrawAOETiles(AreaTiles);
 	ReleaseAllPawns(); // In case some hotkey isn't caught by StagedCancel(), such as switching to another ability or something.
 	Pres.m_kTacticalHUD.Movie.Stack.UnsubscribeFromOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
+	if (LookatCamera != none)
+	{
+		`CAMERASTACK.RemoveCamera(LookatCamera);
+	}
 	super.Canceled();
 }
 
@@ -438,7 +458,7 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 
 // Grenade targeting
 
-static function bool UseGrenadePath() { return true; }
+static function bool UseGrenadePath() { return class'XComGameState_EvacZone'.static.GetEvacZone() == none; }
 
 function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathData WeaponPrecomputedPathData)
 {
@@ -465,6 +485,15 @@ function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathDa
 	}
 
 	// WeaponPrecomputedPathData kept to default values, common for all grenades.
+}
+
+simulated protected function Vector GetSplashRadiusCenter( bool SkipTileSnap = false )
+{
+	if (EvacZone != none)
+	{
+		return World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
+	}
+	return super.GetSplashRadiusCenter(SkipTileSnap);
 }
 
 defaultproperties
