@@ -7,7 +7,7 @@ class Help extends Object abstract;
 
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
-var privatewrite name UnitEvacuatedValue;
+var privatewrite name UnitInSkyrangerValue;
 
 static final function int GetDeploymentType()
 {
@@ -24,6 +24,13 @@ static final function int GetDeploymentType()
 		return `eDT_SeismicBeacon;
 	}
 	return `eDT_Flare;
+}
+
+static final function bool IsUnitInSkyranger(const XComGameState_Unit UnitState)
+{
+	local UnitValue UV;
+
+	return UnitState.GetUnitValue(default.UnitInSkyrangerValue, UV);
 }
 
 static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)
@@ -209,5 +216,5 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DynamicDeployment_Triggered_Event"
-	UnitEvacuatedValue = "IRI_DynamicDeployment_UnitEvaced_Value"
+	UnitInSkyrangerValue = "IRI_DynamicDeployment_UnitEvaced_Value"
 }

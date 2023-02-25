@@ -43,6 +43,8 @@ as well as "show deployed soldiers" matinee (would need MCM toggle probably)
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
+BUG: Save game, select soldier, kill game, load save - soldiers are selected?!
+
 Add "in avenger" status for soldiers that were just evacuated? so they can be redeployed without delay
 
 add one turn minimum delay after selecting soldiers so you don't get instant reinforcements with paratrooper sodleirs'

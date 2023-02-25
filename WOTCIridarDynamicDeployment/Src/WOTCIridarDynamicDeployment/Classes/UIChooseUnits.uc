@@ -33,6 +33,8 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	DeselectAllUnits();
 	XComHQ = `XCOMHQ;
 
+	m_strButtonValues[ePersonnelSoldierSortType_Status] = class'UIUtilities_Text'.static.GetSizedText(class'UIChallengeMode_SquadSelect'.default.m_strLocationLabel, 12);
+	
 	super.InitScreen(InitController, InitMovie, InitName);
 
 	SwitchTab(m_eListType);
@@ -117,6 +119,232 @@ simulated function RefreshData()
 	// Somehow sometimes the ability bar becomes visible again if you click fast, so just re-hide it every time.
 	TacticalHUD.m_kAbilityHUD.Hide();
 }
+
+// The code around overriding unit's status display text, including override events, is a goddamn mess.
+// To do what I wanted to do, which is to display an icon instead of the "X DAYS" status text,
+// I had to copy the UpdateListItemData() from UIPersonnel_SoldierListItem and remove the bits that were interfering with it.
+// The problem was that the override status text can be given only if the override to not show unit's mental status is enabled,
+// which looks bad and doesn't make any sense, and I kinda want the mental status to be there.
+simulated function PopulateListInstantly()
+{
+	local UIPersonnel_SoldierListItem	kItem;
+	local StateObjectReference			SoldierRef;
+	local array<StateObjectReference>	CurrentData;
+	local XComGameState_Unit			UnitState;
+	local array<XComGameState_Unit>		LocUnitStates;
+	local XComGameStateHistory			History;
+
+	History = `XCOMHISTORY;
+	CurrentData = GetCurrentData();
+	foreach CurrentData(SoldierRef)
+	{
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(SoldierRef.ObjectID));
+		if (UnitState == none) continue;
+
+		LocUnitStates.AddItem(UnitState);
+	}
+	LocUnitStates.Sort(SortUnitsByLocation); // Put units in Skyranger at the start of the list.
+
+	foreach LocUnitStates(UnitState)
+	{
+		kItem = Spawn(class'UIPersonnel_SoldierListItem', m_kList.itemContainer);
+		
+		kItem.InitListItem(UnitState.GetReference());
+		UpdateListItemData(kItem);
+	}
+
+	MC.FunctionString("SetEmptyLabel", CurrentData.Length == 0 ? m_strEmptyListLabels[m_eCurrentTab] : "");
+}
+
+static private function int SortUnitsByLocation(XComGameState_Unit UnitStateA, XComGameState_Unit UnitStateB)
+{
+	local bool bInSkyrangerA;
+	local bool bInSkyrangerB;
+
+	bInSkyrangerA = class'Help'.static.IsUnitInSkyranger(UnitStateA);
+	bInSkyrangerB = class'Help'.static.IsUnitInSkyranger(UnitStateB);
+
+	if (bInSkyrangerA && !bInSkyrangerB)
+	{
+		return 1;
+	}
+	if (!bInSkyrangerA && bInSkyrangerB)
+	{
+		return -1;
+	}
+	return 0;
+}
+
+private function UpdateListItemData(UIPersonnel_SoldierListItem kItem)
+{
+	local XComGameState_Unit Unit;
+	local string UnitLoc, status, statusTimeLabel, statusTimeValue, classIcon, rankIcon, flagIcon, mentalStatus;	
+	local int iTimeNum;
+	local X2SoldierClassTemplate SoldierClass;
+	//local XComGameState_ResistanceFaction FactionState; //Issue #1134, not needed
+	local SoldierBond BondData;
+	local StateObjectReference BondmateRef;
+	local XComGameState_Unit Bondmate;
+	local int BondLevel; 
+	local StackedUIIconData StackedClassIcon; // Variable for issue #1134
+	local UnitValue UV;
+
+	local StackedUIIconData EmptyIconInfo; // Single variable for Issue #295
+	
+	Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(kItem.UnitRef.ObjectID));
+	
+	SoldierClass = Unit.GetSoldierClassTemplate();
+	//FactionState = Unit.GetResistanceFaction(); //Issue #1134, not needed
+
+	class'UIUtilities_Strategy'.static.GetPersonnelStatusSeparate(Unit, status, statusTimeLabel, statusTimeValue);
+	mentalStatus = "";
+
+	// Go fox yourself, issue 651
+	//if(ShouldDisplayMentalStatus(Unit)) // Issue #651
+	//{
+	//	Unit.GetMentalStateStringsSeparate(mentalStatus, statusTimeLabel, iTimeNum);
+	//	statusTimeLabel = class'UIUtilities_Text'.static.GetColoredText(statusTimeLabel, Unit.GetMentalStateUIState());
+	//
+	//	if(iTimeNum == 0)
+	//	{
+	//		statusTimeValue = "";
+	//	}
+	//	else
+	//	{
+	//		statusTimeValue = class'UIUtilities_Text'.static.GetColoredText(string(iTimeNum), Unit.GetMentalStateUIState());
+	//	}
+	//}
+
+
+	if( statusTimeValue == "" )
+		statusTimeValue = "---";
+
+	flagIcon = Unit.GetCountryTemplate().FlagImage;
+	rankIcon = Unit.GetSoldierRankIcon(); // Issue #408
+	// Start Issue #106
+	classIcon = Unit.GetSoldierClassIcon();
+	// End Issue #106
+
+	// if personnel is not staffed, don't show location
+	if( class'UIUtilities_Strategy'.static.DisplayLocation(Unit) )
+		UnitLoc = class'UIUtilities_Strategy'.static.GetPersonnelLocation(Unit);
+	else
+		UnitLoc = "";
+
+	//if( kItem.BondIcon == none )
+	//{
+	//	kItem.BondIcon = kItem.Spawn(class'UIBondIcon', kItem);
+	//	if( `ISCONTROLLERACTIVE ) 
+	//		kItem.BondIcon.bIsNavigable = false; 
+	//}
+	//
+	//if( Unit.HasSoldierBond(BondmateRef, BondData) )
+	//{
+	//	Bondmate = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BondmateRef.ObjectID));
+	//	BondLevel = BondData.BondLevel;
+	//	if( !kItem.BondIcon.bIsInited )
+	//	{
+	//		BondIcon.InitBondIcon('UnitBondIcon', BondData.BondLevel, , BondData.Bondmate);
+	//	}
+	//	BondIcon.Show();
+	//	SetTooltipText(Repl(BondmateTooltip, "%SOLDIERNAME", Caps(Bondmate.GetName(eNameType_RankFull))));
+	//	Movie.Pres.m_kTooltipMgr.TextTooltip.SetUsePartialPath(CachedTooltipID, true);
+	//}
+	//else if( Unit.ShowBondAvailableIcon(BondmateRef, BondData) )
+	//{
+	//	BondLevel = BondData.BondLevel;
+	//	if( !BondIcon.bIsInited )
+	//	{
+	//		BondIcon.InitBondIcon('UnitBondIcon', BondData.BondLevel, , BondmateRef);
+	//	}
+	//	BondIcon.Show();
+	//	BondIcon.AnimateCohesion(true);
+	//	SetTooltipText(class'XComHQPresentationLayer'.default.m_strBannerBondAvailable);
+	//	Movie.Pres.m_kTooltipMgr.TextTooltip.SetUsePartialPath(CachedTooltipID, true);
+	//}
+	//else
+	//{
+	//	if( !BondIcon.bIsInited )
+	//	{
+	//		BondIcon.InitBondIcon('UnitBondIcon', BondData.BondLevel, , BondData.Bondmate);
+	//	}
+	//	BondIcon.Hide();
+	//	BondLevel = -1; 
+	//}
+
+	if( Unit.HasSoldierBond(BondmateRef, BondData) )
+	{
+		BondLevel = BondData.BondLevel;
+	}
+
+	if (DDObject.IsUnitSelected(Unit.ObjectID))
+	{
+		status = class'UIUtilities_Text'.static.GetColoredText(`GetLocalizedString("IRI_DynamicDeployment_DeployingStatus"), eUIState_Warning);
+	}
+
+	
+	if (class'Help'.static.IsUnitInSkyranger(Unit))
+	{
+		//statusTimeValue = "<img src='img:///IRIDynamicDeployment_UI.Skyranger' width='48' height='32' vspace='-24'>";
+		statusTimeValue = "\n" $ `CAPS(class'UIControllerMap'.default.m_sSkyranger);
+		statusTimeValue = class'UIUtilities_Text'.static.GetSizedText(statusTimeValue, 14);
+		//statusTimeValue = class'UIUtilities_Text'.static.GetColoredText(statusTimeValue, eUIState_Highlight);
+	}
+	else
+	{
+		//statusTimeValue = "<img src='img:///IRIDynamicDeployment_UI.Avenger' width='48' height='48' vspace='-12'>";
+		statusTimeValue = "\n" $ `CAPS(class'UIControllerMap'.default.m_sAvenger);
+		statusTimeValue = class'UIUtilities_Text'.static.GetSizedText(statusTimeValue, 14);
+		//statusTimeValue = class'UIUtilities_Text'.static.GetColoredText(statusTimeValue, eUIState_Normal);
+	}
+	 
+
+	// Start Issue #106, #408
+	kItem.AS_UpdateDataSoldier(Caps(Unit.GetName(eNameType_Full)),
+					Caps(Unit.GetName(eNameType_Nick)),
+					Caps(Unit.GetSoldierShortRankName()),
+					rankIcon,
+					Caps(SoldierClass != None ? Unit.GetSoldierClassDisplayName() : ""),
+					classIcon,
+					status,
+					statusTimeValue /*statusTimeValue $"\n" $ Class'UIUtilities_Text'.static.CapsCheckForGermanScharfesS(Class'UIUtilities_Text'.static.GetSizedText( statusTimeLabel, 12))*/,
+					UnitLoc,
+					flagIcon,
+					false, //todo: is disabled 
+					Unit.ShowPromoteIcon(),
+					false, // psi soldiers can't rank up via missions
+					mentalStatus,
+					BondLevel);
+	// End Issue #106, #408
+
+	// Would be done already by this point. --Iridar
+	//Issue #295 - Add a 'none' check before accessing FactionState --> Issue #1134 replaces this fix
+	// Start Issue #1134
+	//StackedClassIcon = Unit.GetStackedClassIcon();
+	//if (StackedClassIcon.Images.Length > 0)
+	//{
+	//	AS_SetFactionIcon(StackedClassIcon);
+	//}
+	//else
+	//{
+	//	// Preserve backwards compatibility in case AS_SetFactionIcon() is overridden via an MCO.
+	//	AS_SetFactionIcon(EmptyIconInfo);
+	//}
+	// End Issue #1134
+}
+
+/*	eUIState_Normal,
+	eUIState_Faded,
+	eUIState_Header,
+	eUIState_Disabled,
+	eUIState_Good,
+	eUIState_Bad,
+	eUIState_Warning,
+	eUIState_Highlight,
+	eUIState_Cash,
+	eUIState_Psyonic,
+	eUIState_Warning2,
+	eUIState_TheLost*/
 
 function UpdateConfirmButtonVisibility()
 {

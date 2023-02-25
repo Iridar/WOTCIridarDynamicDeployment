@@ -436,7 +436,7 @@ static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction
 	local XComGameState_DynamicDeployment	DDObject;
 	local XComGameState_EvacZone			EvacZone;
 
-	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
+	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone(); // TODO: Problem, this state exists even after evac zone created by Request Evac expires.
 	if (EvacZone != none && `GETMCMVAR(DISALLOW_DD_IF_EVAC_ZONE_EXISTS))
 	{
 		if (`GETMCMVAR(ALLOW_DD_IF_EVAC_ZONE_MISSION_PLACED) && EvacZone.bMissionPlaced)
