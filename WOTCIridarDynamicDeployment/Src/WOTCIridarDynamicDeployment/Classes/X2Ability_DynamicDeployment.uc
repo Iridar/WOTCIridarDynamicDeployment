@@ -290,6 +290,8 @@ static private function X2AbilityTemplate CreateDeploymentAbility(const name Tem
 	AerialScout.TargetConditions.AddItem(new class'X2Condition_AerialScout');
 	Template.AddShooterEffect(AerialScout);
 
+	//Template.CinescriptCameraType = "StandardGrenadeFiring";
+
 	// State and Vis
 	Template.bAllowUnderhandAnim = true;
 	Template.Hostility = eHostility_Neutral;

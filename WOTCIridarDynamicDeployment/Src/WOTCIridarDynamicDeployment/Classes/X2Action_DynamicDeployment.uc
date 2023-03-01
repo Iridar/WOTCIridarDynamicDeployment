@@ -168,10 +168,10 @@ Begin:
 	AddUnitsToMatinee();
 
 	PossibleMatinees.AddItem("DDIntro B1");
-	PossibleMatinees.AddItem("DDIntro B2");
-	PossibleMatinees.AddItem("DDIntro B3");
-	PossibleMatinees.AddItem("DDIntro B4");
-	PossibleMatinees.AddItem("DDIntro B5");
+	//PossibleMatinees.AddItem("DDIntro B2");
+	//PossibleMatinees.AddItem("DDIntro B3");
+	//PossibleMatinees.AddItem("DDIntro B4");
+	//PossibleMatinees.AddItem("DDIntro B5");
 	SelectedMatinee = PossibleMatinees[Rand(PossibleMatinees.Length)];
 	
 	SelectMatineeByTag(SelectedMatinee);

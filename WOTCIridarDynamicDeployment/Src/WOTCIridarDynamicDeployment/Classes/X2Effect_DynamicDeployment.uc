@@ -620,8 +620,8 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	}
 
 	// Make Firebrand play the "In the drop position" voiceline.
-	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
-	NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
+	//NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
+	//NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
 		
 	// Begin playing once camera arrives
 	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
