@@ -55,8 +55,17 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 
 static event OnPostTemplatesCreated()
 {
+	local UIDropShipBriefing_MissionStart CDO;
+
 	AddGTSUnlock('IRI_DynamicDeployment_GTS_Unlock');
 	PatchCharTemplates();
+
+	CDO = UIDropShipBriefing_MissionStart(class'XComEngine'.static.GetClassDefaultObject(class'UIDropShipBriefing_MissionStart'));
+	
+	CDO.m_strLocationLabel="DESTINATION:";
+	CDO.m_strBriefingLabel="NOW PLAYING:";
+	CDO.m_strObjectiveLabel="OBJECTIVES:";
+
 }
 
 static private function AddGTSUnlock(const name UnlockName)
@@ -294,4 +303,14 @@ static function bool AbilityTagExpandHandler_CH(string InString, out string OutS
 static private function string DDColor(coerce string strInput)
 {
 	return "<font color='#00ffb4'>" $ strInput $ "</font>"; // mint green
+}
+
+
+
+static function UpdateAnimations(out array<AnimSet> CustomAnimSets, XComGameState_Unit UnitState, XComUnitPawn Pawn)
+{
+    if (UnitState == none)
+		return;
+
+	CustomAnimSets.AddItem(AnimSet(`CONTENT.RequestGameArchetype("IRIDynamicDeployment.Anims.AS_JetPacks")));
 }

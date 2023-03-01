@@ -611,6 +611,11 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
 	StreamActions.AddItem(StreamMap);
 
+	StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
+	StreamMap.MapToStream = "CIN_SkyrangerIntros";
+	StreamMap.MapLocation = AbilityContext.InputContext.TargetLocations[0];
+	StreamActions.AddItem(StreamMap);
+
 	if (bAtLeastOneUnitIsSparkLike)
 	{
 		StreamMap = X2Action_StreamMap(class'X2Action_StreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
@@ -624,8 +629,30 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
 		
 	// Begin playing once camera arrives
-	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false,, StreamActions));
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro A1";
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro A2";
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro A3";
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro A4";
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro A5";
+
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro B1";
 
 	foreach UnitStates(UnitState, iNumUnit)
 	{
@@ -719,19 +746,29 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 		DeployGremlin.MoveLocation = World.GetPositionFromTileCoordinates(GremlinTile);
 	}
 
+	SkyrangerIntro = X2Action_DynamicDeployment(class'X2Action_DynamicDeployment'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SkyrangerIntro));
+	SkyrangerIntro.UnitStates = UnitStates;
+	SkyrangerIntro.OverrideMatineeName = "Intro D2";
+
 	UnitState = UnitStates[0];
 	if (UnitState.ActionPoints.Length > 0)
 	{
-		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SkyrangerIntro));
 		SelectUnitAction.TargetID = UnitState.ObjectID;
 	}
 
-	UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+	GremlinWaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SkyrangerIntro));
+	GremlinWaitAction.DelayTimeSec = 2.0f;
+
+	UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, GremlinWaitAction));
 	UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros";
+
+	UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, GremlinWaitAction));
+	UnstreamMap.MapToUnstream = "CIN_SkyrangerIntros";
 
 	if (bAtLeastOneUnitIsSparkLike)
 	{
-		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
+		UnstreamMap = X2Action_UnstreamMap(class'X2Action_UnstreamMap'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, GremlinWaitAction));
 		UnstreamMap.MapToUnstream = "DDCIN_SkyrangerIntros_Spark";
 	}
 }

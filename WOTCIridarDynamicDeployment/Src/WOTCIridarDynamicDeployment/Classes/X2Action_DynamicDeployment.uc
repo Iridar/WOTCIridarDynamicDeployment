@@ -12,6 +12,7 @@ var private DeployLocationActor MatineeBaseActor;
 var private vector				TargetLocation;
 var private int					DropshipSlotCount;
 var private array<string>		PossibleMatinees;
+var string						OverrideMatineeName;
 var private string				SelectedMatinee;
 
 function Init()
@@ -173,6 +174,11 @@ Begin:
 	PossibleMatinees.AddItem("DDIntro B4");
 	PossibleMatinees.AddItem("DDIntro B5");
 	SelectedMatinee = PossibleMatinees[Rand(PossibleMatinees.Length)];
+
+	if (OverrideMatineeName != "")
+	{
+		SelectedMatinee = OverrideMatineeName;
+	}
 	
 	SelectMatineeByTag(SelectedMatinee);
 	PlayMatinee();

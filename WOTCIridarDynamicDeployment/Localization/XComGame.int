@@ -71,6 +71,94 @@ LocLongDescription="This unit is able to call for Dynamic Deployment without bre
 LocHelpText="This unit is able to call for Dynamic Deployment without breaking the squad concealment and from a longer distance."
 LocFlyOverText="Digital Uplink"
 
+[CityCenter X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Wilderness X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Shanty X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[SmallTown X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Slums X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Facility X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[AbandonedCity X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Tunnels X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+[Stronghold X2MissionSiteDescriptionTemplate]
+DescriptionString="Hell"
+
+
+[UIDropShipBriefing_MissionStart]
+m_strOpLabel=TOP SECRET
+m_strLocationLabel="DESTINATION:"
+m_strBriefingLabel="NOW PLAYING:"
+m_strObjectiveLabel="OBJECTIVES:"
+m_strLoadingText="TRAVELING TO DROP POINT"
+m_strLaunch="PRESS ANY KEY TO LAUNCH"
+m_strSplashTitle="INCOMING TRANSMISSION"
+m_strSplashLabel="TOP SECRET COMMUNICATION"
+m_strConsoleLaunch ="%A LAUNCH MISSION"
+
+[SabotageTransmitter X2MissionTemplate]
+DisplayName="Sabotage Transmitter"
+Briefing="Martin D'Alesio - Fortunate XCOM"
+PostMissionType="Sabotage Transmitter"
+BriefingImage="img:///UILibrary_Common.Xcom_default"
+ObjectiveTextPools[0]="Reinforce deployed forces."
+ObjectiveTextPools[1]="Don't die."
+
+[XComGame]
+[XGLocalizedData]
+GameplayTips_Tactical[0]="99% chance to hit is not 100%"
+GameplayTips_Tactical[1]="99% chance to hit is not 100%"
+GameplayTips_Tactical[2]="99% chance to hit is not 100%"
+GameplayTips_Tactical[3]="99% chance to hit is not 100%"
+GameplayTips_Tactical[4]="99% chance to hit is not 100%"
+GameplayTips_Tactical[5]="99% chance to hit is not 100%"
+GameplayTips_Tactical[6]="99% chance to hit is not 100%"
+GameplayTips_Tactical[7]="99% chance to hit is not 100%"
+GameplayTips_Tactical[8]="99% chance to hit is not 100%"
+GameplayTips_Tactical[9]="99% chance to hit is not 100%"
+GameplayTips_Tactical[10]="99% chance to hit is not 100%"
+GameplayTips_Tactical[11]="99% chance to hit is not 100%"
+GameplayTips_Tactical[12]="99% chance to hit is not 100%"
+GameplayTips_Tactical[13]="99% chance to hit is not 100%"
+GameplayTips_Tactical[14]="99% chance to hit is not 100%"
+GameplayTips_Tactical[15]="99% chance to hit is not 100%"
+
+[XComGame]
+[UIDropShipBriefing_MissionStart]
+m_strOpLabel=TOP SECRET
+m_strLocationLabel="DESTINATION:"
+m_strBriefingLabel="NOW PLAYING:"
+m_strObjectiveLabel="OBJECTIVES:"
+m_strLoadingText="TRAVELING TO DROP POINT"
+m_strLaunch="PRESS ANY KEY TO LAUNCH"
+m_strSplashTitle="INCOMING TRANSMISSION"
+m_strSplashLabel="TOP SECRET COMMUNICATION"
+m_strConsoleLaunch ="%A LAUNCH MISSION"
+
+[XComGame.UIDropShipBriefing_MissionStart]
+m_strOpLabel=TOP SECRET
+m_strLocationLabel="DESTINATION:"
+m_strBriefingLabel="NOW PLAYING:"
+m_strObjectiveLabel="OBJECTIVES:"
+m_strLoadingText="TRAVELING TO DROP POINT"
+m_strLaunch="PRESS ANY KEY TO LAUNCH"
+m_strSplashTitle="INCOMING TRANSMISSION"
+m_strSplashLabel="TOP SECRET COMMUNICATION"
+m_strConsoleLaunch ="%A LAUNCH MISSION"
 
 ; ---------------------------------------------------------------
 ;					SITREPS

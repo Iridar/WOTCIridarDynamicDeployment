@@ -1,0 +1,1 @@
+class UISquadSelect_Override extends UISquadSelect;
