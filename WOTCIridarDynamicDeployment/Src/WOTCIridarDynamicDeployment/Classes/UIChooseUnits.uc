@@ -494,7 +494,7 @@ private function FinalizeSelectionAndClose()
 	UnitStates = DDObject.GetUnitsToDeploy();
 	foreach UnitStates(UnitState)
 	{
-		class'Help'.static.MarkUnitInSkyranger(UnitState);
+		class'Help'.static.MarkUnitInSkyranger(UnitState, NewGameState);
 	}
 	`GAMERULES.SubmitGameState(NewGameState);
 	
