@@ -22,6 +22,7 @@ var private MaterialInstanceTimeVarying		YeloMITV;
 var private ParticleSystem					BeamEmitterPS;
 var private int								iNumSpawnedUnits;
 var private bool							bAreaLocked;
+var private vector							LockedAreaLocation;
 var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
 var private int								MaxZ;
@@ -99,6 +100,7 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 	{
 		// And spawns a pawn that will move with the cursor.
 		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], CachedTargetLocation);
+		LockedAreaLocation = CachedTargetLocation;
 		bAreaLocked = true;
 		return false;
 	}
@@ -263,6 +265,10 @@ private function bool StagedCancel()
 		`AMLOG("There are no pawns left, unlocking area");
 		PrecisionDropTiles.Length = 0; // Reset tile array so that we don't trip on it when placing pawns in a newly locked area later.
 		PrecisionDropTiles.Length = PrecisionDropUnitStates.Length;
+		if (UseGrenadePath())
+		{
+			GrenadePath.bUseOverrideTargetLocation = false;
+		}
 		bAreaLocked = false;
 		return true;
 	}
@@ -307,7 +313,19 @@ function Update(float DeltaTime)
 	//DrawSplashRadius( );
 
 	super(X2TargetingMethod).Update(DeltaTime);
+
+	if (bAreaLocked && UseGrenadePath())
+	{
+		UpdateGrenadePath();
+	}
 }
+
+private function UpdateGrenadePath()
+{	
+	GrenadePath.bUseOverrideTargetLocation = true;
+	GrenadePath.OverrideTargetLocation = LockedAreaLocation;
+}
+
 private function MoveLastSpawnedPawn(const vector MoveLocation)
 {
 	PrecisionDropPawns[iNumSpawnedUnits - 1].SetLocationNoCollisionCheck(MoveLocation);
@@ -489,11 +507,35 @@ function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathDa
 
 simulated protected function Vector GetSplashRadiusCenter( bool SkipTileSnap = false )
 {
+	local vector Center;
+	local TTile SnapTile;
+
 	if (EvacZone != none)
 	{
 		return World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
 	}
-	return super.GetSplashRadiusCenter(SkipTileSnap);
+
+	if (UseGrenadePath() && !bAreaLocked)
+	{
+		Center = GrenadePath.GetEndPosition();
+	}
+	else
+	{
+		Center = Cursor.GetCursorFeetLocation();
+	}
+
+	if (SnapToTile && !SkipTileSnap)
+	{
+		SnapTile = `XWORLD.GetTileCoordinatesFromPosition( Center );
+		
+		// keep moving down until we find a floor tile.
+		while ((SnapTile.Z >= 0) && !`XWORLD.GetFloorPositionForTile( SnapTile, Center ))
+		{
+			--SnapTile.Z;
+		}
+	}
+
+	return Center;
 }
 
 defaultproperties
