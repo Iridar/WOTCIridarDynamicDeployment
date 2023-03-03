@@ -22,6 +22,7 @@ var private MaterialInstanceTimeVarying		YeloMITV;
 var private ParticleSystem					BeamEmitterPS;
 var private int								iNumSpawnedUnits;
 var private bool							bAreaLocked;
+var private bool							bFinalClickReady;
 var private vector							LockedAreaLocation;
 var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
@@ -86,13 +87,64 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	super.Init(InAction, NewTargetIndex);
 }
 
+// #1. This runs first
+function GetTargetLocations(out array<Vector> TargetLocations)
+{
+	TargetLocations.Length = 0;
+	if (bFinalClickReady)
+	{
+		TargetLocations.AddItem(LockedAreaLocation);
+		return;
+	}
+	TargetLocations.AddItem(GetSplashRadiusCenter());
+}
 
+// #2. Then this
+function name ValidateTargetLocations(const array<Vector> TargetLocations)
+{
+	local TTile		SelectedTile;
+	local vector	SelectedLocation;
+	local name		AbilityAvailability;
+	
+	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
+	if (AbilityAvailability == 'AA_Success')
+	{
+		// Only tiles with clearance to MaxZ are valid.
+		SelectedLocation = TargetLocations[0];
+		if (bCheckMaxZ && !World.HasOverheadClearance(SelectedLocation, MaxZ))
+		{
+			AbilityAvailability = 'AA_TileIsBlocked';
+		}
+		
+		if (bAreaLocked) // If area is locked, then it means we're clicking to place a pawn.
+		{
+			// Only tiles within the bounds of designated area are valid.
+			SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
+			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
+			{
+				AbilityAvailability = 'AA_TileIsBlocked';
+			}
+
+			// Only tiles that were not previously selected for other units are valid.
+			if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
+			{
+				AbilityAvailability = 'AA_TileIsBlocked';
+			}
+		}
+	}
+	return AbilityAvailability;
+}
+
+// #3. Finally this
 // Hijack left click or other ways to confirm ability activation if there are any precision drop units.
 // Consecutive clicks will lock the location of the last spawned pawn, and spawn a new one,
 // if there are any remaining.
 function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallback> fnCallback)
 {
 	if (PrecisionDropUnitStates.Length == 0)
+		return true;
+
+	if (bFinalClickReady)
 		return true;
 
 	// First click locks the targeted area.
@@ -123,7 +175,9 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 	// Save selected tiles to be used later by the deployment effect
 	class'XComGameState_DynamicDeployment'.static.SavePrecisionDropTiles_SubmitGameState(PrecisionDropUnitStates, PrecisionDropTiles);
 
-	return true;
+	bFinalClickReady = true;
+
+	return false;
 }
 
 private function LockLastSpawnedPawn()
@@ -247,6 +301,8 @@ private function bool StagedCancel()
 {
 	`AMLOG("Running. iNumSpawnedUnits:" @ iNumSpawnedUnits);
 
+	bFinalClickReady = false;
+
 	if (iNumSpawnedUnits > 1)
 	{
 		ReleaseLastSpawnedPawn();	// This will nuke the pawn the player is currently placing
@@ -297,7 +353,7 @@ function Update(float DeltaTime)
 			//MarkTargetedActors(CurrentlyMarkedTargets, (!AbilityIsOffensive) ? FiringUnit.GetTeam() : eTeam_None );
 			DrawAOETiles(AreaTiles);
 		}
-		else
+		else if (!bFinalClickReady)
 		{
 			// Move the pawn with the cursor, but keep it within bounds of the selected tile area,
 			// And not on top of previously selected tiles for other units
@@ -437,41 +493,6 @@ private function ReleaseAllPawns()
 	{
 		BeamEmitter.Destroy();
 	}
-}
-
-function name ValidateTargetLocations(const array<Vector> TargetLocations)
-{
-	local TTile		SelectedTile;
-	local vector	SelectedLocation;
-	local name		AbilityAvailability;
-	
-	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
-	if (AbilityAvailability == 'AA_Success')
-	{
-		// Only tiles with clearance to MaxZ are valid.
-		SelectedLocation = TargetLocations[0];
-		if (bCheckMaxZ && !World.HasOverheadClearance(SelectedLocation, MaxZ))
-		{
-			AbilityAvailability = 'AA_TileIsBlocked';
-		}
-		
-		if (bAreaLocked) // If area is locked, then it means we're clicking to place a pawn.
-		{
-			// Only tiles within the bounds of designated area are valid.
-			SelectedTile = World.GetTileCoordinatesFromPosition(SelectedLocation);
-			if (class'Helpers'.static.FindTileInList(SelectedTile, AreaTiles) == INDEX_NONE)
-			{
-				AbilityAvailability = 'AA_TileIsBlocked';
-			}
-
-			// Only tiles that were not previously selected for other units are valid.
-			if (class'Helpers'.static.FindTileInList(SelectedTile, PrecisionDropTiles) != INDEX_NONE)
-			{
-				AbilityAvailability = 'AA_TileIsBlocked';
-			}
-		}
-	}
-	return AbilityAvailability;
 }
 
 // Grenade targeting

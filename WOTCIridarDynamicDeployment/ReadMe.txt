@@ -61,7 +61,6 @@ make a uiscreen for selecting which soldiers will remain in skyranger upon deplo
 Fix new UIChooseUnits breaking line text when using extended personnel info.
 
 make tile targeting leak onto lowerZ floor tiles as long as they're within XY plane
-Fix targeting method using grenade trajectory to the location of last clicked on soldier.
 
 TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
 Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.
