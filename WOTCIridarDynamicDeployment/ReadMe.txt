@@ -50,11 +50,6 @@ And deploying is free action
 
 BUG: Save game, select soldier, kill game, load save - soldiers are selected?!
 
-Fix drop animation
-
-Problem: Can't designate precision drop tiles when throwing the flare at max range
-can't designate precision drop tiles on top of the evac zone
-
 add one turn minimum delay after selecting soldiers so you don't get instant reinforcements with paratrooper sodleirs'
 
 make a uiscreen for selecting which soldiers will remain in skyranger upon deployment

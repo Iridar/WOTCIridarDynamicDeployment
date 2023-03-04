@@ -21,7 +21,7 @@ var private MaterialInstanceTimeVarying		HoloMITV;
 var private MaterialInstanceTimeVarying		YeloMITV;
 var private ParticleSystem					BeamEmitterPS;
 var private int								iNumSpawnedUnits;
-var private bool							bAreaLocked;
+var privatewrite bool						bAreaLocked;
 var private bool							bFinalClickReady;
 var private vector							LockedAreaLocation;
 var private XComPresentationLayer			Pres;
@@ -105,6 +105,9 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 	local TTile		SelectedTile;
 	local vector	SelectedLocation;
 	local name		AbilityAvailability;
+
+	if (bFinalClickReady)
+		return 'AA_Success';
 	
 	AbilityAvailability = super.ValidateTargetLocations(TargetLocations);
 	if (AbilityAvailability == 'AA_Success')
@@ -153,6 +156,8 @@ function bool VerifyTargetableFromIndividualMethod(delegate<ConfirmAbilityCallba
 		// And spawns a pawn that will move with the cursor.
 		SpawnPawnForUnit(PrecisionDropUnitStates[iNumSpawnedUnits], CachedTargetLocation);
 		LockedAreaLocation = CachedTargetLocation;
+		Cursor.m_fMaxChainedDistance *= 2;	// Double the Cursor's targeting range so that when the center of the area is at max throw range 
+											// you can still designate precision drop tiles at range further than throw range
 		bAreaLocked = true;
 		return false;
 	}
@@ -325,6 +330,7 @@ private function bool StagedCancel()
 		{
 			GrenadePath.bUseOverrideTargetLocation = false;
 		}
+		Cursor.m_fMaxChainedDistance /= 2;
 		bAreaLocked = false;
 		return true;
 	}
@@ -497,7 +503,8 @@ private function ReleaseAllPawns()
 
 // Grenade targeting
 
-static function bool UseGrenadePath() { return class'XComGameState_EvacZone'.static.GetEvacZone() == none; }
+//static function bool UseGrenadePath() { return class'XComGameState_EvacZone'.static.GetEvacZone() == none; }
+static function bool UseGrenadePath() { return true; }
 
 function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathData WeaponPrecomputedPathData)
 {
@@ -531,10 +538,10 @@ simulated protected function Vector GetSplashRadiusCenter( bool SkipTileSnap = f
 	local vector Center;
 	local TTile SnapTile;
 
-	if (EvacZone != none)
-	{
-		return World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
-	}
+	//if (EvacZone != none)
+	//{
+	//	return World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
+	//}
 
 	if (UseGrenadePath() && !bAreaLocked)
 	{
