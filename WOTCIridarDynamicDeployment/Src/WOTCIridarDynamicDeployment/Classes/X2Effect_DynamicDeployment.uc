@@ -113,7 +113,8 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	local bool							bWasEvacedFromThisMission;
 
 	// Needed to allow redeploying evacuated units
-	bWasEvacedFromThisMission = class'Help'.static.IsUnitInSkyranger(Unit);
+	bWasEvacedFromThisMission = class'Help'.static.IsUnitEvaced(Unit);
+	`AMLOG(`ShowVar(bWasEvacedFromThisMission));
 
 	//tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 	Unit.bSpawnedFromAvenger = true; 
@@ -181,6 +182,7 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	{
 		// So that soldier doesn't appear as "in skyranger" on the soldier select screen.
 		Unit.ClearUnitValue(class'Help'.default.UnitInSkyrangerValue);
+		Unit.ClearUnitValue(class'Help'.default.UnitEvacedValue);
 	}
 
 	if (default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS.Length > 0)

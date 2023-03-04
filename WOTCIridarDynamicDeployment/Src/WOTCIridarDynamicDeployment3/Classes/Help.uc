@@ -8,6 +8,7 @@ class Help extends Object abstract;
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
 var privatewrite name UnitInSkyrangerValue;
+var privatewrite name UnitEvacedValue;
 
 static final function int GetDeploymentType()
 {
@@ -28,8 +29,21 @@ static final function int GetDeploymentType()
 
 static final function MarkUnitInSkyranger(XComGameState_Unit UnitState, optional XComGameState UseGameState)
 {
+	SetUnitValue(default.UnitInSkyrangerValue, UnitState, UseGameState);
+}
+
+static final function MarkUnitEvaced(XComGameState_Unit UnitState, optional XComGameState UseGameState)
+{
+	SetUnitValue(default.UnitEvacedValue, UnitState, UseGameState);
+}
+
+static private function SetUnitValue(const name UnitValueName, XComGameState_Unit UnitState, optional XComGameState UseGameState)
+{
 	local XComGameState_Unit	NewUnitState;
 	local XComGameState			NewGameState;
+
+	`LOG(UnitState.GetFullName() @ "is now in Skyranger",, 'IRITEST');
+	`LOG(GetScriptTrace());
 
 	if (UseGameState != none)
 	{
@@ -38,13 +52,13 @@ static final function MarkUnitInSkyranger(XComGameState_Unit UnitState, optional
 		{	
 			NewUnitState = XComGameState_Unit(UseGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 		}
-		NewUnitState.SetUnitFloatValue(default.UnitInSkyrangerValue, 1.0f, eCleanup_BeginTactical);
+		NewUnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
 	}
 	else
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark evaced unit:" @ UnitState.GetFullName());
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-		UnitState.SetUnitFloatValue(default.UnitInSkyrangerValue, 1.0f, eCleanup_BeginTactical);
+		UnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
 }
@@ -53,8 +67,15 @@ static final function bool IsUnitInSkyranger(const XComGameState_Unit UnitState)
 {
 	local UnitValue UV;
 
-	return UnitState.GetUnitValue(default.UnitInSkyrangerValue, UV);
+	return UnitState.GetUnitValue(default.UnitInSkyrangerValue, UV) || UnitState.GetUnitValue(default.UnitEvacedValue, UV);
 }
+static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
+{
+	local UnitValue UV;
+
+	return UnitState.GetUnitValue(default.UnitEvacedValue, UV);
+}
+
 static final function bool CanSelectUnitsFromAvenger()
 {
 	return class'XComGameState_EvacZone'.static.GetEvacZone() == none;
@@ -242,6 +263,7 @@ static final function string GetLocalizedString(const coerce string StringName)
 
 defaultproperties
 {
-	DDEventName = "IRI_DynamicDeployment_Triggered_Event"
-	UnitInSkyrangerValue = "IRI_DynamicDeployment_UnitEvaced_Value"
+	DDEventName = "IRI_DD_Triggered_Event"
+	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"
+	UnitInSkyrangerValue = "IRI_DD_UnitInSkyranger_Value"
 }

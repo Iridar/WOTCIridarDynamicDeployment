@@ -146,8 +146,8 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
 	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
+	Template.AddCHEvent('CleanupTacticalMission', OnCleanupTacticalMission, ELD_Immediate);
 	
-
 	return Template;
 }
 
@@ -162,9 +162,12 @@ static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, 
 		return ELR_NoInterrupt;
 		
 	// If teleport is available, we're not tied to Skyranger.
-	if (IsFirstTurn() && class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
+	if (IsFirstTurn())
 	{
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
+		if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
+		{
+			class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
+		}
 	}
 	
 	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
@@ -235,15 +238,39 @@ static private function EventListenerReturn OnEvacSpawnerCreated(Object EventDat
 // Mark evacuated units with a unit value so that we know not to reinit their abilities if we're gonna redeploy them again in the same mission.
 static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
-	local XComGameState_Unit	UnitState;
-	local XComGameState			NewGameState;
+	local XComGameState_Unit UnitState;
 
 	UnitState = XComGameState_Unit(EventData);
 	if (UnitState == none)
 		return ELR_NoInterrupt;
 
-	class'Help'.static.MarkUnitInSkyranger(UnitState);
+	class'Help'.static.MarkUnitEvaced(UnitState);
 
 	return ELR_NoInterrupt;
 }
-	
+
+// Rremove the "in skyranger" flag from all units
+// as normally it would be removed only at the begin tactical play, which is too late for the purposes of deploying units.
+static private function EventListenerReturn OnCleanupTacticalMission(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComGameState_Unit	UnitState;
+	local XComGameState_Unit	NewUnitState;
+	local XComGameStateHistory	History;
+
+	History = `XCOMHISTORY;
+
+	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
+	{
+		NewUnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
+		if (NewUnitState == none)
+		{
+			NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+		}
+		NewUnitState.ClearUnitValue(class'Help'.default.UnitInSkyrangerValue);
+		NewUnitState.ClearUnitValue(class'Help'.default.UnitEvacedValue);
+
+		`AMLOG(NewUnitState.GetFullName() @ "is no longer in Skyranger");
+	}
+
+	return ELR_NoInterrupt;
+}
