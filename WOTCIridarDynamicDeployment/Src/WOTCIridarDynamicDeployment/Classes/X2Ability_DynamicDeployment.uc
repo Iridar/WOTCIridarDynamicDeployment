@@ -323,6 +323,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 
 	Template.ActionFireClass = class'X2Action_Fire_Deployment';
 	Template.CustomFireAnim = 'FF_Grenade';
+	Template.CinescriptCameraType = "StandardGrenadeFiring";
 
 	Template.ConcealmentRule = eConceal_Never;
 
@@ -330,8 +331,8 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 }
 
 
-// Separate version for SPARKs so they can use a different version of PerkContent for the sake of different shooter animations
-// otherwise identical.
+// Separate version for SPARKs so they can use a different version of PerkContent with a different PerkWeapon
+// for the sake of different shooter animations, otherwise identical.
 static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 {
 	local X2AbilityTemplate Template;
