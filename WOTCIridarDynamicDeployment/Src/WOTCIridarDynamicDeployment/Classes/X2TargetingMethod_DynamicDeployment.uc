@@ -27,7 +27,6 @@ var private vector							LockedAreaLocation;
 var private XComPresentationLayer			Pres;
 var private array<TTile>					AreaTiles;
 var private int								MaxZ;
-var private bool							bCheckMaxZ;
 
 //var private XComGameState_EvacZone			EvacZone;
 var private X2Camera_LookAtLocation			LookatCamera;
@@ -67,7 +66,6 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 
 	
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;
-	bCheckMaxZ = class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon;
 
 	PrecisionDropUnitStates = DDObject.GetPrecisionDropUnits();
 	if (PrecisionDropUnitStates.Length > 0)
@@ -114,7 +112,7 @@ function name ValidateTargetLocations(const array<Vector> TargetLocations)
 	{
 		// Only tiles with clearance to MaxZ are valid.
 		SelectedLocation = TargetLocations[0];
-		if (bCheckMaxZ && !World.HasOverheadClearance(SelectedLocation, MaxZ))
+		if (!World.HasOverheadClearance(SelectedLocation, MaxZ))
 		{
 			AbilityAvailability = 'AA_TileIsBlocked';
 		}
@@ -415,7 +413,7 @@ private function bool IsTileValid(const TTile TestTile)
 	local vector TestLocation;
 	
 	TestLocation = World.GetPositionFromTileCoordinates(TestTile);
-	if (bCheckMaxZ && !World.HasOverheadClearance(TestLocation, MaxZ))
+	if (!World.HasOverheadClearance(TestLocation, MaxZ))
 	{
 		return false;
 	}
@@ -564,9 +562,4 @@ simulated protected function Vector GetSplashRadiusCenter( bool SkipTileSnap = f
 	}
 
 	return Center;
-}
-
-defaultproperties
-{
-	bCheckMaxZ = true
 }

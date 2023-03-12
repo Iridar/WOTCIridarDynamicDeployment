@@ -8,58 +8,13 @@ IRI_DynamicDeployment_NotEnoughAP = "Not enough Ability Points."
 
 IRI_DynamicDeployment_MutuallyExclusiveUnlock = "Mutually exclusive with:"
 
-IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
-
-IRI_DynamicDeployment_CannotAffordDeployment_Title = "Cannot afford the deployment"
-IRI_DynamicDeployment_CannotAffordDeployment = "Deploying selected units will cost:\n\n%Cost%\n\nYou cannot afford this deployment."
-
-IRI_DynamicDeployment_ConfirmDeploymentCost_Title = "Confirm deployment cost"
-IRI_DynamicDeployment_ConfirmDeploymentCost = "Deploying selected units will cost:\n\n%Cost%\n\nThe cost will be paid immediately."
-
-IRI_DD_TeleportDeployment_Title = "Teleportation Deployment Available"
-IRI_DD_TeleportDeployment_Text = "Commander, now that we have installed and analyzed the aliens' psionic gate, we are able to teleport soldiers into combat without having to rely on Skyranger to deliver them to the area of operations.\n\nTeleportation allows us to deploy soldiers to indoors locations, but it also means they will be unable to perform aerial scouting.\n\n(Aerial Scouting will no longer work. Using Dynamic Deployment no longer incurs cooldown on Request Evac and vice versa. You can now select deployment locations inside buildings.)"
-
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"
 PageTitle = "Dynamic Deployment by Iridar"
-GroupHeader1 = "Soldier Selection Options"
+GroupHeader1 = "Deployment Settings"
 GroupHeader2 = "Action Economy"
-GroupHeader3 = "Deployment Rules"
-GroupHeader4 = "Misc"
-EndLabel = "Created by Iridar | www.patreon.com/Iridar"
-EndLabel_Tip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me on Patreon so I can afford the time to make more awesome mods <3"
-
-DD_OVER_SQUAD_SIZE_OFFSET_Label = "Allowed soldiers above Squad Size"
-DD_OVER_SQUAD_SIZE_OFFSET_Tip = "The maximum number of soldiers that can be deployed via Dynamic Deployment above the Squad Size limit."
-
-DD_MISSION_START_DELAY_TURNS_Label = "Mission start and Skyranger return delay, turns"
-DD_MISSION_START_DELAY_TURNS_Tip = "This setting determines how many turns must pass from the start of the mission before you can use Dynamic Deployment for the first time. Same delay is applied when Skyranger returns after you Request Evac. Teleportation Deployment does not have this delay."
-
-DD_AFTER_DEPLOY_COOLDOWN_Label = "Dynamic Deployment cooldown"
-DD_AFTER_DEPLOY_COOLDOWN_Tip = "This setting determines the cooldown for Dynamic Deployment. Teleportation Deployment does not have this cooldown."
-
-DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Label = "Deploy delay flat, turns"
-DD_SOLDIER_SELECT_DELAY_TURNS_FLAT_Tip = "After selecting soldiers to deploy, you must wait for this number of turns before they can be deployed."
-
-DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Label = "Deploy delay per unit, turns"
-DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT_Tip = "After selecting soldiers to deploy, you must wait for this number of turns before they can be deployed. The number of turns is multiplied by the number of soldiers selected."
-
-
-COUNT_DEAD_SOLDIERS_Label = "Count dead soldiers"
-COUNT_DEAD_SOLDIERS_Tip = "This setting determines whether soldiers killed during the mission count towards the maximum Squad Size."
-
-COUNT_CAPTURED_SOLDIERS_Label = "Count captured soldiers"
-COUNT_CAPTURED_SOLDIERS_Tip = "This setting determines whether soldiers captured during the mission count towards the maximum Squad Size."
-
-COUNT_UNCONSCIOUS_SOLDIERS_Label = "Count unconscious soldiers"
-COUNT_UNCONSCIOUS_SOLDIERS_Tip = "This setting determines whether unconscious soldiers count towards the maximum Squad Size."
-
-COUNT_BLEEDING_OUT_SOLDIERS_Label = "Count bleeding out soldiers"
-COUNT_BLEEDING_OUT_SOLDIERS_Tip = "This setting determines whether soldiers bleeding out count towards the maximum Squad Size."
-
-COUNT_EVACED_SOLDIERS_Label = "Count evacuated soldiers"
-COUNT_EVACED_SOLDIERS_Tip = "This setting determines whether soldiers evacuated from the mission count towards the maximum Squad Size."
+GroupHeader3 = "Misc"
 
 
 SQUAD_MUST_SEE_TILE_Label = "Squad must see the deployment area"
@@ -70,15 +25,16 @@ DEPLOY_CAST_RANGE_TILES_Tip = "This setting determines the maximum throw range f
 
 DD_SOLDIER_SELECT_IS_FREE_ACTION_Label = "Selecting soldiers is a free action"
 DD_SOLDIER_SELECT_IS_FREE_ACTION_Tip = "If enabled, selecting soldiers for Dynamic Deployment will not consume any action points."
-
 DD_SOLDIER_SELECT_ENDS_TURN_Label = "Selecting soldiers ends turn"
 DD_SOLDIER_SELECT_ENDS_TURN_Tip = "If enabled, selecting soldiers for Dynamic Deployment will end the soldier's turn."
-
-DD_DEPLOY_IS_FREE_ACTION_Label = "Deploying soldiers is a free action"
+DD_DEPLOY_IS_FREE_ACTION_Label = "Deployment is a free action"
 DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, designating a deployment area for Dynamic Deployment will not consume any action points."
 
-DD_DEPLOY_ENDS_TURN_Label = "Deploying soldiers ends turn"
+DD_DEPLOY_ENDS_TURN_Label = "Deployment ends turn"
 DD_DEPLOY_ENDS_TURN_Tip = "If enabled, designating a deployment area for Dynamic Deployment will end the soldier's turn."
 
 DEBUG_LOGGING_Label = "Enable debug logging"
 DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log file, located at:\n..\\Documents\\my games\\XCOM2 War of the Chosen\\XComGame\\Logs\\Launch.log"
+
+EndLabel = "Created by Iridar | www.patreon.com/Iridar"
+EndLabel_Tip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me on Patreon so I can afford the time to make more awesome mods <3"

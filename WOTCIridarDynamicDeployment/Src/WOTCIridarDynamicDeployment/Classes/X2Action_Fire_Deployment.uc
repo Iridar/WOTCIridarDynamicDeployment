@@ -32,14 +32,6 @@ function Init()
 			`AMLOG("Overriding mesh to seismic beacon");
 			break;
 
-		case `eDT_TeleportBeacon:
-			AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityContext.InputContext.AbilityRef.ObjectID));
-			FiringUnit = XGUnit(History.GetVisualizer(AbilityState.OwnerStateObject.ObjectID));
-			WeaponEntity = FiringUnit.CurrentPerkAction.GetPerkWeapon();
-			SkeletalMeshComponent(WeaponEntity.Mesh).SetSkeletalMesh(SkeletalMesh(`CONTENT.RequestGameArchetype("IRIDynamicDeployment_Perks.Meshes.SM_Teleport_Beacon")));
-			`AMLOG("Overriding mesh to teleport beacon");
-			break;
-
 		case `eDT_Flare:
 		default:
 			`AMLOG("Not overriding mesh");

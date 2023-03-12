@@ -12,15 +12,10 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FastDrop', "img:///IRIDynamicDeployment_UI.UIPerk_FastDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
-	
-	//Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_SparkRetainConcealment', "img:///IRIDynamicDeployment_UI.UIPerk_SilentBoosters"));
-	//Templates.AddItem(IRI_DDUnlock_SparkOverdrive());
-	//Templates.AddItem(IRI_DynamicDeployment_BlackOps());
 
 	return Templates;
 }
@@ -385,13 +380,6 @@ static private function DDSelect_OverrideAbilityAvailability(out AvailableAction
 	if (DDObject == none) 
 	{
 		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-		return;
-	}
-
-	// Hide if can't deploy any more soldiers
-	if (!DDObject.CanSelectMoreSoldiers())		
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
 		return;
 	}
 

@@ -22,4 +22,3 @@
 
 `define eDT_Flare 0
 `define eDT_SeismicBeacon 1
-`define eDT_TeleportBeacon 2

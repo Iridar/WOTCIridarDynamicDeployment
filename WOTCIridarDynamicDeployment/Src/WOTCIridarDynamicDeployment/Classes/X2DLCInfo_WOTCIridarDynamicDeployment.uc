@@ -57,6 +57,7 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 {
 	local XComGameState_HeadquartersXCom XComHQ;
 	local XComGameState_Unit UnitSate;
+	local int ItemIndex;
 	local int i;
 
 	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
@@ -67,9 +68,9 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 			`AMLOG(i @ "Soldier with name:" @ UnitSate.GetFirstName());
 			if (UnitSate != none && UnitSate.GetFirstName() == "Paul")
 			{
-				for (ItemIndex = 0; ItemIndex < SendSoldierState.InventoryItems.Length; ++ItemIndex)
+				for (ItemIndex = 0; ItemIndex < UnitSate.InventoryItems.Length; ++ItemIndex)
 				{
-					NewStartState.ModifyStateObject(class'XComGameState_Item', SendSoldierState.InventoryItems[ItemIndex].ObjectID);
+					StartGameState.PurgeGameStateForObjectID(UnitSate.InventoryItems[ItemIndex].ObjectID);
 				}
 
 				`AMLOG("Removing Paul from squad");
@@ -253,7 +254,6 @@ exec function DDRemoveUnlockFromSelectedUnit(const name DDUnlock)
 // Sitrep has no gameplay effects.
 static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, optional XComGameState_BaseObject SourceObject)
 {
-	//local XComGameState_MissionSite MissionState;
 	local array<name> ExcludedMissions;
 
 	// Prevent affecting TQL / Multiplayer / Main Menu
@@ -269,20 +269,6 @@ static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, op
 		GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
 		return;
 	}
-
-	if (!class'Help'.static.ShouldUseTeleportDeployment())
-	{
-		ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly");
-		if (ExcludedMissions.Find(GeneratedMission.Mission.MissionName) != INDEX_NONE)
-		{
-			GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
-			return;
-		}
-	}
-
-	//MissionState = XComGameState_MissionSite(SourceObject); //iForceLevel = MissionState.SelectedMissionData.ForceLevel;
-	//if (MissionState == none || !MissionState.Available)
-	//	return;
 }
 
 
@@ -297,19 +283,6 @@ static function bool AbilityTagExpandHandler_CH(string InString, out string OutS
 	case "IRI_DD_TakeAndHold_DefenseBonus":
 	case "IRI_DD_TakeAndHold_AimBonus":
 	case "IRI_DD_HitGroundRunning_MobilityBonus":
-
-	case "IRI_BH_DoublePayload_NumBonusCharges":
-	case "IRI_BH_BurstFire_Cooldown":
-	case "IRI_BH_UnrelentingPressure_CooldownReduction":
-	case "IRI_BH_UnrelentingPressure_CooldownReductionPassive":
-	case "IRI_BH_BlindingFire_DurationTurns":
-	case "IRI_BH_Terminate_Charges":
-	case "IRI_BH_ShadowTeleport_Charges":
-	case "IRI_BH_NamedBullet_Charges":
-	case "IRI_BH_BurstFire_AmmoCost":
-	case "IRI_BH_BurstFire_NumShots":
-	case "IRI_BH_Untraceable_CooldownReduction":
-	case "IRI_BH_HomingMine_Charges":
 		OutString = DDColor(`GetConfigInt(name(InString)));
 		return true;
 

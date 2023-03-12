@@ -86,15 +86,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		EventMgr.TriggerEvent('UnitMoveFinished', NewUnitState, NewUnitState, NewGameState);
 	}
 
-	// Put DD abilities cooldown, unless teleporting
-	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
-	{
-		class'Help'.static.SetDynamicDeploymentCooldown(0, PlayerState.ObjectID, NewGameState);
-	}
-	else
-	{
-		class'Help'.static.SetDynamicDeploymentCooldown(`GETMCMVAR(DD_AFTER_DEPLOY_COOLDOWN), PlayerState.ObjectID, NewGameState);
-	}
+	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState);
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 
@@ -222,153 +214,11 @@ simulated function AddX2ActionsForVisualization(XComGameState VisualizeGameState
 		case `eDT_SeismicBeacon:
 			UndergroundDeploymentVisualization(VisualizeGameState, ActionMetadata);
 			break;
-		case `eDT_TeleportBeacon:
-			TeleportDeploymentVisualization(VisualizeGameState, ActionMetadata);
-			break;
 		case `eDT_Flare:
 		default:
 			SkyrangerDeploymentVisualization(VisualizeGameState, ActionMetadata);
 			break;
 	}
-}
-
-private function TeleportDeploymentVisualization(XComGameState VisualizeGameState, out VisualizationActionMetadata ActionMetadata)
-{
-	local XComGameStateContext_Ability		AbilityContext;
-	local X2Action_ShowSpawnedUnit			ShowUnitAction;
-	local X2Action_PlayAnimation			AnimationAction;
-	local VisualizationActionMetadata		SpawnedUnitMetadata;
-	local VisualizationActionMetadata		EmptyMetadata;
-	local XComGameState_Unit				CosmeticUnit;
-	local VisualizationActionMetadata		CosmeticUnitMetadata;
-	local XComGameState_Item				ItemIterator;
-	local X2Action_HideUIUnitFlag			HideUnitFlag;
-	local X2Action_CameraLookAt				LookAtTargetAction;
-	local X2Action_SelectNextActiveUnit		SelectUnitAction;
-	local XComGameState_DynamicDeployment	DDObject;
-	local array<XComGameState_Unit>			UnitStates;
-	local XComGameState_Unit				UnitState;
-	local int								iNumUnit;
-	local X2Action_TimedWait				WaitAction;
-	local X2Action_PlayEffect				PlayEffect;
-	local X2Action_TimedWait				CameraArrive;
-	local TTile								GremlinTile;
-	local XComWorldData						World;
-	local X2Action							CommonParent;
-	local X2Action_CameraRemove				RemoveCamera;
-
-	World = `XWORLD;
-
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none)
-		return;
-
-	UnitStates = DDObject.GetUnitsToDeploy(VisualizeGameState);
-	if (UnitStates.Length == 0)
-		return;
-
-	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
-
-	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
-
-	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
-	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
-
-	// Move camera to deployment location
-	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
-	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
-	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
-
-	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
-	CameraArrive.DelayTimeSec = 1.0f;
-
-	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, CameraArrive));
-	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
-	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
-
-	// Wait for the teleport effect to pop
-	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, CameraArrive));
-	WaitAction.DelayTimeSec = 1.0f;
-	CommonParent = WaitAction;
-
-	foreach UnitStates(UnitState, iNumUnit)
-	{
-		`AMLOG("Visualizing unit spawn:" @ UnitState.GetFullName());
-
-		SpawnedUnitMetadata = EmptyMetadata;
-		SpawnedUnitMetadata.StateObject_OldState = UnitState;
-		SpawnedUnitMetadata.StateObject_NewState = UnitState;
-
-		//	insert a random time delay for each unit spawn so they don't all drop down at exactly the same time
-		WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, CommonParent));
-		WaitAction.DelayTimeSec = (iNumUnit + FRand()) / 2;
-
-		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		ShowUnitAction.ChangeTimeoutLength(10.0f);
-
-		// Hide the unit flag while the DD animation is playing.
-		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		HideUnitFlag.bHideUIUnitFlag = true;
-
-		PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, HideUnitFlag));
-		PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport";
-		PlayEffect.EffectLocation = World.GetPositionFromTileCoordinates(UnitState.TileLocation);
-
-		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, HideUnitFlag));
-		AnimationAction.Params.AnimName = 'MV_RunFwd_StopStand';
-		AnimationAction.Params.BlendTime = 0.0f;
-		AnimationAction.Params.DesiredEndingAtoms.Add(1);
-		AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
-		AnimationAction.Params.DesiredEndingAtoms[0].Translation = World.GetPositionFromTileCoordinates(UnitState.TileLocation);;
-
-		HideUnitFlag = X2Action_HideUIUnitFlag(class'X2Action_HideUIUnitFlag'.static.AddToVisualizationTree(SpawnedUnitMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		HideUnitFlag.bHideUIUnitFlag = false;
-		
-		// Deploy unit's Gremlin/Bit, if any.
-		CosmeticUnit = none;
-		foreach VisualizeGameState.IterateByClassType(class'XComGameState_Item', ItemIterator)
-		{
-			if (UnitState.ObjectID == ItemIterator.AttachedUnitRef.ObjectID && ItemIterator.CosmeticUnitRef.ObjectID > 0)
-			{
-				CosmeticUnit = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(ItemIterator.CosmeticUnitRef.ObjectID));
-				if (CosmeticUnit != none)
-				{
-					break;
-				}
-			}
-		}
-		if (CosmeticUnit == none)
-			continue;
-
-		CosmeticUnitMetadata = EmptyMetadata;
-		CosmeticUnitMetadata.StateObject_OldState = CosmeticUnit;
-		CosmeticUnitMetadata.StateObject_NewState = CosmeticUnit;
-		
-		ShowUnitAction = X2Action_ShowSpawnedUnit(class'X2Action_ShowSpawnedUnit'.static.AddToVisualizationTree(CosmeticUnitMetadata, AbilityContext));
-		ShowUnitAction.ChangeTimeoutLength(10.0f);
-
-		GremlinTile = UnitState.GetDesiredTileForAttachedCosmeticUnit();
-		GremlinTile.Z += UnitState.UnitHeight - 2;
-
-		AnimationAction = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(CosmeticUnitMetadata, AbilityContext, false, ShowUnitAction));
-		AnimationAction.Params.AnimName = 'MV_RunFwd_StopStand';
-		AnimationAction.Params.BlendTime = 0.0f;
-		AnimationAction.Params.DesiredEndingAtoms.Add(1);
-		AnimationAction.Params.DesiredEndingAtoms[0].Scale = 1.0f;
-		AnimationAction.Params.DesiredEndingAtoms[0].Translation = World.GetPositionFromTileCoordinates(GremlinTile);;
-	}
-
-	UnitState = UnitStates[0];
-	if (UnitState.ActionPoints.Length > 0)
-	{
-		SelectUnitAction = X2Action_SelectNextActiveUnit(class'X2Action_SelectNextActiveUnit'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, SpawnedUnitMetadata.LastActionAdded));
-		SelectUnitAction.TargetID = UnitState.ObjectID;
-	}
-
-	PlayEffect = X2Action_PlayEffect(class'X2Action_PlayEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
-	PlayEffect.EffectName = "IRIDynamicDeployment.PS_Teleport_Area";
-	PlayEffect.EffectLocation = AbilityContext.InputContext.TargetLocations[0];
-	PlayEffect.bStopEffect = true;
 }
 
 

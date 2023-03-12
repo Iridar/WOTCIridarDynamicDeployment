@@ -60,27 +60,6 @@ final function int GetNumSelectedUnits()
 	return 0;
 }
 
-final function int GetDeployDelay()
-{
-	local array<XComGameState_Unit> UnitStates;
-	local XComGameState_Unit		UnitState;
-	local int						iDelay;
-
-	iDelay = `GETMCMVAR(DD_SOLDIER_SELECT_DELAY_TURNS_FLAT);
-
-	UnitStates = GetUnitsToDeploy();
-	foreach UnitStates(UnitState)
-	{
-		if (class'Help'.static.IsUnitInSkyranger(UnitState) || 
-			class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FastDrop'))
-		{
-			continue;
-		}
-		iDelay += `GETMCMVAR(DD_SOLDIER_SELECT_DELAY_TURNS_PER_UNIT);
-	}
-	return iDelay;
-}
-
 // Not sure this even does anything though
 final function PreloadAssets()
 {
@@ -238,18 +217,15 @@ final function GenerateSpawnLocations(const vector DesiredLocation, const out ar
 	World.GetSpawnTilePossibilities(SpawnTile, Width, Width, 1, TilePossibilities);
 	`AMLOG("Got this many tile possibilities:" @ TilePossibilities.Length);
 
-	if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
+	foreach TilePossibilities(SpawnTile)
 	{
-		foreach TilePossibilities(SpawnTile)
+		SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
+		if (World.HasOverheadClearance(SpawnLocation, MaxZ))
 		{
-			SpawnLocation = World.GetPositionFromTileCoordinates(SpawnTile);
-			if (World.HasOverheadClearance(SpawnLocation, MaxZ))
-			{
-				TilePossibilitiesClearedMaxZ.AddItem(SpawnTile);
-			}
+			TilePossibilitiesClearedMaxZ.AddItem(SpawnTile);
 		}
-		TilePossibilities = TilePossibilitiesClearedMaxZ;
 	}
+	TilePossibilities = TilePossibilitiesClearedMaxZ;
 
 	TilePossibilities.RandomizeOrder();
 
@@ -331,54 +307,6 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 		//	If we're still in the cycle then this unit has passed all checks and is eligible to be spawned
 		EligbleUnits.AddItem(UnitState);
 	}
-}
-
-final function bool CanSelectMoreSoldiers()
-{
-	return  GetNumSelectedUnits() < GetMaxNumSoldiersToSelect();
-}
-
-final function int GetMaxNumSoldiersToSelect()
-{
-	local XComGameState_MissionSite			MissionState;
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local XComGameStateHistory				History;
-	local XComGameState_Unit				UnitState;
-	local int CurrentSquadSize;
-	local int i;
-
-	History = `XCOMHISTORY;
-	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
-	MissionState = XComGameState_MissionSite(History.GetGameStateForObjectID(XComHQ.MissionRef.ObjectID));
-
-	CurrentSquadSize = 0;
-	for (i = 0; i < XComHQ.Squad.Length; i++)
-	{
-		if (XComHQ.Squad[i].ObjectID == 0)
-			continue;
-
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(XComHQ.Squad[i].ObjectID));
-		if (UnitState == none)
-			continue;
-
-		if (UnitState.IsDead() && !`GETMCMVAR(COUNT_DEAD_SOLDIERS))
-			continue;
-
-		if (UnitState.bCaptured && !`GETMCMVAR(COUNT_CAPTURED_SOLDIERS))
-			continue;
-
-		if (UnitState.IsUnconscious() && !`GETMCMVAR(COUNT_UNCONSCIOUS_SOLDIERS))
-			continue;
-
-		if (UnitState.IsBleedingOut() && !`GETMCMVAR(COUNT_BLEEDING_OUT_SOLDIERS))
-			continue;
-
-		if (UnitState.bRemovedFromPlay && !`GETMCMVAR(COUNT_EVACED_SOLDIERS))
-			continue;
-
-		CurrentSquadSize++;
-	}
-	return class'X2StrategyGameRulesetDataStructures'.static.GetMaxSoldiersAllowedOnMission(MissionState) - CurrentSquadSize + `GETMCMVAR(DD_OVER_SQUAD_SIZE_OFFSET);
 }
 
 DefaultProperties

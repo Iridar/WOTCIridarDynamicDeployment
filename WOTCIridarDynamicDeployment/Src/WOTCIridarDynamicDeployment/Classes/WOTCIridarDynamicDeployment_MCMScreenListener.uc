@@ -10,7 +10,7 @@ event OnInit(UIScreen Screen)
 {
 	local WOTCIridarDynamicDeployment_MCMScreen MCMScreen;
 
-	if (ScreenClass==none)
+	if (ScreenClass == none)
 	{
 		if (MCM_API(Screen) != none)
 			ScreenClass=Screen.Class;

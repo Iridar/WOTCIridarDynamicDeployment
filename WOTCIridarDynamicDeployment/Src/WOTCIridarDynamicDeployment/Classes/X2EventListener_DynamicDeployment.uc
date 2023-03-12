@@ -22,29 +22,8 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Strategy
 	Template.RegisterInStrategy = true;
 
 	Template.AddCHEvent('OnArmoryMainMenuUpdate', UpdateArmoryMainMenu, ELD_Immediate);
-	Template.AddCHEvent('OnResearchReport', OnOnResearchReport, ELD_Immediate);
 
 	return Template;
-}
-
-// Display a popup that Teleportation Deployment is available when requisite research is complete.
-static private function EventListenerReturn OnOnResearchReport(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
-{
-	local XComGameState_Tech	TechState;
-	local TDialogueBoxData		kDialogData;
-
-	TechState = XComGameState_Tech(EventData);
-	if (TechState != none && TechState.GetMyTemplateName() == `GetConfigName("IRI_DD_TechRequiredToUnlockTeleport") && `XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
-	{
-		kDialogData.strTitle = `GetLocalizedString("IRI_DD_TeleportDeployment_Title");
-		kDialogData.strText = `GetLocalizedString("IRI_DD_TeleportDeployment_Text");
-		kDialogData.eType = eDialog_Normal;
-		kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericOK;
-
-		`PRESBASE.UIRaiseDialog(kDialogData);
-	}
-
-	return ELR_NoInterrupt;
 }
 
 // Insert the Dynamic Deployment button into Armory main menu.
@@ -137,12 +116,14 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.RegisterInTactical = true;
 	Template.RegisterInStrategy = false;
 
-	// This event probably isn't triggered by anything other Request Evac, but better safe than sorry,
-	// since if the event is triggered, but Request Evac isn't present, we're gonna hard crash the game.
+	// This event probably isn't triggered by anything other Request Evac, but better safe than sorry
 	if (class'Help'.static.IsModActive('RequestEvac'))
 	{
-		Template.AddCHEvent('EvacSpawnerCreated', OnEvacSpawnerCreated, ELD_OnStateSubmitted);
+		// This event is triggered when evac is requested with Request Evac mod.
+		Template.AddCHEvent('EvacRequested', OnEvacRequested, ELD_OnStateSubmitted); 
 	}
+	// This triggers when Skyranger arrives.
+	Template.AddCHEvent('EvacZonePlaced', OnSpawnEvacZoneComplete, ELD_OnStateSubmitted); 
 
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
 	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
@@ -151,7 +132,7 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	return Template;
 }
 
-// Set DD on cooldown on mission start and preload assets if deployment is ready.
+// Preload assets if deployment is ready.
 static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_Player				PlayerState;
@@ -160,15 +141,6 @@ static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, 
 	PlayerState = XComGameState_Player(EventSource);
 	if (PlayerState == none || PlayerState.GetTeam() != eTeam_XCom)
 		return ELR_NoInterrupt;
-		
-	// If teleport is available, we're not tied to Skyranger.
-	if (IsFirstTurn())
-	{
-		if (class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
-		{
-			class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerState.ObjectID);
-		}
-	}
 	
 	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') <= 0)
 	{
@@ -199,41 +171,38 @@ static private function bool IsFirstTurn()
 }
 
 // Set DD on cooldown when Evac is requested via Request Evac mod.
-static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+static private function EventListenerReturn OnEvacRequested(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
-	local StateObjectReference				PlayerStateRef;
-	local XComGameState_RequestEvac			RequestEvacState; // Requires building against Request Evac
-	local XComGameState_DynamicDeployment	DDObject;
+	local XComGameState NewGameState;
 
-	// If teleport is available, we're not tied to Skyranger.
-	if (class'Help'.static.GetDeploymentType() == `eDT_TeleportBeacon)
-		return ELR_NoInterrupt;
-
-	PlayerStateRef = class'X2TacticalVisibilityHelpers'.static.GetPlayerFromTeamEnum(eTeam_XCom);
-
-	RequestEvacState = XComGameState_RequestEvac(EventSource);
-	if (RequestEvacState == none)
-		return ELR_NoInterrupt;
-
-	// Can't select more soldiers until the Skyranger arrives, then leaves, then returns to Avenger.
-	class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Select', RequestEvacState.Countdown + class'XComGameState_RequestEvac'.default.TurnsBeforeEvacExpires + `GETMCMVAR(DD_MISSION_START_DELAY_TURNS), PlayerStateRef.ObjectID);
-
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none)
-		return ELR_NoInterrupt;
-
-	// Can't deploy previously selected soldiers until Skyranger arrives.
-	// TODO: This may actually REDUCE the deployment delay if you selected more soldiers than the delay for skyranger to arrive via RequestEvac
-	if (DDObject.bPendingDeployment)
-	{
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
-		class'Help'.static.SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', RequestEvacState.Countdown, PlayerStateRef.ObjectID);
-	}
-
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Disabling DD abilities");
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Select', false, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy', false, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Spark', false, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Uplink', false, NewGameState);
+	`GAMERULES.SubmitGameState(NewGameState);
 
 	return ELR_NoInterrupt;
 }
+static private function EventListenerReturn OnSpawnEvacZoneComplete(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+{
+	local XComGameState NewGameState;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Enabling DD abilities");
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Select', true, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy', true, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Spark', true, NewGameState);
+	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Uplink', true, NewGameState);
+
+	// Skyranger just arrived for evac, can't request DD for a turn.
+	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState, true);
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	return ELR_NoInterrupt;
+}
+
+
 
 // Mark evacuated units with a unit value so that we know not to reinit their abilities if we're gonna redeploy them again in the same mission.
 static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
@@ -245,6 +214,9 @@ static private function EventListenerReturn OnUnitEvacuated(Object EventData, Ob
 		return ELR_NoInterrupt;
 
 	class'Help'.static.MarkUnitEvaced(UnitState);
+
+	// Evacuating a unit puts DD abilities on 1 turn cooldown - skyranger is busy recieving a unit and cannot be used for deployment.
+	class'Help'.static.PutSkyrangerOnCooldown(1,, true);
 
 	return ELR_NoInterrupt;
 }

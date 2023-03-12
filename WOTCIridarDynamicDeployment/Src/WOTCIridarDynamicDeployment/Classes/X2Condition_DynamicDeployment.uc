@@ -6,7 +6,6 @@ function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 	local GeneratedMissionData EmptyData;
 	local XComGameState_HeadquartersXCom XComHQ;
 	local array<name> ExcludedMissions;
-	local array<name> TeleportMissions;
 
 	XComHQ = `XCOMHQ;
 
@@ -16,13 +15,6 @@ function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
 		// Can't use DD on certain missions at all.
 		ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment", true);
 		if (ExcludedMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE)
-		{
-			return false;
-		}
-		
-		// On some missions, can use only teleport DD
-		TeleportMissions = `GetConfigArrayName("IRI_DD_MissionsAllowTeleportOnly", true);
-		if (TeleportMissions.Find(MissionData.Mission.MissionName) != INDEX_NONE && class'Help'.static.GetDeploymentType() != `eDT_TeleportBeacon)
 		{
 			return false;
 		}

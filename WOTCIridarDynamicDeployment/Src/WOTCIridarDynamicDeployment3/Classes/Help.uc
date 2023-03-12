@@ -10,15 +10,79 @@ var privatewrite name DDEventName;
 var privatewrite name UnitInSkyrangerValue;
 var privatewrite name UnitEvacedValue;
 
+static final function PutSkyrangerOnCooldown(const int iCooldown, optional XComGameState UseGameState, optional bool bDeploymentAbilitiesOnly)
+{
+	local XComGameState			NewGameState;
+	local XComGameState_Player	PlayerState;
+	local XComGameStateHistory	History;
+
+	if (UseGameState != none)
+	{
+		foreach UseGameState.IterateByClassType(class'XComGameState_Player', PlayerState)
+		{
+			if (PlayerState.GetTeam() == eTeam_XCom)
+			{
+				PutSkyrangerOnCooldownInternal(PlayerState, iCooldown, bDeploymentAbilitiesOnly);
+				return;
+			}
+		}
+
+		History = `XCOMHISTORY;
+		foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
+		{
+			if (PlayerState.GetTeam() == eTeam_XCom)
+			{
+				PlayerState = XComGameState_Player(UseGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
+				PutSkyrangerOnCooldownInternal(PlayerState, iCooldown, bDeploymentAbilitiesOnly);
+				return;
+			}
+		}
+	}
+	else
+	{
+		foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
+		{
+			if (PlayerState.GetTeam() == eTeam_XCom)
+			{
+				NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState(GetFuncName() @ iCooldown);
+				PlayerState = XComGameState_Player(UseGameState.ModifyStateObject(PlayerState.Class, PlayerState.ObjectID));
+				PutSkyrangerOnCooldownInternal(PlayerState, iCooldown, bDeploymentAbilitiesOnly);
+				`GAMERULES.SubmitGameState(NewGameState);
+				return;
+			}
+		}
+	}
+}
+
+static private function PutSkyrangerOnCooldownInternal(XComGameState_Player PlayerState, const int iCooldown, bool bDeploymentAbilitiesOnly)
+{
+	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Select') < iCooldown) 
+		PlayerState.SetCooldown('IRI_DynamicDeployment_Select', iCooldown);
+
+	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') < iCooldown) 
+		PlayerState.SetCooldown('IRI_DynamicDeployment_Deploy', iCooldown);
+
+	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy_Spark') < iCooldown) 
+		PlayerState.SetCooldown('IRI_DynamicDeployment_Deploy_Spark', iCooldown);
+
+	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy_Uplink') < iCooldown) 
+		PlayerState.SetCooldown('IRI_DynamicDeployment_Deploy_Uplink', iCooldown);
+
+	if (!bDeploymentAbilitiesOnly)
+		return;
+
+	if (PlayerState.GetCooldown('Evac') < iCooldown) 
+		PlayerState.SetCooldown('Evac', iCooldown);
+
+	if (PlayerState.GetCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName()) < iCooldown) 
+		PlayerState.SetCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), iCooldown);
+}
+
 static final function int GetDeploymentType()
 {
 	if (class'X2DLCInfo_Debug'.default.DeployTypeOverride != 0)
 	{
 		return class'X2DLCInfo_Debug'.default.DeployTypeOverride - 1;
-	}
-	if (ShouldUseTeleportDeployment())
-	{
-		return `eDT_TeleportBeacon;
 	}
 	if (IsUndergroundPlot())
 	{
@@ -85,13 +149,6 @@ static final function bool CanSelectUnitsFromAvenger()
 static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)
 {
 	return IsDDAbilityUnlocked(SourceUnit, 'IRI_DDUnlock_DigitalUplink');
-}
-
-// Teleport deployment has a different visualization, but also different rules:
-// no concealment break for spark-like units, no Aerial Scout.
-static final function bool ShouldUseTeleportDeployment()
-{
-	return `XCOMHQ.IsTechResearched(`GetConfigName("IRI_DD_TechRequiredToUnlockTeleport"));
 }
 
 // Different deployment visualization is used on underground plots

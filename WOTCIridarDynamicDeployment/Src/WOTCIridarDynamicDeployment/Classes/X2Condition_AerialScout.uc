@@ -13,7 +13,7 @@ event name CallAbilityMeetsCondition(XComGameState_Ability kAbility, XComGameSta
 	// No scouting when we're not deploying via parachute.
 	if (class'Help'.static.GetDeploymentType() == `eDT_Flare)
 	{
-		`AMLOG("Underground or teleporting, condition fails.");
+		`AMLOG("Underground, condition fails.");
 		return 'AA_AbilityUnavailable';
 	}
 

@@ -6,34 +6,33 @@ LocFriendlyName="Request Reinforcements"
 LocLongDescription="Contact the Avenger to request reinforcements."
 LocHelpText="Contact the Avenger to request reinforcements."
 LocFlyOverText="Request Reinforcements"
-
 [IRI_DynamicDeployment_Deploy X2AbilityTemplate]
-LocFriendlyName="Deploy Reinforcements"
-LocLongDescriptionWhenConcealed = "Designate a location to deploy reinforcements. Will break squad concealment."
-LocLongDescription="Designate a location to deploy reinforcements."
-LocHelpText="Designate a location to deploy reinforcements."
-LocFlyOverText="Deploy Reinforcements"
+LocFriendlyName="Dynamic Deployment"
+LocLongDescriptionWhenConcealed = "Designate a location to deploy the rest of the squad. Will break squad concealment."
+LocLongDescription="Designate a location to deploy the rest of the squad."
+LocHelpText="Designate a location to deploy the rest of the squad."
+LocFlyOverText="Dynamic Deployment"
 
 [IRI_DynamicDeployment_Deploy_Spark X2AbilityTemplate]
-LocFriendlyName="Deploy Reinforcements"
-LocLongDescriptionWhenConcealed = "Designate a location to deploy reinforcements. Will break squad concealment."
-LocLongDescription="Designate a location to deploy reinforcements."
-LocHelpText="Designate a location to deploy reinforcements."
-LocFlyOverText="Deploy Reinforcements"
+LocFriendlyName="Dynamic Deployment"
+LocLongDescriptionWhenConcealed = "Designate a location to deploy the rest of the squad. Will break squad concealment."
+LocLongDescription="Designate a location to deploy the rest of the squad."
+LocHelpText="Designate a location to deploy the rest of the squad."
+LocFlyOverText="Dynamic Deployment"
 
 [IRI_DynamicDeployment_Deploy_Uplink X2AbilityTemplate]
-LocFriendlyName="Deploy Reinforcements"
-LocLongDescriptionWhenConcealed = "Use your digital uplink to designate a location to deploy reinforcements. Will not break squad concealment."
-LocLongDescription="Use your digital uplink to designate a location to deploy reinforcements."
-LocHelpText="Use your digital uplink to designate a location to deploy reinforcements."
-LocFlyOverText="Deploy Reinforcements"
+LocFriendlyName="Dynamic Deployment"
+LocLongDescriptionWhenConcealed = "Use your digital uplink to designate a location to deploy the rest of the squad. Will not break squad concealment."
+LocLongDescription="Use your digital uplink to designate a location to deploy the rest of the squad."
+LocHelpText="Use your digital uplink to designate a location to deploy the rest of the squad."
+LocFlyOverText="Dynamic Deployment"
 
 ; ---------------------------------------------------------------
 ;					GTS UNLOCK
 
 [IRI_DynamicDeployment_GTS_Unlock X2SoldierAbilityUnlockTemplate]
 DisplayName = "Dynamic Deployment"
-Summary = "Train the entire operative roster in Dynamic Deployment, a technique that enables us to deploy a portion of the squad after a mission has begun.\n\nWith Dynamic Deployment, we can select soldiers who are best suited for the mission conditions and also replace any killed or captured soldiers."
+Summary = "Train the entire operative roster in Dynamic Deployment, a technique that enables us to deploy a portion of the squad after a mission has begun."
 
 ; ---------------------------------------------------------------
 ;					DD UNLOCKS
@@ -43,15 +42,10 @@ LocFriendlyName="Precision Drop"
 LocLongDescription="This unit will be able to select a precise location for their Dynamic Deployment within the deployment area."
 LocHelpText="This unit will be able to select a precise location for their Dynamic Deployment within the deployment area."
 
-[IRI_DDUnlock_FastDrop X2AbilityTemplate]
-LocFriendlyName="Constant Readiness"
-LocLongDescription="This unit's deployment does not count towards the delay of the Dynamic Deployment."
-LocHelpText="This unit's deployment does not count towards the delay of the Dynamic Deployment."
-
 [IRI_DDUnlock_AerialScout X2AbilityTemplate]
 LocFriendlyName="Aerial Scouting"
-LocLongDescription="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground or teleportation deployment."
-LocHelpText="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground or teleportation deployment."
+LocLongDescription="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground deployment."
+LocHelpText="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground deployment."
 
 [IRI_DDUnlock_TakeAndHold X2AbilityTemplate]
 LocFriendlyName="Take and Hold"
