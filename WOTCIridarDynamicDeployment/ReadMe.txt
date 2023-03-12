@@ -39,16 +39,20 @@ as well as "show deployed soldiers" matinee (would need MCM toggle probably)
 
 // Cooking maps breaks the SPARK deployment for some reason.
 
-// TODO: Modpreview
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
+Three ways to designate which soldiers remain in Skyranger:
+
+1. Via DD unlock that can be toggled on and off.
+2. Via UIScreen that shows up when clicking "start mission"
+3. Via checkbox under each unit.
+
+2 and 3 must be togglable in MCM for compatibility.
+
+
+
 TODO: Think what to do about teleport deployment if the evacced units are in Skyranger -- Teleport deployment needs to be a separate ability
-
-If evac zone is placed, you can DD only on the evac zone and you can't select units from Avenger
-And deploying is free action
-
-BUG: Save game, select soldier, kill game, load save - soldiers are selected?!
 
 add one turn minimum delay after selecting soldiers so you don't get instant reinforcements with paratrooper sodleirs'
 
@@ -56,14 +60,12 @@ make a uiscreen for selecting which soldiers will remain in skyranger upon deplo
 
 Fix new UIChooseUnits breaking line text when using extended personnel info.
 
-make tile targeting leak onto lowerZ floor tiles as long as they're within XY plane
-
 TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
 Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.
 
 Make DD Select unavailable if there are no soldiers in Skyranger and there's an evac zone
 
-Check if evac zone is actually removed with Request Evac mod
+Check if evac zone is actually removed with Request Evac mod --> it does not.
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

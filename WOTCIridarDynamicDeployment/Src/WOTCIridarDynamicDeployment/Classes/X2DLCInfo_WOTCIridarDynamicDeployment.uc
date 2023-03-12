@@ -53,6 +53,35 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 }
 /// End Issue #409
 
+static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
+{
+	local XComGameState_HeadquartersXCom XComHQ;
+	local XComGameState_Unit UnitSate;
+	local int i;
+
+	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
+	{
+		for (i = 0; i < XComHQ.Squad.Length; i++)
+		{
+			UnitSate = XComGameState_Unit(StartGameState.GetGameStateForObjectID(XComHQ.Squad[i].ObjectID));
+			`AMLOG(i @ "Soldier with name:" @ UnitSate.GetFirstName());
+			if (UnitSate != none && UnitSate.GetFirstName() == "Paul")
+			{
+				for (ItemIndex = 0; ItemIndex < SendSoldierState.InventoryItems.Length; ++ItemIndex)
+				{
+					NewStartState.ModifyStateObject(class'XComGameState_Item', SendSoldierState.InventoryItems[ItemIndex].ObjectID);
+				}
+
+				`AMLOG("Removing Paul from squad");
+				StartGameState.PurgeGameStateForObjectID(UnitSate.ObjectID);
+				XComHQ.Squad.Remove(i, 1);
+				break;
+			}
+		}
+		break;
+	}
+}
+
 static event OnPostTemplatesCreated()
 {
 	AddGTSUnlock('IRI_DynamicDeployment_GTS_Unlock');
@@ -126,8 +155,6 @@ static function string DLCAppendSockets(XComUnitPawn Pawn)
 	Pawn.Mesh.AppendSockets(NewSockets, true);
 	return "";
 }
-
-
 static private function SkeletalMeshSocket CreateSocket(const name SocketName, const name BoneName, optional const float X, optional const float Y, optional const float Z, optional const float dRoll, optional const float dPitch, optional const float dYaw, optional float ScaleX = 1.0f, optional float ScaleY = 1.0f, optional float ScaleZ = 1.0f)
 {
 	local SkeletalMeshSocket NewSocket;
@@ -150,6 +177,9 @@ static private function SkeletalMeshSocket CreateSocket(const name SocketName, c
     
 	return NewSocket;
 }
+
+
+
 
 exec function DDGiveUnlockToSelectedUnit(const name DDUnlock)
 {

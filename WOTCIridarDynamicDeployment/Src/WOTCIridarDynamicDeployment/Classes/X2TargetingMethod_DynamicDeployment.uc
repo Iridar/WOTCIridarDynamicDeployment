@@ -29,7 +29,7 @@ var private array<TTile>					AreaTiles;
 var private int								MaxZ;
 var private bool							bCheckMaxZ;
 
-var private XComGameState_EvacZone			EvacZone;
+//var private XComGameState_EvacZone			EvacZone;
 var private X2Camera_LookAtLocation			LookatCamera;
 
 // Parallel arrays
@@ -54,16 +54,16 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 
 	World = `XWORLD;
 
-	EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
-	if (EvacZone != none)
-	{
-		LookatCamera = new class'X2Camera_LookAtLocation';
-		LookatCamera.UseTether = false;
-		LookatCamera.LookAtLocation = World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
-		`CAMERASTACK.AddCamera(LookatCamera);
-
-		bRestrictToSquadsightRange = false;
-	}
+	//EvacZone = class'XComGameState_EvacZone'.static.GetEvacZone();
+	//if (EvacZone != none)
+	//{
+	//	LookatCamera = new class'X2Camera_LookAtLocation';
+	//	LookatCamera.UseTether = false;
+	//	LookatCamera.LookAtLocation = World.GetPositionFromTileCoordinates(EvacZone.CenterLocation);
+	//	`CAMERASTACK.AddCamera(LookatCamera);
+	//
+	//	bRestrictToSquadsightRange = false;
+	//}
 
 	
 	MaxZ = World.WORLD_FloorHeightsPerLevel * World.WORLD_TotalLevels * World.WORLD_FloorHeight;

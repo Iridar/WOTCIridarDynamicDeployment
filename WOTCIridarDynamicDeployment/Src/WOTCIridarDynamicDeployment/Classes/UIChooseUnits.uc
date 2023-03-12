@@ -539,10 +539,13 @@ private function SetGlobalCooldowns(XComGameState NewGameState)
 
 	DeployDelay = DDObject.GetDeployDelay();
 
-	class'Help'.static.SetDynamicDeploymentCooldown(DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
+	if (DeployDelay > 0)
+	{
+		class'Help'.static.SetDynamicDeploymentCooldown(DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
 	
-	// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
-	class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
+		// Put Request Evac ability on cooldown too, cuz Skyranger is busy getting the soldiers for deployment.
+		class'Help'.static.SetGlobalCooldown(class'CHHelpers'.static.GetPlaceEvacZoneAbilityName(), DeployDelay, SourceUnit.ControllingPlayer.ObjectID, NewGameState);
+	}
 }
 
 private function CalculateTotalCost()

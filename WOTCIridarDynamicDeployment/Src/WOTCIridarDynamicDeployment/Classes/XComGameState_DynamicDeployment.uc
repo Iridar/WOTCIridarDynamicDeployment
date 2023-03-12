@@ -176,10 +176,11 @@ final function array<XComGameState_Unit> GetPrecisionDropUnits()
 
 	foreach UnitStates(UnitState)
 	{
-		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_PrecisionDrop'))
-		{
+		// TODO: DEBUG ONLY
+		//if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_PrecisionDrop'))
+		//{
 			PrecisionDropUnits.AddItem(UnitState);
-		}
+		//}
 	}
 	return PrecisionDropUnits;
 }

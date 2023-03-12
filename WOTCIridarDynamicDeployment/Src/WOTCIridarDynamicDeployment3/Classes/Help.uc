@@ -42,9 +42,6 @@ static private function SetUnitValue(const name UnitValueName, XComGameState_Uni
 	local XComGameState_Unit	NewUnitState;
 	local XComGameState			NewGameState;
 
-	`LOG(UnitState.GetFullName() @ "is now in Skyranger",, 'IRITEST');
-	`LOG(GetScriptTrace());
-
 	if (UseGameState != none)
 	{
 		NewUnitState = XComGameState_Unit(UseGameState.GetGameStateForObjectID(UnitState.ObjectID));
@@ -78,9 +75,13 @@ static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
 
 static final function bool CanSelectUnitsFromAvenger()
 {
-	return class'XComGameState_EvacZone'.static.GetEvacZone() == none;
-}
+	local XComGameState_BattleData BattleData;
 
+	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+
+	return BattleData.IsAbilityGloballyDisabled('Evac');
+}
+	
 static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)
 {
 	return IsDDAbilityUnlocked(SourceUnit, 'IRI_DDUnlock_DigitalUplink');

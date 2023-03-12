@@ -201,8 +201,8 @@ static private function bool IsFirstTurn()
 // Set DD on cooldown when Evac is requested via Request Evac mod.
 static private function EventListenerReturn OnEvacSpawnerCreated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
-	local StateObjectReference PlayerStateRef;
-	local XComGameState_RequestEvac RequestEvacState; // Requires building against Request Evac
+	local StateObjectReference				PlayerStateRef;
+	local XComGameState_RequestEvac			RequestEvacState; // Requires building against Request Evac
 	local XComGameState_DynamicDeployment	DDObject;
 
 	// If teleport is available, we're not tied to Skyranger.
