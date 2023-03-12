@@ -22,8 +22,92 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Strategy
 	Template.RegisterInStrategy = true;
 
 	Template.AddCHEvent('OnArmoryMainMenuUpdate', UpdateArmoryMainMenu, ELD_Immediate);
+	Template.AddCHEvent('UISquadSelect_NavHelpUpdate', OnSquadSelectNavHelpUpdate, ELD_Immediate, 50);
 
 	return Template;
+}
+
+
+static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackObject)
+{
+	local UISquadSelect						SquadSelect;
+	local UISquadSelect_ListItem			ListItem;
+	local array<UIPanel>					ChildrenPanels;
+	local UIPanel							ChildPanel;
+	local UIPanel							SSChildPanel;
+	local XComGameState_Unit				UnitState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local XComGameStateHistory				History;
+	local UIMechaListItem_ClickToggleCheckbox DDCheckbox;
+	local int								ExtraHeight;
+	local bool								bChecked;
+
+	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
+		return ELR_NoInterrupt;
+
+	SquadSelect = UISquadSelect(EventSource);
+	if (SquadSelect == none)
+		return ELR_NoInterrupt;
+
+	History = `XCOMHISTORY;
+	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom', true));
+	if (XComHQ == none)
+		return ELR_NoInterrupt;
+
+	SquadSelect.GetChildrenOfType(class'UISquadSelect_ListItem', ChildrenPanels);
+
+	//`AMLOG("Running");
+
+	foreach ChildrenPanels(ChildPanel)
+	{
+		ListItem = UISquadSelect_ListItem(ChildPanel);
+		//if (ListItem.SlotIndex < 0 || ListItem.SlotIndex > XComHQ.Squad.Length)
+		//	continue;
+
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
+		if (UnitState == none)
+			continue;
+
+		if (ListItem.GetChildByName('IRI_DD_SquadSelect_Checkbox', false) != none || ListItem.bDisabled)
+			continue;
+
+		`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
+
+		bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+
+		DDCheckbox = ListItem.Spawn(class'UIMechaListItem_ClickToggleCheckbox', ListItem);
+		DDCheckbox.bAnimateOnInit = false;
+		DDCheckbox.InitListItem('IRI_DD_SquadSelect_Checkbox');
+		DDCheckbox.UpdateDataCheckbox("Dynamic Deployment", "tooltip", bChecked, none, none); // TODO: Localize
+		DDCheckbox.SetWidth(465);
+		DDCheckbox.UnitState = UnitState;
+
+		// And they said I could never teach a llama to drive!
+		if (ListItem.IsA('robojumper_UISquadSelect_ListItem'))
+		{
+			ExtraHeight = 0;
+			foreach ListItem.ChildPanels(SSChildPanel)
+			{
+				if (SSChildPanel.IsA('robojumper_UISquadSelect_StatsPanel'))
+				{
+					ExtraHeight += SSChildPanel.Height;
+				}
+				if (SSChildPanel.IsA('robojumper_UISquadSelect_SkillsPanel'))
+				{
+					ExtraHeight += SSChildPanel.Height;
+				}
+			}
+			DDCheckbox.SetY(ListItem.Height + ExtraHeight);
+			ListItem.SetY(ListItem.Y - DDCheckbox.Height - 10);
+		}
+		else
+		{
+			//`AMLOG("Regular panel. Y:" @ ListItem.Y @ "Height:" @ ListItem.Height);
+			DDCheckbox.SetY(362);
+			ListItem.SetY(ListItem.Y - DDCheckbox.Height);
+		}
+	}
+	return ELR_NoInterrupt;
 }
 
 // Insert the Dynamic Deployment button into Armory main menu.
@@ -238,7 +322,7 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 		{
 			NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 		}
-		NewUnitState.ClearUnitValue(class'Help'.default.UnitInSkyrangerValue);
+		NewUnitState.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
 		NewUnitState.ClearUnitValue(class'Help'.default.UnitEvacedValue);
 
 		`AMLOG(NewUnitState.GetFullName() @ "is no longer in Skyranger");

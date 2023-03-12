@@ -7,8 +7,23 @@ class Help extends Object abstract;
 
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
-var privatewrite name UnitInSkyrangerValue;
 var privatewrite name UnitEvacedValue;
+var privatewrite name DynamicDeploymentValue;
+
+// Only units with this value will appear on UIChooseUnits screen.
+// This for selecting which soldiers should remain in Skyranger in Squad Select.
+// Also used to mark soldiers evaced during the mission so they can be redeployed.
+static final function MarkUnitForDynamicDeployment(XComGameState_Unit UnitState, const bool bDeploy, optional XComGameState UseGameState)
+{
+	SetUnitValue(default.DynamicDeploymentValue, UnitState, UseGameState, !bDeploy);
+}
+static final function bool IsUnitMarkedForDynamicDeployment(const XComGameState_Unit UnitState)
+{
+	local UnitValue UV;
+
+	return UnitState.GetUnitValue(default.DynamicDeploymentValue, UV);
+}
+
 
 static final function PutSkyrangerOnCooldown(const int iCooldown, optional XComGameState UseGameState, optional bool bDeploymentAbilitiesOnly)
 {
@@ -91,17 +106,13 @@ static final function int GetDeploymentType()
 	return `eDT_Flare;
 }
 
-static final function MarkUnitInSkyranger(XComGameState_Unit UnitState, optional XComGameState UseGameState)
-{
-	SetUnitValue(default.UnitInSkyrangerValue, UnitState, UseGameState);
-}
 
 static final function MarkUnitEvaced(XComGameState_Unit UnitState, optional XComGameState UseGameState)
 {
 	SetUnitValue(default.UnitEvacedValue, UnitState, UseGameState);
 }
 
-static private function SetUnitValue(const name UnitValueName, XComGameState_Unit UnitState, optional XComGameState UseGameState)
+static private function SetUnitValue(const name UnitValueName, XComGameState_Unit UnitState, optional XComGameState UseGameState, optional const bool bClearValue)
 {
 	local XComGameState_Unit	NewUnitState;
 	local XComGameState			NewGameState;
@@ -113,23 +124,32 @@ static private function SetUnitValue(const name UnitValueName, XComGameState_Uni
 		{	
 			NewUnitState = XComGameState_Unit(UseGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
 		}
-		NewUnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+		if (bClearValue)
+		{
+			NewUnitState.ClearUnitValue(UnitValueName);
+		}
+		else
+		{
+			NewUnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+		}
 	}
 	else
 	{
 		NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Mark evaced unit:" @ UnitState.GetFullName());
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-		UnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+		if (bClearValue)
+		{
+			UnitState.ClearUnitValue(UnitValueName);
+		}
+		else
+		{
+			UnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+		}
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
 }
 
-static final function bool IsUnitInSkyranger(const XComGameState_Unit UnitState)
-{
-	local UnitValue UV;
 
-	return UnitState.GetUnitValue(default.UnitInSkyrangerValue, UV) || UnitState.GetUnitValue(default.UnitEvacedValue, UV);
-}
 static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
 {
 	local UnitValue UV;
@@ -137,14 +157,6 @@ static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
 	return UnitState.GetUnitValue(default.UnitEvacedValue, UV);
 }
 
-static final function bool CanSelectUnitsFromAvenger()
-{
-	local XComGameState_BattleData BattleData;
-
-	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-
-	return BattleData.IsAbilityGloballyDisabled('Evac');
-}
 	
 static final function bool ShouldUseDigitalUplink(const XComGameState_Unit SourceUnit)
 {
@@ -322,6 +334,5 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DD_Triggered_Event"
-	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"
-	UnitInSkyrangerValue = "IRI_DD_UnitInSkyranger_Value"
+	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
 }

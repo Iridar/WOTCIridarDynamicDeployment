@@ -285,11 +285,9 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 	local XComGameStateHistory				History;
 	local StateObjectReference				UnitReference;
 	local XComGameState_Unit				UnitState;
-	local bool								bCanSelectUnitsFromAvenger;
 	
 	History = `XCOMHISTORY;
 	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
-	bCanSelectUnitsFromAvenger = class'Help'.static.CanSelectUnitsFromAvenger();
 
 	foreach XComHQ.Crew(UnitReference)
 	{
@@ -300,7 +298,7 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 
 		if (UnitState == none) continue;
 
-		if (!bCanSelectUnitsFromAvenger && !class'Help'.static.IsUnitInSkyranger(UnitState)) continue;
+		if (!class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState)) continue;
 
 		if (!class'Help'.static.IsUnitEligibleForDynamicDeployment(UnitState)) continue;
 

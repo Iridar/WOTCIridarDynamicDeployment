@@ -132,6 +132,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIInventory_DynamicDeploymentUnlock.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIMechaListItem_ClickToggleCheckbox.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\WOTCIridarDynamicDeployment_Defaults.uc">
       <SubType>Content</SubType>
     </Content>

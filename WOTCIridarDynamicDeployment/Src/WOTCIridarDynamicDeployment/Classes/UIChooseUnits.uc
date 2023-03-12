@@ -6,8 +6,6 @@ class UIChooseUnits extends UIPersonnel;
 
 // Thanks to RustyDios for the idea to use UIPersonnel.
 
-var XComGameState_Unit SourceUnit;
-
 var private XComGameState_HeadquartersXCom		XComHQ;
 var private array<XComGameState_Unit>			UnitStates;
 var private XComGameState_DynamicDeployment		DDObject;
@@ -189,30 +187,7 @@ private function OnSoldierClicked(StateObjectReference UnitRef)
 
 private function OnConfirmButtonClicked(UIButton Button)
 {	
-	local XComGameState			NewGameState;
-	local XGUnit				GameUnit;
-	local XComGameState_Unit	UnitState;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Set Global Cooldowns");
-	
-	// Then mark deploying units as in Skyranger. So that if the player calls for evac
-	// before deploying the units, they still can deploy them on the evac zone.
-	// Needs to be done in that order, because units in Skyranger do not impose a delay.
-	UnitStates = DDObject.GetUnitsToDeploy();
-	foreach UnitStates(UnitState)
-	{
-		class'Help'.static.MarkUnitInSkyranger(UnitState, NewGameState);
-	}
-	`GAMERULES.SubmitGameState(NewGameState);
-	
 	CloseScreen();
-
-	GameUnit = XGUnit(SourceUnit.GetVisualizer());
-	if (GameUnit != none)
-	{
-		// This line is in the banks, but basegame voices don't appear to have any cues for it, so this probably will never do anything.
-		GameUnit.UnitSpeak('RequestReinforcements');
-	}
 }
 
 // ================================= CANCEL ==============================================

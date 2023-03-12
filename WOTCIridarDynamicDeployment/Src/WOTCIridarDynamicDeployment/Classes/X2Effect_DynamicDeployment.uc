@@ -173,7 +173,7 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	else
 	{
 		// So that soldier doesn't appear as "in skyranger" on the soldier select screen.
-		Unit.ClearUnitValue(class'Help'.default.UnitInSkyrangerValue);
+		Unit.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
 		Unit.ClearUnitValue(class'Help'.default.UnitEvacedValue);
 	}
 

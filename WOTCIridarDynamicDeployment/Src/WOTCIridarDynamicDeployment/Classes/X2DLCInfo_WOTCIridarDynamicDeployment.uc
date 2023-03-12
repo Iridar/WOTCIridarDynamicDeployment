@@ -56,27 +56,34 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 {
 	local XComGameState_HeadquartersXCom XComHQ;
-	local XComGameState_Unit UnitSate;
+	local XComGameState_Unit UnitState;
 	local int ItemIndex;
 	local int i;
 
+	`AMLOG("Running");
+
 	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
 	{
-		for (i = 0; i < XComHQ.Squad.Length; i++)
+		`AMLOG("Found XComHQ...");
+		for (i = XComHQ.Squad.Length - 1; i >= 0; i--)
 		{
-			UnitSate = XComGameState_Unit(StartGameState.GetGameStateForObjectID(XComHQ.Squad[i].ObjectID));
-			`AMLOG(i @ "Soldier with name:" @ UnitSate.GetFirstName());
-			if (UnitSate != none && UnitSate.GetFirstName() == "Paul")
+			UnitState = XComGameState_Unit(StartGameState.GetGameStateForObjectID(XComHQ.Squad[i].ObjectID));
+			if (UnitState == none)
+				continue;
+				
+			`AMLOG("Looking at soldier:" @ UnitState.GetFullName());
+
+			if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState))
 			{
-				for (ItemIndex = 0; ItemIndex < UnitSate.InventoryItems.Length; ++ItemIndex)
+				`AMLOG("Removing Dynamic Deployment unit from squad:" @ UnitState.GetFullName());
+
+				for (ItemIndex = 0; ItemIndex < UnitState.InventoryItems.Length; ++ItemIndex)
 				{
-					StartGameState.PurgeGameStateForObjectID(UnitSate.InventoryItems[ItemIndex].ObjectID);
+					StartGameState.PurgeGameStateForObjectID(UnitState.InventoryItems[ItemIndex].ObjectID);
 				}
 
-				`AMLOG("Removing Paul from squad");
-				StartGameState.PurgeGameStateForObjectID(UnitSate.ObjectID);
+				StartGameState.PurgeGameStateForObjectID(UnitState.ObjectID);
 				XComHQ.Squad.Remove(i, 1);
-				break;
 			}
 		}
 		break;
