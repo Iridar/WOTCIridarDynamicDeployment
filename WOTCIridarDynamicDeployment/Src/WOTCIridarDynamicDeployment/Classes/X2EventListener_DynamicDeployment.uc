@@ -41,6 +41,7 @@ static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object Ev
 	local UIMechaListItem_ClickToggleCheckbox DDCheckbox;
 	local int								ExtraHeight;
 	local bool								bChecked;
+	local UILargeButton						DummyButton;
 
 	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
 		return ELR_NoInterrupt;
@@ -54,16 +55,28 @@ static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object Ev
 	if (XComHQ == none)
 		return ELR_NoInterrupt;
 
+	// Add an intermediate step of showing a UIScreen with the squad so the player can select units that will remain in Skyranger.
+	if (SquadSelect.LaunchButton.GetChildByName('IRI_DD_DummyLaunchButton', false) == none)
+	{
+		DummyButton = SquadSelect.LaunchButton.Spawn(class'UILargeButton', SquadSelect.LaunchButton);
+		DummyButton.InitPanel('IRI_DD_DummyLaunchButton');
+		DummyButton.OnClickedDelegate = SquadSelect.LaunchButton.OnClickedDelegate;
+		SquadSelect.LaunchButton.OnClickedDelegate = OnLaunchMission;
+		DummyButton.Hide();
+		DummyButton.SetPosition(-100, -100);
+	}
+
+	// Add a checkbox under each soldier poster.
 	SquadSelect.GetChildrenOfType(class'UISquadSelect_ListItem', ChildrenPanels);
-
-	//`AMLOG("Running");
-
 	foreach ChildrenPanels(ChildPanel)
 	{
 		ListItem = UISquadSelect_ListItem(ChildPanel);
 		//if (ListItem.SlotIndex < 0 || ListItem.SlotIndex > XComHQ.Squad.Length)
 		//	continue;
 
+		// TODO: Figure out why this gives the same unit with RJSS, maybe use a UISL, 
+		// we need to update checkboxes when UISquadSelect gets focus anyway when closing the UISChooseUnits_SquadSelect
+		// or do that in OnScreenClosed() in that screen.
 		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
 		if (UnitState == none || !class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
 			continue;
@@ -109,6 +122,16 @@ static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object Ev
 	}
 	return ELR_NoInterrupt;
 }
+static private function OnLaunchMission(UIButton Button)
+{
+	local UIChooseUnits_SquadSelect ChooseUnits;
+	local XComPresentationLayerBase Pres;
+
+	Pres = Button.Movie.Pres;
+	ChooseUnits = Pres.Spawn(class'UIChooseUnits_SquadSelect', Pres);
+	Pres.ScreenStack.Push(ChooseUnits);
+}
+
 
 // Insert the Dynamic Deployment button into Armory main menu.
 static private function EventListenerReturn UpdateArmoryMainMenu(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)

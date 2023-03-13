@@ -27,11 +27,11 @@ Three ways to designate which soldiers remain in Skyranger:
 3. Via checkbox under each unit.
 
 2 and 3 must be togglable in MCM for compatibility.
+Also an MCM toggle to allow selecting different units for deployment
 
 
 make a uiscreen for selecting which soldiers will remain in skyranger upon deployment
 
-Fix new UIChooseUnits breaking line text when using extended personnel info.
 
 TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
 Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.

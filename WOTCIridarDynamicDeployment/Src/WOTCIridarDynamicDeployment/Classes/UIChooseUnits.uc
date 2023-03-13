@@ -6,12 +6,12 @@ class UIChooseUnits extends UIPersonnel;
 
 // Thanks to RustyDios for the idea to use UIPersonnel.
 
-var private XComGameState_HeadquartersXCom		XComHQ;
-var private array<XComGameState_Unit>			UnitStates;
-var private XComGameState_DynamicDeployment		DDObject;
+var protected XComGameState_HeadquartersXCom	XComHQ;
+var protected array<XComGameState_Unit>			UnitStates;
+var protected XComGameState_DynamicDeployment	DDObject;
 
-var private UILargeButton		ConfirmButton;
-var private UITacticalHUD		TacticalHUD;
+var protected UILargeButton		ConfirmButton;
+var protected UITacticalHUD		TacticalHUD;
 
 // ================================= INIT DATA ==============================================
 
@@ -39,7 +39,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 }
 
 // Big green button at the bottom.
-private function CreateConfirmButton()
+protected function CreateConfirmButton()
 {
 	local int iconYOffset;
 
@@ -108,55 +108,7 @@ simulated function RefreshData()
 	TacticalHUD.m_kAbilityHUD.Hide();
 }
 
-// The code around overriding unit's status display text, including override events, is a goddamn mess.
-// To do what I wanted to do, which is to display an icon instead of the "X DAYS" status text,
-// I had to copy the UpdateListItemData() from UIPersonnel_SoldierListItem and remove the bits that were interfering with it.
-// The problem was that the override status text can be given only if the override to not show unit's mental status is enabled,
-// which looks bad and doesn't make any sense, and I kinda want the mental status to be there.
-//simulated function PopulateListInstantly()
-//{
-//	local UIPersonnel_SoldierListItem	kItem;
-//	local StateObjectReference			SoldierRef;
-//	local array<StateObjectReference>	CurrentData;
-//	local XComGameState_Unit			UnitState;
-//	local array<XComGameState_Unit>		LocUnitStates;
-//	local XComGameStateHistory			History;
-//
-//	History = `XCOMHISTORY;
-//	CurrentData = GetCurrentData();
-//	foreach CurrentData(SoldierRef)
-//	{
-//		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(SoldierRef.ObjectID));
-//		if (UnitState == none) continue;
-//
-//		LocUnitStates.AddItem(UnitState);
-//	}
-//
-//	foreach LocUnitStates(UnitState)
-//	{
-//		kItem = Spawn(class'UIPersonnel_SoldierListItem', m_kList.itemContainer);
-//		
-//		kItem.InitListItem(UnitState.GetReference());
-//	}
-//
-//	MC.FunctionString("SetEmptyLabel", CurrentData.Length == 0 ? m_strEmptyListLabels[m_eCurrentTab] : "");
-//}
-
-
-/*	eUIState_Normal,
-	eUIState_Faded,
-	eUIState_Header,
-	eUIState_Disabled,
-	eUIState_Good,
-	eUIState_Bad,
-	eUIState_Warning,
-	eUIState_Highlight,
-	eUIState_Cash,
-	eUIState_Psyonic,
-	eUIState_Warning2,
-	eUIState_TheLost*/
-
-function UpdateConfirmButtonVisibility()
+protected function UpdateConfirmButtonVisibility()
 {
 	if (DDObject.IsAnyUnitSelected())
 	{
@@ -170,7 +122,7 @@ function UpdateConfirmButtonVisibility()
 
 // ================================= INTERACTION ==============================================
 
-private function OnSoldierClicked(StateObjectReference UnitRef)
+protected function OnSoldierClicked(StateObjectReference UnitRef)
 {
 	local XComGameState NewGameState;
 
@@ -186,7 +138,7 @@ private function OnSoldierClicked(StateObjectReference UnitRef)
 
 // ================================= CONFIRM SELECTION ==============================================
 
-private function OnConfirmButtonClicked(UIButton Button)
+protected function OnConfirmButtonClicked(UIButton Button)
 {	
 	CloseScreen();
 }

@@ -129,6 +129,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIChooseUnits.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIChooseUnits_SquadSelect.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIInventory_DynamicDeploymentUnlock.uc">
       <SubType>Content</SubType>
     </Content>
