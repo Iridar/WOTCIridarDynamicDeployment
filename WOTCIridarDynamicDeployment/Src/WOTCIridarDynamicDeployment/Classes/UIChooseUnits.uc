@@ -20,6 +20,8 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	DDObject = class'XComGameState_DynamicDeployment'.static.GetOrCreate();
 	DDObject.GetUnitStatesEligibleForDynamicDeployment(UnitStates);
 
+	TacticalHUD = UITacticalHUD(Movie.Pres.ScreenStack.GetScreen(class'UITacticalHUD'));
+
 	// There's no good time for us to deselect units at any point after deployment,
 	// so do it before entering screen instead.
 	DeselectAllUnits();
@@ -33,7 +35,6 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	
 	CreateConfirmButton();
 
-	TacticalHUD = UITacticalHUD(Movie.Pres.ScreenStack.GetScreen(class'UITacticalHUD'));
 	TacticalHUD.m_kAbilityHUD.Hide();	 // Hide soldier's ability bar, so the Confirm button doesn't look ugly on top of it.
 }
 

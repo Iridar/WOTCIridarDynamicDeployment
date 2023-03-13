@@ -65,20 +65,20 @@ static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object Ev
 		//	continue;
 
 		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
-		if (UnitState == none)
+		if (UnitState == none || !class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
 			continue;
 
 		if (ListItem.GetChildByName('IRI_DD_SquadSelect_Checkbox', false) != none || ListItem.bDisabled)
 			continue;
 
-		`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
-
 		bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+
+		`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
 
 		DDCheckbox = ListItem.Spawn(class'UIMechaListItem_ClickToggleCheckbox', ListItem);
 		DDCheckbox.bAnimateOnInit = false;
 		DDCheckbox.InitListItem('IRI_DD_SquadSelect_Checkbox');
-		DDCheckbox.UpdateDataCheckbox("Dynamic Deployment", "tooltip", bChecked, none, none); // TODO: Localize
+		DDCheckbox.UpdateDataCheckbox(`CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel")), "", bChecked, none, none);
 		DDCheckbox.SetWidth(465);
 		DDCheckbox.UnitState = UnitState;
 

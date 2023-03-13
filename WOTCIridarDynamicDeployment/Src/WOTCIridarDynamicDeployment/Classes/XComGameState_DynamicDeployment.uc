@@ -285,25 +285,40 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 	local XComGameStateHistory				History;
 	local StateObjectReference				UnitReference;
 	local XComGameState_Unit				UnitState;
+	local bool								bHealthy;
+	local bool								bShaken;
+	local bool								bIgnoreInjuries;
 	
 	History = `XCOMHISTORY;
 	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
 
 	foreach XComHQ.Crew(UnitReference)
 	{
-		//if (IsUnitSelected(UnitReference.ObjectID))
-		//	continue;
-
 		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitReference.ObjectID));
+		if (UnitState == none || !UnitState.IsSoldier() || UnitState.IsDead()) continue;
 
-		if (UnitState == none) continue;
+		`AMLOG("Looking at soldier:" @ UnitState.GetFullName());
 
-		if (!class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState)) continue;
+		if (!class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState)) 
+			continue;
 
-		if (!class'Help'.static.IsUnitEligibleForDynamicDeployment(UnitState)) continue;
+		// Shaken checks are probably irrelevant
+		bShaken = UnitState.GetMentalState() == eMentalState_Shaken;
+		bHealthy = !UnitState.IsInjured() && !bShaken;
+		bIgnoreInjuries = UnitState.IgnoresInjuries() || UnitState.bRecoveryBoosted;
 
-		//	If we're still in the cycle then this unit has passed all checks and is eligible to be spawned
-		EligbleUnits.AddItem(UnitState);
+		if (!bShaken && XComHQ.bAllowLightlyWoundedOnMissions && UnitState.IsLightlyInjured())
+		{
+			bIgnoreInjuries = true;
+		}
+
+		`AMLOG("Unit is marked for Dynamic Deployment" @ `ShowVar(bShaken) @ `ShowVar(bHealthy) @ `ShowVar(bIgnoreInjuries));
+
+		if (bHealthy || bIgnoreInjuries)
+		{
+			`AMLOG("Unit is eligible for Dynamic Deployment");
+			EligbleUnits.AddItem(UnitState);
+		}
 	}
 }
 

@@ -15,13 +15,15 @@ var privatewrite name DynamicDeploymentValue;
 // Also used to mark soldiers evaced during the mission so they can be redeployed.
 static final function MarkUnitForDynamicDeployment(XComGameState_Unit UnitState, const bool bDeploy, optional XComGameState UseGameState)
 {
-	SetUnitValue(default.DynamicDeploymentValue, UnitState, UseGameState, !bDeploy);
+	// Record and check specific mission state ObjectID so that mods that use infiltration mechanics allow DDing soldiers
+	// only on missions they actually left to infiltrate.
+	SetUnitValue(default.DynamicDeploymentValue, `XCOMHQ.MissionRef.ObjectID, UnitState, UseGameState, !bDeploy);
 }
 static final function bool IsUnitMarkedForDynamicDeployment(const XComGameState_Unit UnitState)
 {
 	local UnitValue UV;
 
-	return UnitState.GetUnitValue(default.DynamicDeploymentValue, UV);
+	return UnitState.GetUnitValue(default.DynamicDeploymentValue, UV) && `XCOMHQ.MissionRef.ObjectID == UV.fValue;
 }
 
 
@@ -109,10 +111,10 @@ static final function int GetDeploymentType()
 
 static final function MarkUnitEvaced(XComGameState_Unit UnitState, optional XComGameState UseGameState)
 {
-	SetUnitValue(default.UnitEvacedValue, UnitState, UseGameState);
+	SetUnitValue(default.UnitEvacedValue, 1.0f, UnitState, UseGameState);
 }
 
-static private function SetUnitValue(const name UnitValueName, XComGameState_Unit UnitState, optional XComGameState UseGameState, optional const bool bClearValue)
+static private function SetUnitValue(const name UnitValueName, const float fValue, XComGameState_Unit UnitState, optional XComGameState UseGameState, optional const bool bClearValue)
 {
 	local XComGameState_Unit	NewUnitState;
 	local XComGameState			NewGameState;
@@ -130,7 +132,7 @@ static private function SetUnitValue(const name UnitValueName, XComGameState_Uni
 		}
 		else
 		{
-			NewUnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+			NewUnitState.SetUnitFloatValue(UnitValueName, fValue, eCleanup_BeginTactical);
 		}
 	}
 	else
@@ -143,7 +145,7 @@ static private function SetUnitValue(const name UnitValueName, XComGameState_Uni
 		}
 		else
 		{
-			UnitState.SetUnitFloatValue(UnitValueName, 1.0f, eCleanup_BeginTactical);
+			UnitState.SetUnitFloatValue(UnitValueName, fValue, eCleanup_BeginTactical);
 		}
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
@@ -249,17 +251,7 @@ static final function bool IsUnitEligibleForDDAbilities(const XComGameState_Unit
 	return UnitState.IsSoldier();
 }
 
-static final function bool IsUnitEligibleForDynamicDeployment(const XComGameState_Unit UnitState)
-{
-	// Unit will still be in squad if they were evacuated.
-	// So disallow only units that were not evacuated that are in squad.
-	if (!UnitState.bRemovedFromPlay && `XCOMHQ.Squad.Find('ObjectID', UnitState.ObjectID) != INDEX_NONE) return false;
-	if (!IsUnitEligibleForDDAbilities(UnitState)) return false;
-	//if (UnitState.IsDead()) return false; // Checked by CanGoOnMission()
-	if (!UnitState.CanGoOnMission()) return false;
 
-	return true;
-}
 
 // Spark-like units use a different skyranger drop / underground drop animation,
 // and use a different set of DD unlocks.
