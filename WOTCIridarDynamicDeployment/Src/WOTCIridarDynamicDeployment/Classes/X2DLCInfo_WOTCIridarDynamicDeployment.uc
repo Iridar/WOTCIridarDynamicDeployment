@@ -55,12 +55,15 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 
 static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 {
-	local XComGameState_HeadquartersXCom XComHQ;
-	local XComGameState_Unit UnitState;
-	local int ItemIndex;
-	local int i;
+	local XComGameState_DynamicDeployment	DDObject;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local XComGameState_Unit				UnitState;
+	local int								ItemIndex;
+	local int								i;
 
 	`AMLOG("Running");
+
+	DDObject = XComGameState_DynamicDeployment(StartGameState.CreateNewStateObject(class'XComGameState_DynamicDeployment'));
 
 	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
 	{
@@ -75,6 +78,9 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 
 			if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState))
 			{
+				// Autoselect deployable units so they can be deployed from mission start without having to select them manually every time.
+				DDObject.ToggleUnitSelection(UnitState.ObjectID);
+
 				`AMLOG("Removing Dynamic Deployment unit from squad:" @ UnitState.GetFullName());
 
 				for (ItemIndex = 0; ItemIndex < UnitState.InventoryItems.Length; ++ItemIndex)

@@ -8,6 +8,7 @@ IRI_DynamicDeployment_NotEnoughAP = "Not enough Ability Points."
 
 IRI_DynamicDeployment_MutuallyExclusiveUnlock = "Mutually exclusive with:"
 
+IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"

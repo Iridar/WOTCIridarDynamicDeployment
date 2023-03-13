@@ -27,7 +27,7 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	DeselectAllUnits();
 	XComHQ = `XCOMHQ;
 
-	m_strButtonValues[ePersonnelSoldierSortType_Status] = class'UIUtilities_Text'.static.GetSizedText(class'UIChallengeMode_SquadSelect'.default.m_strLocationLabel, 12);
+	//m_strButtonValues[ePersonnelSoldierSortType_Status] = class'UIUtilities_Text'.static.GetSizedText(class'UIChallengeMode_SquadSelect'.default.m_strLocationLabel, 12);
 	
 	super.InitScreen(InitController, InitMovie, InitName);
 

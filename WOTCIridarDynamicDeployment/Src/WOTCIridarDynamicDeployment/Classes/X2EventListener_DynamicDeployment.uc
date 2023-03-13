@@ -212,8 +212,34 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
 	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
 	Template.AddCHEvent('CleanupTacticalMission', OnCleanupTacticalMission, ELD_Immediate);
+	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
 	
 	return Template;
+}
+
+static private function EventListenerReturn OnOverridePersonnelStatus(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComLWTuple						OverrideTuple;
+	local XComGameState_Unit				UnitState;
+	local XComGameState_DynamicDeployment	DDObject;
+
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	if (DDObject == none)
+		return ELR_NoInterrupt;
+
+	UnitState = XComGameState_Unit(EventSource);
+	if (UnitState == none) 
+		return ELR_NoInterrupt;
+
+	OverrideTuple = XComLWTuple(EventData);
+
+	if (DDObject.IsUnitSelected(UnitState.ObjectID))
+	{
+		OverrideTuple.Data[0].s = `GetLocalizedString("IRI_DynamicDeployment_DeployingStatus");
+		OverrideTuple.Data[4].i = eUIState_Warning;
+	}
+
+	return ELR_NoInterrupt;
 }
 
 // Preload assets if deployment is ready.
