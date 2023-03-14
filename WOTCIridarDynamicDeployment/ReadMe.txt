@@ -31,7 +31,6 @@ Also an MCM toggle to allow selecting different units for deployment
 
 Handle unit evacuation (add as eligible unit)
 
-
 TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
 Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.
 

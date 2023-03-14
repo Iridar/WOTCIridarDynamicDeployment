@@ -1,6 +1,8 @@
-class UISL_DynamicDeployment extends UIScreenListener;
+class UISL_DynamicDeployment extends UIScreenListener config(whatever);
 
+// 
 // This needs to be done in a UISL, there's no event to do it in time.
+
 var private bool bRegistered;
 
 event OnInit(UIScreen Screen)
@@ -15,17 +17,14 @@ event OnInit(UIScreen Screen)
 	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
 		return;
 
-	//ScreenClass = Screen.Class;
-
 	PatchLaunchMissionButton(SquadSelect);
 	OnSquadSelectUpdate(none, none, none, '', none);
 
 	SelfObj = self;
 
-	// TODO: This does not actually run when adding or removing soldiers. Figure out how to do that.
-	// This triggers when adding or removing a soldier from squad select, and in OnReceiveFocus too.
-	//`XEVENTMGR.RegisterForEvent(SelfObj, 'UISquadSelect_NavHelpUpdate', OnSquadSelectNavHelpUpdate, ELD_Immediate);
-	`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate);
+	// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
+
+	`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate, 49);
 	bRegistered = true;
 }
 
@@ -38,12 +37,14 @@ event OnRemoved(UIScreen Screen)
 
 	SelfObj = self;
 
-	//`XEVENTMGR.UnregisterFromEvent(SelfObj, 'UISquadSelect_NavHelpUpdate');
 	`XEVENTMGR.UnregisterFromEvent(SelfObj, 'rjSquadSelect_UpdateData');
 }
 
 event OnReceiveFocus(UIScreen Screen)
 {
+	if (!bRegistered || UISquadSelect(Screen) == none)
+		return;
+
 	OnSquadSelectUpdate(none, none, none, '', none);
 }
 
@@ -104,10 +105,21 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 				DDCheckbox.SetWidth(465);
 				DDCheckbox.UnitState = UnitState;
 
+				ExtraHeight = 0;
+				SSChildPanel = ListItem.GetChildByName('IRI_MLM_LoadLoadout_SquadSelect_Shortcut', false);
+				if (SSChildPanel != none)
+				{
+					`AMLOG("Loadout manager bar is present:" @ default.OffsetZ);
+					ExtraHeight += 36;
+				}
+				else 
+				{
+					`AMLOG("Loadout manager bar is NOT present");
+				}
+
 				// And they said I could never teach a llama to drive!
 				if (ListItem.IsA('robojumper_UISquadSelect_ListItem'))
 				{
-					ExtraHeight = 0;
 					foreach ListItem.ChildPanels(SSChildPanel)
 					{
 						if (SSChildPanel.IsA('robojumper_UISquadSelect_StatsPanel'))
@@ -125,7 +137,7 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 				else
 				{
 					//`AMLOG("Regular panel. Y:" @ ListItem.Y @ "Height:" @ ListItem.Height);
-					DDCheckbox.SetY(362);
+					DDCheckbox.SetY(362 + ExtraHeight);
 					ListItem.SetY(ListItem.Y - DDCheckbox.Height);
 				}
 			}

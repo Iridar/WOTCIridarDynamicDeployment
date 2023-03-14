@@ -2,6 +2,7 @@ class X2DLCInfo_WOTCIridarDynamicDeployment extends X2DownloadableContentInfo;
 
 var private config(DynamicDeployment) array<name> CharTemplatesSkipDDAnimSet;
 
+
 /// Start Issue #409
 /// <summary>
 /// Called from XComGameState_Unit:GetEarnedSoldierAbilities
