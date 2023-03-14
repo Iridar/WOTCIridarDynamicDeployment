@@ -31,10 +31,11 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Strategy
 static private function EventListenerReturn UpdateArmoryMainMenu(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local UIList				Menu;
-	local UIListItemString		DDButton;
+	local UIMechaListItem		DDButton;
 	local UIArmory_MainMenu		MainMenu;
 	local XComGameState_Unit	UnitState;
 	local string				strLabel;
+	local bool					bChecked;
 
 	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
 		return ELR_NoInterrupt;
@@ -52,10 +53,10 @@ static private function EventListenerReturn UpdateArmoryMainMenu(Object EventDat
 		return ELR_NoInterrupt;
 
 	strLabel = `CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel"));
+	bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
 
-	DDButton = Menu.Spawn(class'UIListItemString', Menu.ItemContainer).InitListItem(strLabel); 
-	DDButton.MCName = 'ArmoryMainMenu_DDButton';
-	DDButton.ButtonBG.OnClickedDelegate = OnDDButtonClicked;
+	DDButton = Menu.Spawn(class'UIMechaListItem', Menu.ItemContainer).InitListItem('ArmoryMainMenu_DDButton'); 
+	DDButton.UpdateDataCheckbox(strLabel, "", bChecked, OnDDCheckboxChanged, OnDDButtonClicked);
 
 	MoveMenuItemIntoPosition(Menu, DDButton, 7); // Above "dismiss" button
 
@@ -88,7 +89,7 @@ static private function MoveMenuItemIntoPosition(UIList Menu, UIPanel Item, int 
 	if (StartingIndex == Menu.SelectedIndex && Menu.OnSelectionChanged != none)
 		Menu.OnSelectionChanged(Menu, Menu.SelectedIndex);
 }
-static private function OnDDButtonClicked(UIButton kButton)
+static private function OnDDButtonClicked()
 {
 	local XComHQPresentationLayer		HQPres;
 	local UIArmory_MainMenu				MainMenu;
@@ -105,7 +106,24 @@ static private function OnDDButtonClicked(UIButton kButton)
 		`XSTRATEGYSOUNDMGR.PlaySoundEvent("Play_MenuSelect");
 	}
 }
+static private function OnDDCheckboxChanged(UICheckbox CheckboxControl)
+{
+	local UIArmory_MainMenu		ArmoryScreen;
+	local XComGameState_Unit	UnitState;
+	local bool					bMarked;
+	
+	ArmoryScreen = UIArmory_MainMenu(CheckboxControl.Movie.Pres.ScreenStack.GetFirstInstanceOf(class'UIArmory_MainMenu'));
+	if (ArmoryScreen == none)
+		return;
 
+	UnitState = ArmoryScreen.GetUnit();
+	if (UnitState == none)
+		return;
+
+	bMarked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+
+	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, !bMarked);
+}
 
 
 static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical()
