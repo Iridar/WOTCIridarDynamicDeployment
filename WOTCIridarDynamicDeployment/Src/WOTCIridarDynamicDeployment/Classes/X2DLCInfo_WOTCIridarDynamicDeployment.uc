@@ -3,6 +3,11 @@ class X2DLCInfo_WOTCIridarDynamicDeployment extends X2DownloadableContentInfo;
 
 var private config(DynamicDeployment) array<name> CharTemplatesSkipDDAnimSet;
 
+exec function TestSquadSelect()
+{
+	`XEVENTMGR.TriggerEvent('IriTestEvent', UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect')), UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect')), none);
+}
+
 /// Start Issue #409
 /// <summary>
 /// Called from XComGameState_Unit:GetEarnedSoldierAbilities
