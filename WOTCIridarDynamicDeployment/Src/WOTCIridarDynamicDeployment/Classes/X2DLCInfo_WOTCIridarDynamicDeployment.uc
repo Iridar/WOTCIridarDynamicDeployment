@@ -1,12 +1,6 @@
 class X2DLCInfo_WOTCIridarDynamicDeployment extends X2DownloadableContentInfo;
 
-
 var private config(DynamicDeployment) array<name> CharTemplatesSkipDDAnimSet;
-
-exec function TestSquadSelect()
-{
-	`XEVENTMGR.TriggerEvent('IriTestEvent', UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect')), UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect')), none);
-}
 
 /// Start Issue #409
 /// <summary>
@@ -83,6 +77,9 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 
 			if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState))
 			{
+				// During the mission, only these units will be potentially selectable for DD.
+				DDObject.AddEligibleUnitID(UnitState.ObjectID);
+
 				// Autoselect deployable units so they can be deployed from mission start without having to select them manually every time.
 				DDObject.ToggleUnitSelection(UnitState.ObjectID);
 

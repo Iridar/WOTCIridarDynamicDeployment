@@ -18,14 +18,14 @@ event OnInit(UIScreen Screen)
 	//ScreenClass = Screen.Class;
 
 	PatchLaunchMissionButton(SquadSelect);
-	OnSquadSelectNavHelpUpdate(none, none, none, '', none);
+	OnSquadSelectUpdate(none, none, none, '', none);
 
 	SelfObj = self;
 
 	// TODO: This does not actually run when adding or removing soldiers. Figure out how to do that.
 	// This triggers when adding or removing a soldier from squad select, and in OnReceiveFocus too.
-	`XEVENTMGR.RegisterForEvent(SelfObj, 'UISquadSelect_NavHelpUpdate', OnSquadSelectNavHelpUpdate, ELD_Immediate);
-	`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectNavHelpUpdate, ELD_Immediate);
+	//`XEVENTMGR.RegisterForEvent(SelfObj, 'UISquadSelect_NavHelpUpdate', OnSquadSelectNavHelpUpdate, ELD_Immediate);
+	`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate);
 	bRegistered = true;
 }
 
@@ -38,11 +38,16 @@ event OnRemoved(UIScreen Screen)
 
 	SelfObj = self;
 
-	`XEVENTMGR.UnregisterFromEvent(SelfObj, 'UISquadSelect_NavHelpUpdate');
+	//`XEVENTMGR.UnregisterFromEvent(SelfObj, 'UISquadSelect_NavHelpUpdate');
 	`XEVENTMGR.UnregisterFromEvent(SelfObj, 'rjSquadSelect_UpdateData');
 }
 
-static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+event OnReceiveFocus(UIScreen Screen)
+{
+	OnSquadSelectUpdate(none, none, none, '', none);
+}
+
+static private function EventListenerReturn OnSquadSelectUpdate(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local UISquadSelect						SquadSelect;
 	local UISquadSelect_ListItem			ListItem;
@@ -74,15 +79,17 @@ static private function EventListenerReturn OnSquadSelectNavHelpUpdate(Object Ev
 
 		bShouldHaveCheckbox = false;
 
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
-		if (UnitState != none && class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
-		{	
-			bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
-			bShouldHaveCheckbox = true;
+		if (!ListItem.bDisabled)
+		{
+			UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
+			if (UnitState != none && class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
+			{	
+				bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+				bShouldHaveCheckbox = true;
 
-			`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
+				`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
+			}
 		}
-		
 
 		DDCheckbox = UIMechaListItem_ClickToggleCheckbox(ListItem.GetChildByName('IRI_DD_SquadSelect_Checkbox', false));
 		if (DDCheckbox == none)

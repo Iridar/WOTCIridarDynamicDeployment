@@ -8,14 +8,21 @@ simulated function UIMechaListItem UpdateDataCheckbox(string _Desc,
 									  delegate<OnCheckboxChangedCallback> _OnCheckboxChangedCallback = none,
 									  optional delegate<OnClickDelegate> _OnClickDelegate = none)
 {
-	return super.UpdateDataCheckbox(_Desc, _CheckboxLabel, bIsChecked, none, OnMechaListItemClicked);
+	super.UpdateDataCheckbox(_Desc, _CheckboxLabel, bIsChecked, OnCheckboxChanged, OnMechaListItemClicked);
+
+	return self;
+}
+
+private function OnCheckboxChanged(UICheckbox CheckboxControl)
+{
+	`AMLOG(UnitState.GetFullName() @ "is now marked for Dynamic Deployment:" @ CheckboxControl.bChecked);
+
+	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, CheckboxControl.bChecked);
 }
 
 private function OnMechaListItemClicked()
 {
-	CheckBox.SetChecked(!CheckBox.bChecked, false);
+	`AMLOG("Running");
 
-	`AMLOG(UnitState.GetFullName() @ "is now marked for Dynamic Deployment:" @ CheckBox.bChecked);
-
-	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, CheckBox.bChecked);
+	CheckBox.SetChecked(!CheckBox.bChecked, true);
 }
