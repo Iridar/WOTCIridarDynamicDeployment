@@ -3,6 +3,8 @@ class UISL_DynamicDeployment extends UIScreenListener config(whatever);
 // 
 // This needs to be done in a UISL, there's no event to do it in time.
 
+`include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
+
 var private bool bRegistered;
 
 event OnInit(UIScreen Screen)
@@ -17,15 +19,21 @@ event OnInit(UIScreen Screen)
 	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
 		return;
 
-	PatchLaunchMissionButton(SquadSelect);
-	OnSquadSelectUpdate(none, none, none, '', none);
+	if (`GETMCMVAR(ENABLE_LAUNCH_MISSION_SCREEN))
+	{
+		PatchLaunchMissionButton(SquadSelect);
+	}
 
-	SelfObj = self;
+	if (`GETMCMVAR(ENABLE_SOLDIER_LIST_CHECKBOX))
+	{
+		OnSquadSelectUpdate(none, none, none, '', none);
 
-	// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
+		// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
 
-	`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate, 49);
-	bRegistered = true;
+		SelfObj = self;
+		`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate, 49);
+		bRegistered = true;
+	}
 }
 
 event OnRemoved(UIScreen Screen)
@@ -109,7 +117,6 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 				SSChildPanel = ListItem.GetChildByName('IRI_MLM_LoadLoadout_SquadSelect_Shortcut', false);
 				if (SSChildPanel != none)
 				{
-					`AMLOG("Loadout manager bar is present:" @ default.OffsetZ);
 					ExtraHeight += 36;
 				}
 				else 

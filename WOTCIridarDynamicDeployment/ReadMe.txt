@@ -27,14 +27,10 @@ Three ways to designate which soldiers remain in Skyranger:
 3. Via checkbox under each unit.
 
 2 and 3 must be togglable in MCM for compatibility.
-Also an MCM toggle to allow selecting different units for deployment
+Also an MCM toggle to allow selecting different units for deployment (to control whether select units is visible when units are already selected)
 
 Handle unit evacuation (add as eligible unit)
-
-TODO: What happens if you select reinforcements, then request evac? skyranger is here, it should be able to both evac and drop reinforcements.
-Oh right, you shoudl be able to drop reinforcements once skyraner arrives. this needs to be tested.
-
-Make DD Select unavailable if there are no soldiers in Skyranger and there's an evac zone
+disallow DDing ALL squadmembers
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

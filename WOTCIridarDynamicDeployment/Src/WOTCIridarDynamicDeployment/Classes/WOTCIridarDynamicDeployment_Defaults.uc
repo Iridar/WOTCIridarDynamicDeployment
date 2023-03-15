@@ -9,4 +9,8 @@ var config bool DD_SOLDIER_SELECT_ENDS_TURN;
 var config bool DD_DEPLOY_IS_FREE_ACTION;
 var config bool DD_DEPLOY_ENDS_TURN;
 
+var config bool ENABLE_SOLDIER_LIST_CHECKBOX;
+var config bool ENABLE_ARMORY_CHECKBOX;
+var config bool ENABLE_LAUNCH_MISSION_SCREEN;
+
 var config bool DEBUG_LOGGING;

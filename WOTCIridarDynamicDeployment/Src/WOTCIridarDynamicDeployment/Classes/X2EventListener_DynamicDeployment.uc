@@ -53,10 +53,18 @@ static private function EventListenerReturn UpdateArmoryMainMenu(Object EventDat
 		return ELR_NoInterrupt;
 
 	strLabel = `CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel"));
-	bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
-
+	
 	DDButton = Menu.Spawn(class'UIMechaListItem', Menu.ItemContainer).InitListItem('ArmoryMainMenu_DDButton'); 
-	DDButton.UpdateDataCheckbox(strLabel, "", bChecked, OnDDCheckboxChanged, OnDDButtonClicked);
+
+	if (`GETMCMVAR(ENABLE_ARMORY_CHECKBOX))
+	{
+		bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+		DDButton.UpdateDataCheckbox(strLabel, "", bChecked, OnDDCheckboxChanged, OnDDButtonClicked);
+	}
+	else
+	{
+		DDButton.UpdateDataDescription(strLabel, OnDDButtonClicked);
+	}
 
 	MoveMenuItemIntoPosition(Menu, DDButton, 7); // Above "dismiss" button
 

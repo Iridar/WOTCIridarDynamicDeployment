@@ -290,7 +290,6 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 {
 	local XComGameState_HeadquartersXCom	XComHQ;
 	local XComGameStateHistory				History;
-	local StateObjectReference				UnitReference;
 	local XComGameState_Unit				UnitState;
 	local bool								bHealthy;
 	local bool								bShaken;

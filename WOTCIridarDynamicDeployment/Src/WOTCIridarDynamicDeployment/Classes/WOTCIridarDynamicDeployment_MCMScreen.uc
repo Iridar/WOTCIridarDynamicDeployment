@@ -7,6 +7,7 @@ var localized string PageTitle;
 var localized string GroupHeader1;
 var localized string GroupHeader2;
 var localized string GroupHeader3;
+var localized string GroupHeader4;
 
 var localized string EndLabel;
 var localized string EndLabel_Tip;
@@ -21,6 +22,10 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxVars(DD_DEPLOY_ENDS_TURN);
 `MCM_API_AutoCheckBoxVars(DEBUG_LOGGING);
 
+`MCM_API_AutoCheckBoxVars(ENABLE_SOLDIER_LIST_CHECKBOX);
+`MCM_API_AutoCheckBoxVars(ENABLE_ARMORY_CHECKBOX);
+`MCM_API_AutoCheckBoxVars(ENABLE_LAUNCH_MISSION_SCREEN);
+
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 `MCM_API_AutoSliderFns(DEPLOY_CAST_RANGE_TILES,, 1);
@@ -30,6 +35,10 @@ var localized string EndLabel_Tip;
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_IS_FREE_ACTION, 1);
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_ENDS_TURN, 1);
 `MCM_API_AutoCheckBoxFns(DEBUG_LOGGING, 1);
+
+`MCM_API_AutoCheckBoxFns(ENABLE_SOLDIER_LIST_CHECKBOX, 1);
+`MCM_API_AutoCheckBoxFns(ENABLE_ARMORY_CHECKBOX, 1);
+`MCM_API_AutoCheckBoxFns(ENABLE_LAUNCH_MISSION_SCREEN, 1);
 
 event OnInit(UIScreen Screen)
 {
@@ -47,6 +56,14 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	Page.SetPageTitle(PageTitle);
 	Page.SetSaveHandler(SaveButtonClicked);
 	Page.EnableResetButton(ResetButtonClicked);
+
+	// Interface Options
+
+	Group = Page.AddGroup('Group4', GroupHeader4);
+
+	`MCM_API_AutoAddCheckBox(Group, ENABLE_SOLDIER_LIST_CHECKBOX);	
+	`MCM_API_AutoAddCheckBox(Group, ENABLE_ARMORY_CHECKBOX);	
+	`MCM_API_AutoAddCheckBox(Group, ENABLE_LAUNCH_MISSION_SCREEN);	
 
 	// Deployment Options
 
@@ -103,6 +120,10 @@ simulated function LoadSavedSettings()
 	DD_DEPLOY_IS_FREE_ACTION = `GETMCMVAR(DD_DEPLOY_IS_FREE_ACTION);
 	DD_DEPLOY_ENDS_TURN = `GETMCMVAR(DD_DEPLOY_ENDS_TURN);
 	DEBUG_LOGGING = `GETMCMVAR(DEBUG_LOGGING);
+
+	ENABLE_SOLDIER_LIST_CHECKBOX = `GETMCMVAR(ENABLE_SOLDIER_LIST_CHECKBOX);
+	ENABLE_LAUNCH_MISSION_SCREEN = `GETMCMVAR(ENABLE_LAUNCH_MISSION_SCREEN);
+	ENABLE_ARMORY_CHECKBOX = `GETMCMVAR(ENABLE_ARMORY_CHECKBOX);
 }
 
 simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
@@ -114,6 +135,10 @@ simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
 	`MCM_API_AutoReset(DD_DEPLOY_IS_FREE_ACTION);
 	`MCM_API_AutoReset(DD_DEPLOY_ENDS_TURN);
 	`MCM_API_AutoReset(DEBUG_LOGGING);
+
+	`MCM_API_AutoReset(ENABLE_SOLDIER_LIST_CHECKBOX);
+	`MCM_API_AutoReset(ENABLE_LAUNCH_MISSION_SCREEN);
+	`MCM_API_AutoReset(ENABLE_ARMORY_CHECKBOX);
 }
 
 

@@ -49,8 +49,8 @@ LocHelpText="During Dynamic Deployment, this soldier reveals the terrain and uni
 
 [IRI_DDUnlock_TakeAndHold X2AbilityTemplate]
 LocFriendlyName="Take and Hold"
-LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until it performs a dash."
-LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until it performs a dash."
+LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until they perform a dash."
+LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until they perform a dash."
 LocFlyOverText="Take and Hold"
 
 [IRI_DDUnlock_HitGroundRunning X2AbilityTemplate]

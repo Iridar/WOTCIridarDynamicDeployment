@@ -13,10 +13,10 @@ IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
 
 ModName = "Dynamic Deployment"
 PageTitle = "Dynamic Deployment by Iridar"
-GroupHeader1 = "Deployment Settings"
-GroupHeader2 = "Action Economy"
-GroupHeader3 = "Misc"
-
+GroupHeader4 = "INTERFACE SETTINGS"
+GroupHeader1 = "DEPLOYMENT SETTINGS"
+GroupHeader2 = "ACTION ECONOMY"
+GroupHeader3 = "MISC"
 
 SQUAD_MUST_SEE_TILE_Label = "Squad must see the deployment area"
 SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in the squad must have line of sight to the selected deployment area. You will not be able to select a deployment area inside the fog of war."
@@ -39,3 +39,12 @@ DEBUG_LOGGING_Tip = "If enabled, the mod will print debug messages into the log 
 
 EndLabel = "Created by Iridar | www.patreon.com/Iridar"
 EndLabel_Tip = "Thank you for using my mods, I hope you enjoy! Please consider supporting me on Patreon so I can afford the time to make more awesome mods <3"
+
+ENABLE_SOLDIER_LIST_CHECKBOX_Label = "Enable Squad Select Checkboxes"
+ENABLE_SOLDIER_LIST_CHECKBOX_Tip = "If enabled, there will be a checkbox under each soldier in Squad Select to control which units should use Dynamic Deployment. This method is most convenient for mouse users."
+
+ENABLE_LAUNCH_MISSION_SCREEN_Label = "Enable Launch Mission Deployment Screen"
+ENABLE_LAUNCH_MISSION_SCREEN_Tip = "If enabled, launching a mission from Squad Select will first display a screen to select which units should use Dynamic Deployment. This method should work for controller users."
+
+ENABLE_ARMORY_CHECKBOX_Label = "Enable Armory Deployment Checkbox"
+ENABLE_ARMORY_CHECKBOX_Tip = "If enabled, the Dynamic Deployment button in the Armory will have a checkbox to control whether each unit should use Dynamic Deployment. This method should be used when other methods are not available due to mod conflicts."
