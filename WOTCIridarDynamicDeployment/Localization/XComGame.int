@@ -65,6 +65,11 @@ LocLongDescription="This unit is able to call for Dynamic Deployment without bre
 LocHelpText="This unit is able to call for Dynamic Deployment without breaking the squad concealment and from a longer distance."
 LocFlyOverText="Digital Uplink"
 
+[IRI_DDUnlock_FirstAid X2AbilityTemplate]
+LocFriendlyName="First Aid"
+LocLongDescription="When evacuated, this unit restores <Ability:IRI_DD_FirstAid_HealMissingHP_Percent/> of missing HP and can be redeployed again."
+LocHelpText="When evacuated, this unit restores <Ability:IRI_DD_FirstAid_HealMissingHP_Percent/> of missing HP and can be redeployed again."
+LocFlyOverText="First Aid"
 
 ; ---------------------------------------------------------------
 ;					SITREPS

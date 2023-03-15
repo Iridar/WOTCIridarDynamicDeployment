@@ -1,8 +1,6 @@
 [Help]
 IRI_DynamicDeployment_ArmoryLabel = "Dynamic Deployment"
 IRI_DynamicDeployment_UnlockLabel = "UNLOCK"
-
-IRI_DynamicDeployment_UnlockedLabel_Robotic = "UPGRADE INSTALLED"
 IRI_DynamicDeployment_UnlockedLabel = "UNLOCKED"
 IRI_DynamicDeployment_NotEnoughAP = "Not enough Ability Points."
 

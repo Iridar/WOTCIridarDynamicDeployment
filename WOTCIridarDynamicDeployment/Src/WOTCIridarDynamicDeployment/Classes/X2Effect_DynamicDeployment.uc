@@ -93,6 +93,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	`AMLOG("Deployment complete");
 }
 
+// TODO: This function is mess, untangle it.
 static private protected function XComGameState_Unit AddStrategyUnitToBoard(XComGameState_Unit Unit, XComGameState NewGameState, const vector SpawnLocation)
 {
 	local XComGameStateHistory			History;
@@ -104,19 +105,23 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	local TTile							CosmeticUnitTile;
 	local bool							bWasEvacedFromThisMission;
 
+	History = `XCOMHISTORY;
+
 	// Needed to allow redeploying evacuated units
 	bWasEvacedFromThisMission = class'Help'.static.IsUnitEvaced(Unit);
 	`AMLOG(`ShowVar(bWasEvacedFromThisMission));
 
 	//tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
 	Unit.bSpawnedFromAvenger = true; 
-	//Unit.ClearRemovedFromPlayFlag();
+
+	// This causes redscreens about having to clamp the tile location, but I'm pretty sure it's schitzofrenic
+	// I've copied the clamping code and there was no difference between tiles.
+	Unit.SetVisibilityLocationFromVector(SpawnLocation);
 	
 	// No need to do this stuff if the unit was already on this mission.
 	if (!bWasEvacedFromThisMission)
 	{
 		// assign the new unit to the human team -LEB
-		History = `XCOMHISTORY;
 		foreach History.IterateByClassType(class'XComGameState_Player', PlayerState)
 		{
 			if (PlayerState.GetTeam() == eTeam_XCom)
@@ -139,32 +144,52 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 			Group = XComGameState_AIGroup(NewGameState.ModifyStateObject(Group.Class, Group.ObjectID));
 			Group.AddUnitToGroup(Unit.ObjectID, NewGameState);
 		}
+	}
 
-		// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
-		foreach Unit.InventoryItems(ItemReference)
+	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
+	foreach Unit.InventoryItems(ItemReference)
+	{
+		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
+
+		if (!bWasEvacedFromThisMission)
 		{
-			ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
 			ItemState.BeginTacticalPlay(NewGameState);   // this needs to be called explicitly since we're adding an existing state directly into tactical
-
+		
 			// add any cosmetic items that might exists
 			ItemState.CreateCosmeticItemUnit(NewGameState);
 			CosmeticUnit = XComGameState_Unit(NewGameState.GetGameStateForObjectID(ItemState.CosmeticUnitRef.ObjectID));
+		}
+		else if (ItemState.CosmeticUnitRef.ObjectID > 0)
+		{
+			CosmeticUnit = XComGameState_Unit(History.GetGameStateForObjectID(ItemState.CosmeticUnitRef.ObjectID));
 			if (CosmeticUnit != none)
 			{
-				CosmeticUnitTile = Unit.GetDesiredTileForAttachedCosmeticUnit();
-				CosmeticUnitTile.Z += Unit.UnitHeight - 2;
-				CosmeticUnit.SetVisibilityLocation(CosmeticUnitTile);
+				CosmeticUnit = XComGameState_Unit(NewGameState.ModifyStateObject(CosmeticUnit.Class, CosmeticUnit.ObjectID));
 			}
 		}
+		if (CosmeticUnit != none)
+		{
+			if (bWasEvacedFromThisMission)  
+			{
+				`AMLOG("Found cosmetic unit" @ ItemState.GetMyTemplateName());
+				CosmeticUnit.ClearRemovedFromPlayFlag();
+			}
+			CosmeticUnitTile = Unit.GetDesiredTileForAttachedCosmeticUnit();
+			CosmeticUnitTile.Z += Unit.UnitHeight - 2;
+			CosmeticUnit.SetVisibilityLocation(CosmeticUnitTile);
+		}
+		else 
+		{
+			if (bWasEvacedFromThisMission) `AMLOG("Did not find cosmetic unit" @ ItemState.GetMyTemplateName());
+		}
+	}
 
+	if (!bWasEvacedFromThisMission)
+	{
 		// add abilities -LEB
 		// Must happen after items are added, to do ammo merging properly. -LEB
 		`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
 	}
-
-	// This causes redscreens about having to clamp the tile location, but I'm pretty sure it's schitzofrenic
-	// I've copied the clamping code and there was no difference between tiles.
-	Unit.SetVisibilityLocationFromVector(SpawnLocation);
 
 	if (!bWasEvacedFromThisMission)
 	{
@@ -172,7 +197,9 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 	}
 	else
 	{
-		// So that soldier doesn't appear as "in skyranger" on the soldier select screen.
+		Unit.ClearRemovedFromPlayFlag();
+		`XWORLD.SetTileBlockedByUnitFlag(Unit);
+		// So that soldier doesn't appear on unit selection screen again until evacuated.
 		Unit.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
 		Unit.ClearUnitValue(class'Help'.default.UnitEvacedValue);
 	}
@@ -188,6 +215,25 @@ static private protected function XComGameState_Unit AddStrategyUnitToBoard(XCom
 
 	return Unit;
 }
+
+//static function UnitResumeTacticalPlay(XComGameState_Unit UnitState)
+//{
+//	local X2EventManager EventManager;
+//	local XComGameState_BattleData BattleDataState;
+//	local XComGameStateHistory History;
+//	local XComGameState_HeadquartersXCom XComHQ;
+//
+//	EventManager = `XEVENTMGR;
+//	History = `XCOMHISTORY;
+//
+//	//EventManager.TriggerEvent('OnUnitBeginPlay', UnitState, UnitState, NewGameState);
+//
+//	UnitState.RegisterForEvents();
+//
+//	`XWORLD.SetTileBlockedByUnitFlag(UnitState);
+//}
+
+
 static private protected function XComGameState_AIGroup GetPlayerGroup()
 {
 	local XComGameStateHistory History;

@@ -62,11 +62,11 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 	local UISquadSelect_ListItem			ListItem;
 	local array<UIPanel>					ChildrenPanels;
 	local UIPanel							ChildPanel;
-	local UIPanel							SSChildPanel;
+	
 	local XComGameState_Unit				UnitState;
 	local XComGameStateHistory				History;
 	local UIMechaListItem_ClickToggleCheckbox DDCheckbox;
-	local int								ExtraHeight;
+	
 	local bool								bChecked;
 	local bool								bShouldHaveCheckbox;
 
@@ -112,41 +112,7 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 				DDCheckbox.UpdateDataCheckbox(`CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel")), "", bChecked, none, none);
 				DDCheckbox.SetWidth(465);
 				DDCheckbox.UnitState = UnitState;
-
-				ExtraHeight = 0;
-				SSChildPanel = ListItem.GetChildByName('IRI_MLM_LoadLoadout_SquadSelect_Shortcut', false);
-				if (SSChildPanel != none)
-				{
-					ExtraHeight += 36;
-				}
-				else 
-				{
-					`AMLOG("Loadout manager bar is NOT present");
-				}
-
-				// And they said I could never teach a llama to drive!
-				if (ListItem.IsA('robojumper_UISquadSelect_ListItem'))
-				{
-					foreach ListItem.ChildPanels(SSChildPanel)
-					{
-						if (SSChildPanel.IsA('robojumper_UISquadSelect_StatsPanel'))
-						{
-							ExtraHeight += SSChildPanel.Height;
-						}
-						if (SSChildPanel.IsA('robojumper_UISquadSelect_SkillsPanel'))
-						{
-							ExtraHeight += SSChildPanel.Height;
-						}
-					}
-					DDCheckbox.SetY(ListItem.Height + ExtraHeight);
-					ListItem.SetY(ListItem.Y - DDCheckbox.Height - 10);
-				}
-				else
-				{
-					//`AMLOG("Regular panel. Y:" @ ListItem.Y @ "Height:" @ ListItem.Height);
-					DDCheckbox.SetY(362 + ExtraHeight);
-					ListItem.SetY(ListItem.Y - DDCheckbox.Height);
-				}
+				DDCheckbox.UpdatePosition(ListItem);
 			}
 			else
 			{
@@ -159,6 +125,9 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 			if (bShouldHaveCheckbox)
 			{
 				// Checkbox should be there and is there, just update the value.
+				// Have to update position too in case player returns to squad select from armory where they unlocked more perks
+				// and soldier list item became taller
+				DDCheckbox.UpdatePosition(ListItem);
 				DDCheckbox.Show();
 				DDCheckbox.Checkbox.SetChecked(bChecked, false);
 			}

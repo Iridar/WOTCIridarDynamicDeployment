@@ -12,8 +12,9 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FirstAid', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop")); // TODO: Icon //TODO: THis needs to be a pure passive for the icon
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));//TODO: THis needs to be a pure passive for the icon
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
 
@@ -321,6 +322,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.CinescriptCameraType = "StandardGrenadeFiring";
 
 	Template.ConcealmentRule = eConceal_Never;
+	Template.SuperConcealmentLoss = 100;
 
 	return Template;
 }
@@ -341,6 +343,7 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Spark()
 	Template.CustomFireAnim = 'FF_Grenade';
 
 	Template.ConcealmentRule = eConceal_Never;
+	Template.SuperConcealmentLoss = 100;
 
 	return Template;
 }

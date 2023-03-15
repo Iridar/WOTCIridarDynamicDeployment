@@ -85,7 +85,7 @@ static private function PutSkyrangerOnCooldownInternal(XComGameState_Player Play
 	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy_Uplink') < iCooldown) 
 		PlayerState.SetCooldown('IRI_DynamicDeployment_Deploy_Uplink', iCooldown);
 
-	if (!bDeploymentAbilitiesOnly)
+	if (bDeploymentAbilitiesOnly)
 		return;
 
 	if (PlayerState.GetCooldown('Evac') < iCooldown) 
@@ -112,6 +112,12 @@ static final function int GetDeploymentType()
 static final function MarkUnitEvaced(XComGameState_Unit UnitState, optional XComGameState UseGameState)
 {
 	SetUnitValue(default.UnitEvacedValue, 1.0f, UnitState, UseGameState);
+}
+static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
+{
+	local UnitValue UV;
+
+	return UnitState.GetUnitValue(default.UnitEvacedValue, UV);
 }
 
 static private function SetUnitValue(const name UnitValueName, const float fValue, XComGameState_Unit UnitState, optional XComGameState UseGameState, optional const bool bClearValue)
@@ -149,14 +155,6 @@ static private function SetUnitValue(const name UnitValueName, const float fValu
 		}
 		`GAMERULES.SubmitGameState(NewGameState);
 	}
-}
-
-
-static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
-{
-	local UnitValue UV;
-
-	return UnitState.GetUnitValue(default.UnitEvacedValue, UV);
 }
 
 	
@@ -326,5 +324,6 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DD_Triggered_Event"
-	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
+	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"	
+	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
 }

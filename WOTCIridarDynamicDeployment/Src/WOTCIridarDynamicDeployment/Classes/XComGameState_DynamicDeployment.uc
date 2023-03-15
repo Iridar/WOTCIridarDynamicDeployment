@@ -51,10 +51,18 @@ final function DeselectAllUnits()
 	PrecisionDropTileStorages.Length = 0;
 	bPendingDeployment = false;
 }
+final function FullReset()
+{
+	DeselectAllUnits();
+	EligibleUnitIDs.Length = 0;
+}
 
 final function AddEligibleUnitID(const int UnitObjectID)
 {
-	EligibleUnitIDs.AddItem(UnitObjectID);
+	if (EligibleUnitIDs.Find(UnitObjectID) == INDEX_NONE)
+	{
+		EligibleUnitIDs.AddItem(UnitObjectID);
+	}
 }
 
 
@@ -162,11 +170,10 @@ final function array<XComGameState_Unit> GetPrecisionDropUnits()
 
 	foreach UnitStates(UnitState)
 	{
-		// TODO: DEBUG ONLY
-		//if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_PrecisionDrop'))
-		//{
+		if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_PrecisionDrop'))
+		{
 			PrecisionDropUnits.AddItem(UnitState);
-		//}
+		}
 	}
 	return PrecisionDropUnits;
 }
@@ -332,7 +339,8 @@ final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState
 DefaultProperties
 {
 	// Nuke this state object during tactical -> strategy transition.
-	bTacticalTransient = true
+	// EDIT: Also apparently it means it won't be saved into the save file...
+	//bTacticalTransient = true
 
 	// There can be only one. dramatic_backdrop.mp3
 	bSingletonStateType = true

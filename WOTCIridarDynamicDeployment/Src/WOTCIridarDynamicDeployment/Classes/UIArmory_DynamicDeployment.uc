@@ -69,16 +69,8 @@ simulated function InitScreen(XComPlayerController InitController, UIMovie InitM
 	if (UnitState == none)
 		CloseScreen();
 
-	if (UnitState.IsRobotic())
-	{
-		m_strTitle = `GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel_Robotic");
-		m_strBuy = class'UIChooseUpgrade'.default.m_strUpgradeButton; // "Upgrade"
-	}
-	else
-	{
-		m_strTitle = `GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel");
-		m_strBuy = `GetLocalizedString("IRI_DynamicDeployment_UnlockLabel"); // "Unlock"
-	}
+	m_strTitle = `GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel");
+	m_strBuy = `GetLocalizedString("IRI_DynamicDeployment_UnlockLabel"); // "Unlock"
 	m_strSubTitleTitle = "";
 	m_strConfirmButtonLabel = m_strBuy;
 
@@ -250,16 +242,7 @@ simulated function PopulateData()
 		ListItem = Spawn(class'UIInventory_DynamicDeploymentUnlock', List.itemContainer);
 		ListItem.DDUnlock = DDUnlock;
 		ListItem.bUnlocked = true;
-
-		if (UnitState.IsRobotic())
-		{
-			ListItem.strUnlockedLabel = `GetLocalizedString("IRI_DynamicDeployment_UnlockedLabel_Robotic");
-		}
-		else
-		{
-			ListItem.strUnlockedLabel = `GetLocalizedString("IRI_DynamicDeployment_UnlockedLabel");
-		}
-
+		ListItem.strUnlockedLabel = `GetLocalizedString("IRI_DynamicDeployment_UnlockedLabel");
 		ListItem.InitInventoryListCommodity(AbilityCommodity, , "", m_eStyle, , 126);
 	}
 }

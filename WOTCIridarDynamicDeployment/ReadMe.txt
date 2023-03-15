@@ -8,6 +8,13 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
+Done:
+
+Test request evac interactions - DD abiliteis should be disabled. = works.
+BUG: Loading a save still deselects units that were selected for DD. = fixed
+
+BUG: redeploying evaced unit makes them disappear after drop
+
 
 // Note: cooking maps breaks the SPARK deployment for some reason.
 
@@ -15,6 +22,12 @@ https://github.com/Iridar/EnhancedModProjectTemplate
 // TODO: Test everything with redscreens and check logs
 
 TODO: Paramedic training - after being evacuated, this unit heals and can be redeployed even if wounded
+TODO: Move camera to deployment location.
+
+Seismic beacon needs a better effect
+
+Make DD abilities unavailable if there are no units to deploy
+
 
 #Evacuating a unit or spawning an evac zone should put DD on cooldown of 1 turn.
 #Deploying units should put call evac, evac and deployment itself on a cooldown for 1 turn
@@ -29,8 +42,14 @@ Three ways to designate which soldiers remain in Skyranger:
 2 and 3 must be togglable in MCM for compatibility.
 Also an MCM toggle to allow selecting different units for deployment (to control whether select units is visible when units are already selected)
 
-Handle unit evacuation (add as eligible unit)
 disallow DDing ALL squadmembers
+
+Bug:
+Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK
+[0145.72] Warning: Warning, Material fx_cap_n_hold.M_Transmitter_Cyl missing bUsedWithParticleSprites=True!
+
+HP from armor is lost when redeploying.
+SPARK used wrong animation when redeploying underground?
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

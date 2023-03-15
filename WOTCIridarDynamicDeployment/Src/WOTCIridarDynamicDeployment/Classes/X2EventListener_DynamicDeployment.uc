@@ -260,16 +260,49 @@ static private function EventListenerReturn OnSpawnEvacZoneComplete(Object Event
 // Mark evacuated units with a unit value so that we know not to reinit their abilities if we're gonna redeploy them again in the same mission.
 static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
-	local XComGameState_Unit UnitState;
+	local XComGameState_Unit				UnitState;
+	local XComGameState						NewGameState;
+	local float								CurrentHP;
+	local float								MaxHP;
+	local float								HealHP;
+	local XComGameState_DynamicDeployment	DDObject;
 
 	UnitState = XComGameState_Unit(EventData);
 	if (UnitState == none)
 		return ELR_NoInterrupt;
 
-	class'Help'.static.MarkUnitEvaced(UnitState);
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
+	if (DDObject == none)
+		return ELR_NoInterrupt;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("DD Mark Unit Evaced");
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
+
+	// Heal the unit if they have the right ability.
+	if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FirstAid'))
+	{
+		CurrentHP = UnitState.GetCurrentStat(eStat_HP);
+		MaxHP = UnitState.GetMaxStat(eStat_HP);
+		HealHP = (MaxHP - CurrentHP) * `GetConfigFloat("IRI_DD_FirstAid_HealMissingHP_Percent");
+
+		`AMLOG("Healing unit:" @ UnitState.GetFullName() @ `ShowVar(CurrentHP) @ `ShowVar(MaxHP) @ `ShowVar(HealHP) @ "HP after heal:" @ CurrentHP + HealHP);
+
+		CurrentHP += HealHP;
+		UnitState.SetCurrentStat(eStat_HP, int(CurrentHP));
+	}
+
+	// To allow redeploying this unit.
+	DDObject.AddEligibleUnitID(UnitState.ObjectID);
+	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, true, NewGameState);
+
+	// To prevent items and abilities being re-inited for this unit if redeployed.
+	class'Help'.static.MarkUnitEvaced(UnitState, NewGameState);
 
 	// Evacuating a unit puts DD abilities on 1 turn cooldown - skyranger is busy recieving a unit and cannot be used for deployment.
-	class'Help'.static.PutSkyrangerOnCooldown(1,, true);
+	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState, true);
+
+	`GAMERULES.SubmitGameState(NewGameState);
 
 	return ELR_NoInterrupt;
 }
@@ -281,8 +314,27 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 	local XComGameState_Unit	UnitState;
 	local XComGameState_Unit	NewUnitState;
 	local XComGameStateHistory	History;
+	local XComGameState_DynamicDeployment DDObject;
 
 	History = `XCOMHISTORY;
+
+	// Wipe all data from DDObject on mission end so it doesn't leak into the next mission.
+	foreach NewGameState.IterateByClassType(class'XComGameState_DynamicDeployment', DDObject)
+	{
+		break;
+	}
+	if (DDObject == none)
+	{
+		DDObject = XComGameState_DynamicDeployment(History.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
+		if (DDObject != none)
+		{
+			DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
+		}
+	}
+	if (DDObject != none)
+	{
+		DDObject.FullReset();
+	}
 
 	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
 	{

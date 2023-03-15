@@ -63,8 +63,17 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 
 	`AMLOG("Running");
 
-	DDObject = XComGameState_DynamicDeployment(StartGameState.CreateNewStateObject(class'XComGameState_DynamicDeployment'));
-
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
+	if (DDObject == none)
+	{
+		DDObject = XComGameState_DynamicDeployment(StartGameState.CreateNewStateObject(class'XComGameState_DynamicDeployment'));
+	}
+	else
+	{
+		DDObject = XComGameState_DynamicDeployment(StartGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
+		DDObject.FullReset();
+	}
+	
 	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
 	{
 		`AMLOG("Found XComHQ...");
@@ -299,7 +308,11 @@ static function bool AbilityTagExpandHandler_CH(string InString, out string OutS
 	case "IRI_DD_TakeAndHold_DefenseBonus":
 	case "IRI_DD_TakeAndHold_AimBonus":
 	case "IRI_DD_HitGroundRunning_MobilityBonus":
-		OutString = DDColor(`GetConfigInt(name(InString)));
+		OutString = DDColor(`GetConfigInt(InString));
+		return true;
+
+	case "IRI_DD_FirstAid_HealMissingHP_Percent":	
+		OutString = DDColor(int(`GetConfigFloat(InString) * 100) $ "%"); // 0.5f -> 50%
 		return true;
 
 	// ----------------------------------------------------------------------------------------------------------------------
