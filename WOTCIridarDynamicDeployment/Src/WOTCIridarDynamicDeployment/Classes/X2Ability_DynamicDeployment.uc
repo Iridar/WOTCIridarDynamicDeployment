@@ -16,7 +16,9 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));//TODO: THis needs to be a pure passive for the icon
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
+	Templates.AddItem(PurePassive('IRI_DDUnlock_TakeAndHold_Passive', "img:///IRIDynamicDeployment_UI.UIPerk_TakeAndHold",, 'eAbilitySource_Commander'));
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
+	Templates.AddItem(PurePassive('IRI_DDUnlock_HitGroundRunning_Passive', "img:///IRIDynamicDeployment_UI.UIPerk_HitGroundRunning",, 'eAbilitySource_Commander'));
 
 	return Templates;
 }
@@ -58,6 +60,8 @@ static private function X2AbilityTemplate IRI_DDUnlock_HitGroundRunning()
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+
+	Template.AdditionalAbilities.AddItem('IRI_DDUnlock_HitGroundRunning_Passive');
 	
 	return Template;
 }
@@ -100,6 +104,8 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 	
 	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
 	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
+
+	Template.AdditionalAbilities.AddItem('IRI_DDUnlock_TakeAndHold_Passive');
 	
 	return Template;
 }
@@ -107,6 +113,7 @@ static private function X2AbilityTemplate IRI_DDUnlock_TakeAndHold()
 static private function X2AbilityTemplate CreatePassiveDDUnlock(const name TemplateName, const string strImage)
 {
 	local X2AbilityTemplate Template;
+	local X2Effect_Persistent PersistentEffect;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, TemplateName);
 
@@ -119,6 +126,12 @@ static private function X2AbilityTemplate CreatePassiveDDUnlock(const name Templ
 	Template.bHideOnClassUnlock = true;
 	Template.bDisplayInUITooltip = false;
 	Template.bDontDisplayInAbilitySummary = false;
+
+	// Dummy effect for the UI icon
+	PersistentEffect = new class'X2Effect_Persistent';
+	PersistentEffect.BuildPersistentEffect(1, true, false);
+	PersistentEffect.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, strImage, true,, Template.AbilitySourceName);
+	Template.AddTargetEffect(PersistentEffect);
 
 	// Targeting and Triggering
 	Template.AbilityToHitCalc = default.DeadEye;

@@ -53,11 +53,22 @@ LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_T
 LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until they perform a dash."
 LocFlyOverText="Take and Hold"
 
+[IRI_DDUnlock_TakeAndHold_Passive X2AbilityTemplate]
+LocFriendlyName="Take and Hold"
+LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until they perform a dash."
+LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_TakeAndHold_AimBonus/> Aim and +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> Defense for <Ability:IRI_DD_TakeAndHold_DurationTurns/> turns, or until they perform a dash."
+
 [IRI_DDUnlock_HitGroundRunning X2AbilityTemplate]
 LocFriendlyName="Hit The Ground Running"
 LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> Mobility until the end of turn."
 LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> Mobility until the end of turn."
 LocFlyOverText="Hit The Ground Running"
+
+[IRI_DDUnlock_HitGroundRunning_Passive X2AbilityTemplate]
+LocFriendlyName="Hit The Ground Running"
+LocLongDescription="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> Mobility until the end of turn."
+LocHelpText="After Dynamic Deployment, this unit gains +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> Mobility until the end of turn."
+
 
 [IRI_DDUnlock_DigitalUplink X2AbilityTemplate]
 LocFriendlyName="Digital Uplink"
