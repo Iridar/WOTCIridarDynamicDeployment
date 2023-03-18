@@ -13,20 +13,30 @@ Done:
 Test request evac interactions - DD abiliteis should be disabled. = works.
 BUG: Loading a save still deselects units that were selected for DD. = fixed
 
-BUG: redeploying evaced unit makes them disappear after drop
-
-
 // Note: cooking maps breaks the SPARK deployment for some reason.
 
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
+TODO: Since deployment mark is tied to mission state object ID, DD should be disallowed on all missions that will have tactical-to-tactical transfers.
 TODO: Paramedic training - after being evacuated, this unit heals and can be redeployed even if wounded
 TODO: Move camera to deployment location.
 
-Seismic beacon needs a better effect
+SPARK used wrong deployment animation when redeploying underground
+When redeploying, targeting method spawn a cosmetic unit
+
+Seismic beacon needs a better effect and projectile trail
 
 Make DD abilities unavailable if there are no units to deploy
+
+disallow DDing ALL squadmembers
+
+Bug:
+Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK
+[0145.72] Warning: Warning, Material fx_cap_n_hold.M_Transmitter_Cyl missing bUsedWithParticleSprites=True!
+
+HP from armor is lost when redeploying.
+SPARK used wrong animation when redeploying underground?
 
 
 #Evacuating a unit or spawning an evac zone should put DD on cooldown of 1 turn.
@@ -41,15 +51,6 @@ Three ways to designate which soldiers remain in Skyranger:
 
 2 and 3 must be togglable in MCM for compatibility.
 Also an MCM toggle to allow selecting different units for deployment (to control whether select units is visible when units are already selected)
-
-disallow DDing ALL squadmembers
-
-Bug:
-Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK
-[0145.72] Warning: Warning, Material fx_cap_n_hold.M_Transmitter_Cyl missing bUsedWithParticleSprites=True!
-
-HP from armor is lost when redeploying.
-SPARK used wrong animation when redeploying underground?
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.

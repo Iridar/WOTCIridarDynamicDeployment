@@ -14,7 +14,7 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FirstAid', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop")); // TODO: Icon //TODO: THis needs to be a pure passive for the icon
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));//TODO: THis needs to be a pure passive for the icon
+	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
 	Templates.AddItem(PurePassive('IRI_DDUnlock_TakeAndHold_Passive', "img:///IRIDynamicDeployment_UI.UIPerk_TakeAndHold",, 'eAbilitySource_Commander'));
 	Templates.AddItem(IRI_DDUnlock_HitGroundRunning());
