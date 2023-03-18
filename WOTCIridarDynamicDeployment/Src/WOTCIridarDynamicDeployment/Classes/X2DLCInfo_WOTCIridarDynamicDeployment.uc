@@ -311,10 +311,6 @@ static function bool AbilityTagExpandHandler_CH(string InString, out string OutS
 		OutString = DDColor(`GetConfigInt(InString));
 		return true;
 
-	case "IRI_DD_FirstAid_HealMissingHP_Percent":	
-		OutString = DDColor(int(`GetConfigFloat(InString) * 100) $ "%"); // 0.5f -> 50%
-		return true;
-
 	// ----------------------------------------------------------------------------------------------------------------------
 	default:
 		break;

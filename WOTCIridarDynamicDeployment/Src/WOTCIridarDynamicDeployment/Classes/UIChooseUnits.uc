@@ -1,4 +1,4 @@
-class UIChooseUnits extends UIPersonnel;
+class UIChooseUnits extends UIPersonnel abstract;
 
 // Displayed in tactical when using Dynamic Select.
 // On the surface, identical to the similar screen in strategy.

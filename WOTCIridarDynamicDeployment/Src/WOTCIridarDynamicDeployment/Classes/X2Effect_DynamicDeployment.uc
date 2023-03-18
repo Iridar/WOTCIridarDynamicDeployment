@@ -63,14 +63,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		SpawnLocation = SpawnLocations[iNumUnit];
 		`AMLOG("SpawnLocation:" @ SpawnLocation);
 
-		if (class'Help'.static.IsUnitEvaced(NewUnitState))
-		{
-			DeployEvacedUnit(NewUnitState, NewGameState, SpawnLocation);
-		}
-		else
-		{
-			DeployUnit(NewUnitState, NewGameState, SpawnLocation);
-		}
+		DeployUnit(NewUnitState, NewGameState, SpawnLocation);
 
 		// Add unit to squad, if they're not there already - 
 		// might be the case for redeploying units evaced this mission
@@ -168,73 +161,6 @@ static private function XComGameState_Unit DeployUnit(XComGameState_Unit Unit, X
 	`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
 
 	Unit.BeginTacticalPlay(NewGameState); 
-
-	if (default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS.Length > 0)
-	{
-		Unit.ActionPoints = default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS;
-	}
-	else 
-	{
-		Unit.GiveStandardActionPoints();
-	}
-
-	return Unit;
-}
-
-static private function XComGameState_Unit DeployEvacedUnit(XComGameState_Unit Unit, XComGameState NewGameState, const vector SpawnLocation)
-{
-	local XComGameStateHistory			History;
-	local XComGameState_Player			PlayerState;
-	local StateObjectReference			ItemReference;
-	local XComGameState_Item			ItemState;
-	local XComGameState_Unit			CosmeticUnit;
-	local XComGameState_AIGroup			Group, PreviousGroupState;
-	local TTile							CosmeticUnitTile;
-
-	History = `XCOMHISTORY;
-
-	//tell the game that the new unit is part of your squad so the mission wont just end if others retreat -LEB
-	Unit.bSpawnedFromAvenger = true; 
-
-	// This causes redscreens about having to clamp the tile location, but I'm pretty sure it's schitzofrenic
-	// I've copied the clamping code and there was no difference between tiles.
-	Unit.SetVisibilityLocationFromVector(SpawnLocation);
-
-	// add item states. This needs to be done so that the visualizer sync picks up the IDs and creates their visualizers -LEB
-	foreach Unit.InventoryItems(ItemReference)
-	{
-		ItemState = XComGameState_Item(History.GetGameStateForObjectID(ItemReference.ObjectID));
-		if (ItemState == none)
-			continue;
-
-		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
-
-		if (ItemState.CosmeticUnitRef.ObjectID > 0)
-		{
-			CosmeticUnit = XComGameState_Unit(History.GetGameStateForObjectID(ItemState.CosmeticUnitRef.ObjectID));
-			if (CosmeticUnit != none)
-			{
-				CosmeticUnit = XComGameState_Unit(NewGameState.ModifyStateObject(CosmeticUnit.Class, CosmeticUnit.ObjectID));
-			}
-			if (CosmeticUnit != none)
-			{
-				CosmeticUnit.ClearRemovedFromPlayFlag();
-				CosmeticUnitTile = Unit.GetDesiredTileForAttachedCosmeticUnit();
-				CosmeticUnitTile.Z += Unit.UnitHeight - 2;
-				CosmeticUnit.SetVisibilityLocation(CosmeticUnitTile);
-			}
-		}
-		
-	}
-
-	Unit.ClearRemovedFromPlayFlag();
-	`XWORLD.SetTileBlockedByUnitFlag(Unit);
-
-	`XEVENTMGR.TriggerEvent('OnUnitBeginPlay', Unit, Unit, NewGameState);
-
-	// So that soldier doesn't appear on unit selection screen again until evacuated.
-	Unit.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
-	Unit.ClearUnitValue(class'Help'.default.UnitEvacedValue);
 
 	if (default.OVERRIDE_AFTER_SPAWN_ACTION_POINTS.Length > 0)
 	{

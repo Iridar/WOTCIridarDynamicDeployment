@@ -7,7 +7,6 @@ class Help extends Object abstract;
 
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
-var privatewrite name UnitEvacedValue;
 var privatewrite name DynamicDeploymentValue;
 
 // Only units with this value will appear on UIChooseUnits screen.
@@ -73,9 +72,6 @@ static final function PutSkyrangerOnCooldown(const int iCooldown, optional XComG
 
 static private function PutSkyrangerOnCooldownInternal(XComGameState_Player PlayerState, const int iCooldown, bool bDeploymentAbilitiesOnly)
 {
-	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Select') < iCooldown) 
-		PlayerState.SetCooldown('IRI_DynamicDeployment_Select', iCooldown);
-
 	if (PlayerState.GetCooldown('IRI_DynamicDeployment_Deploy') < iCooldown) 
 		PlayerState.SetCooldown('IRI_DynamicDeployment_Deploy', iCooldown);
 
@@ -106,18 +102,6 @@ static final function int GetDeploymentType()
 		return `eDT_SeismicBeacon;
 	}
 	return `eDT_Flare;
-}
-
-
-static final function MarkUnitEvaced(XComGameState_Unit UnitState, optional XComGameState UseGameState)
-{
-	SetUnitValue(default.UnitEvacedValue, 1.0f, UnitState, UseGameState);
-}
-static final function bool IsUnitEvaced(const XComGameState_Unit UnitState)
-{
-	local UnitValue UV;
-
-	return UnitState.GetUnitValue(default.UnitEvacedValue, UV);
 }
 
 static private function SetUnitValue(const name UnitValueName, const float fValue, XComGameState_Unit UnitState, optional XComGameState UseGameState, optional const bool bClearValue)
@@ -227,7 +211,6 @@ static final function SetGlobalCooldown(const name AbilityName, const int Cooldo
 
 static final function SetDynamicDeploymentCooldown(const int Cooldown, const int SourcePlayerID, optional XComGameState UseGameState)
 {
-	SetGlobalCooldown('IRI_DynamicDeployment_Select', Cooldown, SourcePlayerID, UseGameState);
 	SetGlobalCooldown('IRI_DynamicDeployment_Deploy', Cooldown, SourcePlayerID, UseGameState);
 	SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Spark', Cooldown, SourcePlayerID, UseGameState);
 	SetGlobalCooldown('IRI_DynamicDeployment_Deploy_Uplink', Cooldown, SourcePlayerID, UseGameState);
@@ -324,6 +307,5 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DD_Triggered_Event"
-	UnitEvacedValue = "IRI_DD_UnitEvaced_Value"	
 	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
 }

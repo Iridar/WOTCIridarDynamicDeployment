@@ -19,11 +19,8 @@ BUG: Loading a save still deselects units that were selected for DD. = fixed
 // TODO: Test everything with redscreens and check logs
 
 TODO: Since deployment mark is tied to mission state object ID, DD should be disallowed on all missions that will have tactical-to-tactical transfers.
-TODO: Paramedic training - after being evacuated, this unit heals and can be redeployed even if wounded
-TODO: Move camera to deployment location.
 
-SPARK used wrong deployment animation when redeploying underground
-When redeploying, targeting method spawn a cosmetic unit
+TODO: Move camera to deployment location.
 
 Seismic beacon needs a better effect and projectile trail
 
@@ -34,10 +31,6 @@ disallow DDing ALL squadmembers
 Bug:
 Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK
 [0145.72] Warning: Warning, Material fx_cap_n_hold.M_Transmitter_Cyl missing bUsedWithParticleSprites=True!
-
-HP from armor is lost when redeploying.
-SPARK used wrong animation when redeploying underground?
-
 
 #Evacuating a unit or spawning an evac zone should put DD on cooldown of 1 turn.
 #Deploying units should put call evac, evac and deployment itself on a cooldown for 1 turn

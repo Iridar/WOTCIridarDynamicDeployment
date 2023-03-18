@@ -6,13 +6,11 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
-	Templates.AddItem(IRI_DynamicDeployment_Select());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Spark());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
 
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_PrecisionDrop', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop"));
-	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_FirstAid', "img:///IRIDynamicDeployment_UI.UIPerk_PrecisionDrop")); // TODO: Icon //TODO: THis needs to be a pure passive for the icon
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_AerialScout', "img:///IRIDynamicDeployment_UI.UIPerk_AerialScout"));
 	Templates.AddItem(CreatePassiveDDUnlock('IRI_DDUnlock_DigitalUplink', "img:///IRIDynamicDeployment_UI.UIPerk_DigitalUplink"));
 	Templates.AddItem(IRI_DDUnlock_TakeAndHold());
@@ -145,101 +143,6 @@ static private function X2AbilityTemplate CreatePassiveDDUnlock(const name Templ
 	return Template;
 }
 
-static private function X2AbilityTemplate IRI_DynamicDeployment_Select()
-{
-	local X2AbilityTemplate				Template;
-	local X2AbilityCost_ActionPoints	ActionPointCost;
-
-	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment_Select');
-
-	// Icon Setup
-	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicSelect";
-	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
-	Template.AbilitySourceName = 'eAbilitySource_Commander';
-	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	Template.OverrideAbilityAvailabilityFn = DDSelect_OverrideAbilityAvailability;
-
-	Template.bDisplayInUITacticalText = false;
-	Template.bHideOnClassUnlock = true;
-	Template.bDisplayInUITooltip = false;
-	
-	// Cost
-	ActionPointCost = new class'X2AbilityCost_ActionPoints';
-	ActionPointCost.iNumPoints = 1;
-	ActionPointCost.bFreeCost = `GETMCMVAR(DD_SOLDIER_SELECT_IS_FREE_ACTION);
-	ActionPointCost.bConsumeAllPoints = `GETMCMVAR(DD_SOLDIER_SELECT_ENDS_TURN);
-	Template.AbilityCosts.AddItem(ActionPointCost);
-
-	// Shooter Conditions
-	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
-	Template.AddShooterEffectExclusions();
-
-	Template.AbilityShooterConditions.AddItem(new class'X2Condition_DynamicDeployment');
-
-	// Targeting and Triggering
-	Template.AbilityToHitCalc = default.DeadEye;
-	Template.AbilityTargetStyle = default.SelfTarget;
-	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
-	
-	// State and Vis
-	Template.Hostility = eHostility_Neutral;
-	Template.bSkipExitCoverWhenFiring = true;
-	Template.bSkipFireAction = true;
-	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
-	Template.BuildVisualizationFn = DynamicDeployment_Select_BuildVisualization;
-	
-	Template.ChosenActivationIncreasePerUse = class'X2AbilityTemplateManager'.default.NonAggressiveChosenActivationIncreasePerUse;
-	Template.LostSpawnIncreasePerUse = class'X2AbilityTemplateManager'.default.StandardShotLostSpawnIncreasePerUse;
-
-	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy');
-	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
-	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Uplink');
-	
-	return Template;
-}
-
-static final function DynamicDeployment_Select_BuildVisualization(XComGameState VisualizeGameState)
-{
-	local XComGameStateHistory			History;
-	local XComGameStateContext_Ability  Context;
-	local StateObjectReference          ShootingUnitRef;	
-	local X2Action_PlayAnimation		PlayAnimation;
-	local VisualizationActionMetadata	ActionMetadata;
-	local X2Action_TimedWait			TimedWait;
-	local X2Action						CommonParent;
-	local XComGameState_Unit			UnitState;
-
-	History = `XCOMHISTORY;
-	Context = XComGameStateContext_Ability(VisualizeGameState.GetContext());
-
-	ShootingUnitRef = Context.InputContext.SourceObject;
-	UnitState = XComGameState_Unit(VisualizeGameState.GetGameStateForObjectID(ShootingUnitRef.ObjectID));
-
-	ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(ShootingUnitRef.ObjectID, eReturnType_Reference, VisualizeGameState.HistoryIndex - 1);
-	ActionMetadata.StateObject_NewState = UnitState;
-	ActionMetadata.VisualizeActor = History.GetVisualizer(ShootingUnitRef.ObjectID);
-
-	CommonParent = class'X2Action_MarkerTreeInsertBegin'.static.AddToVisualizationTree(ActionMetadata, Context);
-
-	PlayAnimation = X2Action_PlayAnimation(class'X2Action_PlayAnimation'.static.AddToVisualizationTree(ActionMetadata, Context, false, CommonParent));
-
-	if (UnitState != none && class'Help'.static.IsCharTemplateSparkLike(UnitState.GetMyTemplate()))
-	{
-		PlayAnimation.Params.AnimName = 'HL_SignalPositivePost';
-	}
-	else
-	{
-		PlayAnimation.Params.AnimName = 'HL_CallReinforcements';
-	}
-		
-	// Use a delay to display the screen some time into the animation, but don't wait for it to complete fully.
-	TimedWait = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, Context, false, CommonParent));
-	TimedWait.DelayTimeSec = 1.5f;
-
-	class'X2Action_SelectUnits'.static.AddToVisualizationTree(ActionMetadata, Context, false, TimedWait);
-}
-
-
 static private function X2AbilityTemplate CreateDeploymentAbility(const name TemplateName)
 {
 	local X2AbilityTemplate					Template;
@@ -337,6 +240,9 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 	Template.ConcealmentRule = eConceal_Never;
 	Template.SuperConcealmentLoss = 100;
 
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Uplink');
+
 	return Template;
 }
 
@@ -383,39 +289,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 	Template.CustomFireAnim = 'FF_Deploy_Uplink';
 
 	return Template;
-}
-
-static private function DDSelect_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
-{
-	local XComGameState_DynamicDeployment DDObject;
-
-	`AMLOG("Running");
-
-	// Special handle first deployment of the mission.
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
-	if (DDObject == none) 
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-		return;
-	}
-
-	// Hide jf already have some soldiers selected for deployment
-	if (DDObject.bPendingDeployment) 
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-		return;
-	}
-
-	// Display when on cooldown.
-	if (Action.AvailableCode == 'AA_CoolingDown')
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	}
-	else
-	{	
-		// Otherwise display when other condiitons succeed.
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
-	}
 }
 
 static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)

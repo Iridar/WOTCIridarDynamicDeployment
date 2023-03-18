@@ -1,11 +1,6 @@
 ; ---------------------------------------------------------------
 ;					SELECT AND DEPLOY
 
-[IRI_DynamicDeployment_Select X2AbilityTemplate]
-LocFriendlyName="Request Reinforcements"
-LocLongDescription="Contact the Avenger to request reinforcements."
-LocHelpText="Contact the Avenger to request reinforcements."
-LocFlyOverText="Request Reinforcements"
 [IRI_DynamicDeployment_Deploy X2AbilityTemplate]
 LocFriendlyName="Dynamic Deployment"
 LocLongDescriptionWhenConcealed = "Designate a location to deploy the rest of the squad. Will break squad concealment."
@@ -75,12 +70,6 @@ LocFriendlyName="Digital Uplink"
 LocLongDescription="This unit is able to call for Dynamic Deployment without breaking the squad concealment and from a longer distance."
 LocHelpText="This unit is able to call for Dynamic Deployment without breaking the squad concealment and from a longer distance."
 LocFlyOverText="Digital Uplink"
-
-[IRI_DDUnlock_FirstAid X2AbilityTemplate]
-LocFriendlyName="First Aid"
-LocLongDescription="When evacuated, this unit restores <Ability:IRI_DD_FirstAid_HealMissingHP_Percent/> of missing HP and can be redeployed again."
-LocHelpText="When evacuated, this unit restores <Ability:IRI_DD_FirstAid_HealMissingHP_Percent/> of missing HP and can be redeployed again."
-LocFlyOverText="First Aid"
 
 ; ---------------------------------------------------------------
 ;					SITREPS

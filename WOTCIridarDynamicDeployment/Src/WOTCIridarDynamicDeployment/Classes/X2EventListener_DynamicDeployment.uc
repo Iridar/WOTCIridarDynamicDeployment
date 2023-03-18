@@ -153,7 +153,6 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.AddCHEvent('EvacZonePlaced', OnSpawnEvacZoneComplete, ELD_OnStateSubmitted); 
 
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
-	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
 	Template.AddCHEvent('CleanupTacticalMission', OnCleanupTacticalMission, ELD_Immediate);
 	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
 	
@@ -229,7 +228,6 @@ static private function EventListenerReturn OnEvacRequested(Object EventData, Ob
 	local XComGameState NewGameState;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Disabling DD abilities");
-	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Select', false, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy', false, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Spark', false, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Uplink', false, NewGameState);
@@ -242,7 +240,6 @@ static private function EventListenerReturn OnSpawnEvacZoneComplete(Object Event
 	local XComGameState NewGameState;
 
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Enabling DD abilities");
-	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Select', true, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy', true, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Spark', true, NewGameState);
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Uplink', true, NewGameState);
@@ -255,64 +252,10 @@ static private function EventListenerReturn OnSpawnEvacZoneComplete(Object Event
 	return ELR_NoInterrupt;
 }
 
-
-
-// Mark evacuated units with a unit value so that we know not to reinit their abilities if we're gonna redeploy them again in the same mission.
-static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
-{
-	local XComGameState_Unit				UnitState;
-	local XComGameState						NewGameState;
-	local float								CurrentHP;
-	local float								MaxHP;
-	local float								HealHP;
-	local XComGameState_DynamicDeployment	DDObject;
-
-	UnitState = XComGameState_Unit(EventData);
-	if (UnitState == none)
-		return ELR_NoInterrupt;
-
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
-	if (DDObject == none)
-		return ELR_NoInterrupt;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("DD Mark Unit Evaced");
-	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
-
-	// Heal the unit if they have the right ability.
-	if (class'Help'.static.IsDDAbilityUnlocked(UnitState, 'IRI_DDUnlock_FirstAid'))
-	{
-		CurrentHP = UnitState.GetCurrentStat(eStat_HP);
-		MaxHP = UnitState.GetMaxStat(eStat_HP);
-		HealHP = (MaxHP - CurrentHP) * `GetConfigFloat("IRI_DD_FirstAid_HealMissingHP_Percent");
-
-		`AMLOG("Healing unit:" @ UnitState.GetFullName() @ `ShowVar(CurrentHP) @ `ShowVar(MaxHP) @ `ShowVar(HealHP) @ "HP after heal:" @ CurrentHP + HealHP);
-
-		CurrentHP += HealHP;
-		UnitState.SetCurrentStat(eStat_HP, int(CurrentHP));
-	}
-
-	// To allow redeploying this unit.
-	DDObject.AddEligibleUnitID(UnitState.ObjectID);
-	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, true, NewGameState);
-
-	// To prevent items and abilities being re-inited for this unit if redeployed.
-	class'Help'.static.MarkUnitEvaced(UnitState, NewGameState);
-
-	// Evacuating a unit puts DD abilities on 1 turn cooldown - skyranger is busy recieving a unit and cannot be used for deployment.
-	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState, true);
-
-	`GAMERULES.SubmitGameState(NewGameState);
-
-	return ELR_NoInterrupt;
-}
-
-// Rremove the "in skyranger" flag from all units
-// as normally it would be removed only at the begin tactical play, which is too late for the purposes of deploying units.
 static private function EventListenerReturn OnCleanupTacticalMission(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
-	local XComGameState_Unit	UnitState;
-	local XComGameState_Unit	NewUnitState;
+	//local XComGameState_Unit	UnitState;
+	//local XComGameState_Unit	NewUnitState;
 	local XComGameStateHistory	History;
 	local XComGameState_DynamicDeployment DDObject;
 
@@ -336,18 +279,17 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 		DDObject.FullReset();
 	}
 
-	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
-	{
-		NewUnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
-		if (NewUnitState == none)
-		{
-			NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-		}
-		NewUnitState.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
-		NewUnitState.ClearUnitValue(class'Help'.default.UnitEvacedValue);
-
-		`AMLOG(NewUnitState.GetFullName() @ "is no longer in Skyranger");
-	}
+	//foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
+	//{
+	//	NewUnitState = XComGameState_Unit(NewGameState.GetGameStateForObjectID(UnitState.ObjectID));
+	//	if (NewUnitState == none)
+	//	{
+	//		NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+	//	}
+	//	NewUnitState.ClearUnitValue(class'Help'.default.DynamicDeploymentValue);
+	//
+	//	`AMLOG(NewUnitState.GetFullName() @ "is no longer in Skyranger");
+	//}
 
 	return ELR_NoInterrupt;
 }
