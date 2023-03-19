@@ -12,7 +12,6 @@ struct PrecisionDropTileStorageStruct
 var privatewrite array<PrecisionDropTileStorageStruct> PrecisionDropTileStorages;
 
 var private array<int> SelectedUnitIDs;	// Holds the ID of the unit selected for deployment.
-var private array<int> EligibleUnitIDs;	// Units that were marked for DD when embarking on this mission. Filled in OnPreMission.
 
 final function bool IsUnitSelected(const int UnitObjectID)
 {
@@ -51,20 +50,6 @@ final function DeselectAllUnits()
 	PrecisionDropTileStorages.Length = 0;
 	bPendingDeployment = false;
 }
-final function FullReset()
-{
-	DeselectAllUnits();
-	EligibleUnitIDs.Length = 0;
-}
-
-final function AddEligibleUnitID(const int UnitObjectID)
-{
-	if (EligibleUnitIDs.Find(UnitObjectID) == INDEX_NONE)
-	{
-		EligibleUnitIDs.AddItem(UnitObjectID);
-	}
-}
-
 
 final function int GetNumSelectedUnits()
 {
@@ -290,50 +275,6 @@ static final function XComGameState_DynamicDeployment GetOrCreate()
 	`GAMERULES.SubmitGameState(NewGameState);
 
 	return DDObject;
-}
-
-
-final function GetUnitStatesEligibleForDynamicDeployment(out array<XComGameState_Unit> EligbleUnits)
-{
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local XComGameStateHistory				History;
-	local XComGameState_Unit				UnitState;
-	local bool								bHealthy;
-	local bool								bShaken;
-	local bool								bIgnoreInjuries;
-	local int								UnitObjectID;
-	
-	History = `XCOMHISTORY;
-	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
-
-	foreach EligibleUnitIDs(UnitObjectID)
-	{
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitObjectID));
-		if (UnitState == none || !UnitState.IsSoldier() || UnitState.IsDead()) continue;
-
-		`AMLOG("Looking at soldier:" @ UnitState.GetFullName());
-
-		if (!class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState)) 
-			continue;
-
-		// Shaken checks are probably irrelevant
-		bShaken = UnitState.GetMentalState() == eMentalState_Shaken;
-		bHealthy = !UnitState.IsInjured() && !bShaken;
-		bIgnoreInjuries = UnitState.IgnoresInjuries() || UnitState.bRecoveryBoosted;
-
-		if (!bShaken && XComHQ.bAllowLightlyWoundedOnMissions && UnitState.IsLightlyInjured())
-		{
-			bIgnoreInjuries = true;
-		}
-
-		`AMLOG("Unit is marked for Dynamic Deployment" @ `ShowVar(bShaken) @ `ShowVar(bHealthy) @ `ShowVar(bIgnoreInjuries));
-
-		if (bHealthy || bIgnoreInjuries)
-		{
-			`AMLOG("Unit is eligible for Dynamic Deployment");
-			EligbleUnits.AddItem(UnitState);
-		}
-	}
 }
 
 DefaultProperties

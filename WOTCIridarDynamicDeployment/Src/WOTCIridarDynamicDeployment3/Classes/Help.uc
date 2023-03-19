@@ -8,23 +8,96 @@ class Help extends Object abstract;
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
 var privatewrite name DynamicDeploymentValue;
+var privatewrite name DynamicDeploymentByDefaultValue;
 
-// Only units with this value will appear on UIChooseUnits screen.
-// This for selecting which soldiers should remain in Skyranger in Squad Select.
-// Also used to mark soldiers evaced during the mission so they can be redeployed.
+static final function bool IsDynamicDeploymentAllowed(optional name MissionName)
+{
+	local GeneratedMissionData				MissionData;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local array<name>						ExcludedMissions;
+
+	if (MissionName == '')
+	{
+		XComHQ = `XCOMHQ;
+		MissionData = XComHQ.GetGeneratedMissionData(XComHQ.MissionRef.ObjectID);
+		MissionName = MissionData.Mission.MissionName;
+
+		// Might prevent DD from showing up with Open Squad Select Anytime or something like that.
+		if (MissionName == '')
+			return false;
+	}
+
+	// Can't use DD on certain missions
+	ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment", true);
+
+	return ExcludedMissions.Find(MissionData.Mission.MissionName) == INDEX_NONE;	
+}
+
+static final function int GetNumUnmarkedSquadMembers()
+{
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Unit				UnitState;
+	local XComGameStateHistory				History;
+	local int iNumUnits;
+	local int iNumMarkedUnits;
+
+	History = `XCOMHISTORY;
+
+	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+	foreach XComHQ.Squad(UnitRef)
+	{
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (UnitState == none)
+			continue;
+
+		iNumUnits++;
+
+		if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState, XComHQ.MissionRef.ObjectID))
+		{
+			iNumMarkedUnits++;
+		}
+	}
+	`LOG(`ShowVar(iNumUnits) @ `ShowVar(iNumMarkedUnits) @ XComHQ.MissionRef.ObjectID,, 'WOTCIridarDynamicDeployment');
+	return iNumUnits - iNumMarkedUnits;
+}
+
+static final function bool IsDynamicDeploymentUnlocked()
+{
+	return `XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock');
+}
+
 static final function MarkUnitForDynamicDeployment(XComGameState_Unit UnitState, const bool bDeploy, optional XComGameState UseGameState)
 {
 	// Record and check specific mission state ObjectID so that mods that use infiltration mechanics allow DDing soldiers
 	// only on missions they actually left to infiltrate.
 	SetUnitValue(default.DynamicDeploymentValue, `XCOMHQ.MissionRef.ObjectID, UnitState, UseGameState, !bDeploy);
 }
-static final function bool IsUnitMarkedForDynamicDeployment(const XComGameState_Unit UnitState)
+static final function bool IsUnitMarkedForDynamicDeployment(const XComGameState_Unit UnitState, optional int MissionID)
 {
 	local UnitValue UV;
+
+	// For performance intensive checks
+	if (MissionID != 0)
+	{
+		return UnitState.GetUnitValue(default.DynamicDeploymentValue, UV) && MissionID == UV.fValue;
+	}
 
 	return UnitState.GetUnitValue(default.DynamicDeploymentValue, UV) && `XCOMHQ.MissionRef.ObjectID == UV.fValue;
 }
 
+// Used when clicking the checkbox in the armory.
+// If this value is present, then when soldier is added to squad select, they will be marked for dynamic deployment, if possible.
+static final function MarkUnitForDynamicDeploymentDefault(XComGameState_Unit UnitState, const bool bMark, optional XComGameState UseGameState)
+{
+	SetUnitValue(default.DynamicDeploymentByDefaultValue, 1.0f, UnitState, UseGameState, !bMark);
+}
+static final function bool IsUnitMarkedForDynamicDeploymentDefault(const XComGameState_Unit UnitState, optional int MissionID)
+{
+	local UnitValue UV;
+
+	return UnitState.GetUnitValue(default.DynamicDeploymentByDefaultValue, UV);
+}
 
 static final function PutSkyrangerOnCooldown(const int iCooldown, optional XComGameState UseGameState, optional bool bDeploymentAbilitiesOnly)
 {
@@ -308,4 +381,5 @@ defaultproperties
 {
 	DDEventName = "IRI_DD_Triggered_Event"
 	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
+	DynamicDeploymentByDefaultValue = "IRI_DD_UnitMark_Default_Value"
 }

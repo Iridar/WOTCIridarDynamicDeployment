@@ -157,8 +157,7 @@ static private function X2AbilityTemplate CreateDeploymentAbility(const name Tem
 	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_DynamicDeploy";
 	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.PLACE_EVAC_PRIORITY + 5;
 	Template.AbilitySourceName = 'eAbilitySource_Commander';
-	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	Template.OverrideAbilityAvailabilityFn = DDDeploy_OverrideAbilityAvailability;
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
 
 	Template.bDisplayInUITacticalText = false;
 	Template.bHideOnClassUnlock = true;
@@ -289,30 +288,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy_Uplink()
 	Template.CustomFireAnim = 'FF_Deploy_Uplink';
 
 	return Template;
-}
-
-static private function DDDeploy_OverrideAbilityAvailability(out AvailableAction Action, XComGameState_Ability AbilityState, XComGameState_Unit OwnerState)
-{
-	local XComGameState_DynamicDeployment DDObject;
-
-	// Hide if no unit selected for deployment
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
-	if (DDObject == none || !DDObject.IsAnyUnitSelected() || !DDObject.bPendingDeployment) 
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-		return;
-	}
-
-	// Display when on cooldown.
-	if (Action.AvailableCode == 'AA_CoolingDown')
-	{
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_AlwaysShow;
-	}
-	else
-	{	
-		// Otherwise display when other condiitons succeed.
-		Action.eAbilityIconBehaviorHUD = eAbilityIconBehavior_ShowIfAvailable;
-	}
 }
 
 //	========================================

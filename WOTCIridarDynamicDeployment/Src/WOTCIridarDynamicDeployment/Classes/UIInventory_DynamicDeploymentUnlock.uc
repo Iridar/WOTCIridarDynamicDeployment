@@ -1,6 +1,6 @@
 class UIInventory_DynamicDeploymentUnlock extends UIInventory_ClassListItem;
 
-// List Item in the list of DD Unlocks in the armory.
+// List Item in the UIArmory_DynamicDeployment list of DD Unlocks in the Armory.
 
 var DDUnlockStruct DDUnlock;
 

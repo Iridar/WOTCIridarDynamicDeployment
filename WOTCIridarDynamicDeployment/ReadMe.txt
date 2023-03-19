@@ -18,15 +18,18 @@ BUG: Loading a save still deselects units that were selected for DD. = fixed
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
-TODO: Since deployment mark is tied to mission state object ID, DD should be disallowed on all missions that will have tactical-to-tactical transfers.
+Known Issues: 
+For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
+
 
 TODO: Move camera to deployment location.
 
 Seismic beacon needs a better effect and projectile trail
 
-Make DD abilities unavailable if there are no units to deploy
+test what happens if units are selected for DD but never deployed
+might need to add them to squad in OnTacticalCleanup
+// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
 
-disallow DDing ALL squadmembers
 
 Bug:
 Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK

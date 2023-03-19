@@ -1,6 +1,8 @@
-class UISL_DynamicDeployment extends UIScreenListener config(whatever);
+class UISL_DynamicDeployment extends UIScreenListener;
 
-// 
+// This UISL for Squad Select handles:
+// 1. Adding a checkbox under each soldier
+// 2. Replacing the delegate for clicking on the Launch Mission button.
 // This needs to be done in a UISL, there's no event to do it in time.
 
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
@@ -16,7 +18,11 @@ event OnInit(UIScreen Screen)
 	if (SquadSelect == none)
 		return;
 
-	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
+	if (!class'Help'.static.IsDynamicDeploymentUnlocked())
+		return;
+
+	// Don't add new UI elements if the DD can't be used on this mission anyway.
+	if (!class'Help'.static.IsDynamicDeploymentAllowed())
 		return;
 
 	if (`GETMCMVAR(ENABLE_LAUNCH_MISSION_SCREEN))
@@ -26,12 +32,11 @@ event OnInit(UIScreen Screen)
 
 	if (`GETMCMVAR(ENABLE_SOLDIER_LIST_CHECKBOX))
 	{
+		// Insert checkboxes immedaite
 		OnSquadSelectUpdate(none, none, none, '', none);
 
-		// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
-
 		SelfObj = self;
-		`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_Immediate, 49);
+		`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_OnStateSubmitted, 49);
 		bRegistered = true;
 	}
 }
@@ -56,25 +61,58 @@ event OnReceiveFocus(UIScreen Screen)
 	OnSquadSelectUpdate(none, none, none, '', none);
 }
 
-static private function EventListenerReturn OnSquadSelectUpdate(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+static final function UnmarkOneSoldier()
 {
-	local UISquadSelect						SquadSelect;
-	local UISquadSelect_ListItem			ListItem;
-	local array<UIPanel>					ChildrenPanels;
-	local UIPanel							ChildPanel;
-	
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
 	local XComGameState_Unit				UnitState;
 	local XComGameStateHistory				History;
+
+	`AMLOG("Running" @ class'Help'.static.GetNumUnmarkedSquadMembers());
+
+	History = `XCOMHISTORY;
+
+	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+	foreach XComHQ.Squad(UnitRef)
+	{
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (UnitState == none)
+			continue;
+
+		`AMLOG("Unmarking" @ UnitState.GetFullName());
+
+		class'Help'.static.MarkUnitForDynamicDeployment(UnitState, false);
+		break;
+	}
+}
+
+// One function for creating checkbox when the screen is initialized, 
+// and, when screen receives focus, updating their status (in case soldier's DD status is changed elsewhere) 
+// and position (in case soldier list item becomes taller e.g. due to unlocking more abilities and the ability panel becoming taller)
+static private function EventListenerReturn OnSquadSelectUpdate(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+{
+	local UISquadSelect						  SquadSelect;
+	local UISquadSelect_ListItem			  ListItem;
+	local array<UIPanel>					  ChildrenPanels;
+	local UIPanel							  ChildPanel;
+	local XComGameState_Unit				  UnitState;
+	local XComGameStateHistory				  History;
+	local bool								  bChecked;
+	local bool								  bShouldHaveCheckbox;
 	local UIMechaListItem_ClickToggleCheckbox DDCheckbox;
-	
-	local bool								bChecked;
-	local bool								bShouldHaveCheckbox;
 
 	SquadSelect = UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect'));
 	if (SquadSelect == none)
 		return ELR_NoInterrupt;
 
-		`AMLOG("Running:" @ Event);
+	`AMLOG("Running:" @ Event);
+
+	// When adding soldiers to squad select, ensure that at least one is not marked for DD.
+	// This also technically runs if there are no soldiers at all in squad select but eh
+	if (class'Help'.static.GetNumUnmarkedSquadMembers() == 0)
+	{
+		UnmarkOneSoldier();
+	}
 
 	History = `XCOMHISTORY;
 
@@ -87,16 +125,29 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 			continue;
 
 		bShouldHaveCheckbox = false;
+		bChecked = false;
 
 		if (!ListItem.bDisabled)
 		{
 			UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
 			if (UnitState != none && class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
 			{	
-				bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+				if (class'Help'.static.GetNumUnmarkedSquadMembers() > 0)
+				{
+					if (class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState))
+					{
+						class'Help'.static.MarkUnitForDynamicDeployment(UnitState, true);
+						bChecked = true;
+					}
+					else
+					{
+						bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+					}
+				}
+
 				bShouldHaveCheckbox = true;
 
-				`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ bChecked);
+				`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState) @ `ShowVar(bChecked));
 			}
 		}
 
@@ -137,11 +188,13 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 			}
 		}
 	}
+	`AMLOG("Done");
+
 	return ELR_NoInterrupt;
 }
 
 
-// Add an intermediate step of showing a UIScreen with the squad so the player can select units that will remain in Skyranger.
+// Add an intermediate step of showing a UIScreen with the squad so the player can select units that will remain in Skyranger for DD.
 static private function PatchLaunchMissionButton(UISquadSelect SquadSelect)
 {	
 	local UILargeButton DummyButton;
@@ -152,16 +205,16 @@ static private function PatchLaunchMissionButton(UISquadSelect SquadSelect)
 	DummyButton = SquadSelect.LaunchButton.Spawn(class'UILargeButton', SquadSelect.LaunchButton);
 	DummyButton.InitPanel('IRI_DD_DummyLaunchButton');
 	DummyButton.OnClickedDelegate = SquadSelect.LaunchButton.OnClickedDelegate;
-	SquadSelect.LaunchButton.OnClickedDelegate = OnLaunchMission;
+	SquadSelect.LaunchButton.OnClickedDelegate = OnLaunchMissionClicked;
 	DummyButton.Hide();
 	DummyButton.SetPosition(-100, -100);
 }
-static private function OnLaunchMission(UIButton Button)
+static private function OnLaunchMissionClicked(UIButton Button)
 {
-	local UIChooseUnits_SquadSelect ChooseUnits;
+	local UIChooseUnits ChooseUnits;
 	local XComPresentationLayerBase Pres;
 
 	Pres = Button.Movie.Pres;
-	ChooseUnits = Pres.Spawn(class'UIChooseUnits_SquadSelect', Pres);
+	ChooseUnits = Pres.Spawn(class'UIChooseUnits', Pres);
 	Pres.ScreenStack.Push(ChooseUnits);
 }

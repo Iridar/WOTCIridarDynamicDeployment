@@ -37,7 +37,7 @@ static private function EventListenerReturn UpdateArmoryMainMenu(Object EventDat
 	local string				strLabel;
 	local bool					bChecked;
 
-	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
+	if (!class'Help'.static.IsDynamicDeploymentUnlocked())
 		return ELR_NoInterrupt;
 
 	MainMenu = UIArmory_MainMenu(EventSource);
@@ -128,9 +128,9 @@ static private function OnDDCheckboxChanged(UICheckbox CheckboxControl)
 	if (UnitState == none)
 		return;
 
-	bMarked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
+	bMarked = class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState);
 
-	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, !bMarked);
+	class'Help'.static.MarkUnitForDynamicDeploymentDefault(UnitState, !bMarked);
 }
 
 
@@ -276,7 +276,7 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 	}
 	if (DDObject != none)
 	{
-		DDObject.FullReset();
+		DDObject.DeselectAllUnits();
 	}
 
 	//foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)

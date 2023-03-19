@@ -7,6 +7,9 @@ IRI_DynamicDeployment_NotEnoughAP = "Not enough Ability Points."
 IRI_DynamicDeployment_MutuallyExclusiveUnlock = "Mutually exclusive with:"
 
 IRI_DynamicDeployment_DeployingStatus = "DEPLOYING"
+
+IRI_DD_CannotDDEntireSquad_Text = "You cannot Dynamically Deploy the entire squad, at least one soldier must be deployed normally."
+
 [WOTCIridarDynamicDeployment_MCMScreen]
 
 ModName = "Dynamic Deployment"

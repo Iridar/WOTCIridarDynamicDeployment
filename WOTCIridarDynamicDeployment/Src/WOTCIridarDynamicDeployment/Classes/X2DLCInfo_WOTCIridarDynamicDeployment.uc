@@ -3,42 +3,6 @@ class X2DLCInfo_WOTCIridarDynamicDeployment extends X2DownloadableContentInfo;
 var private config(DynamicDeployment) array<name> CharTemplatesSkipDDAnimSet;
 
 
-/// Start Issue #409
-/// <summary>
-/// Called from XComGameState_Unit:GetEarnedSoldierAbilities
-/// Allows DLC/Mods to add to and modify a unit's EarnedSoldierAbilities
-/// Has no return value, just modify the EarnedAbilities out variable array
-/// </summary>
-/// HL-Docs: feature:ModifyEarnedSoldierAbilities; issue:409; tags:
-/// This allows mods to add to or otherwise modify earned abilities for units.
-/// For example, the Officer Pack can use this to attach learned officer abilities to the unit.
-///
-/// Note: abilities added this way will **not** be picked up by `XComGameState_Unit::HasSoldierAbility()`
-///
-/// Elements of the `EarnedAbilities` array are structs of type `SoldierClassAbilityType`.
-/// Each element has the following parameters:
-///  * AbilityName - template name of the ability that should be added to the unit.
-///  * ApplyToWeaponSlot - inventory slot of the item that this ability should be attached to.
-/// Being attached to the correct item is critical for abilities that rely on the source item, 
-/// for example abilities that deal damage of the weapon they are attached to.
-/// * UtilityCat - used only if `ApplyToWeaponSlot = eInvSlot_Utility`. Optional. 
-/// If specified, the ability will be initialized for the unit when they enter tactical combat 
-/// only if they have a weapon with the specified weapon category in one of their utility slots.
-///
-///```unrealscript
-/// local SoldierClassAbilityType NewAbility;
-///
-/// NewAbility.AbilityName = 'PrimaryWeapon_AbilityTemplateName';
-/// NewAbility.ApplyToWeaponSlot = eInvSlot_Primary;
-///
-/// EarnedAbilities.AddItem(NewAbility);
-///
-/// NewAbility.AbilityName = 'UtilityItem_AbilityTemplateName';
-/// NewAbility.ApplyToWeaponSlot = eInvSlot_Utility;
-/// NewAbility.UtilityCat = 'UtilityItemWeaponCategory';
-///
-/// EarnedAbilities.AddItem(NewAbility);
-///```
 static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> EarnedAbilities, XComGameState_Unit UnitState)
 {
 	local DDUnlockStruct DDUnlock;
@@ -51,7 +15,7 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 		}
 	}
 }
-/// End Issue #409
+
 
 static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSite MissionState)
 {
@@ -71,8 +35,11 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 	else
 	{
 		DDObject = XComGameState_DynamicDeployment(StartGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
-		DDObject.FullReset();
+		DDObject.DeselectAllUnits();
 	}
+
+	if (!class'Help'.static.IsDynamicDeploymentAllowed())
+		return;
 	
 	foreach StartGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
 	{
@@ -87,8 +54,6 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 
 			if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState))
 			{
-				// During the mission, only these units will be potentially selectable for DD.
-				DDObject.AddEligibleUnitID(UnitState.ObjectID);
 
 				// Autoselect deployable units so they can be deployed from mission start without having to select them manually every time.
 				DDObject.ToggleUnitSelection(UnitState.ObjectID);
@@ -105,6 +70,27 @@ static event OnPreMission(XComGameState StartGameState, XComGameState_MissionSit
 			}
 		}
 		break;
+	}
+}
+
+// If we know for sure DD won't be available on a certain mission, add a sitrep for player information.
+// Sitrep has no gameplay effects.
+static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, optional XComGameState_BaseObject SourceObject)
+{
+	local array<name> ExcludedMissions;
+
+	// Prevent affecting TQL / Multiplayer / Main Menu
+	If (`HQGAME  == none || `HQPC == None || `HQPRES == none)
+		return;
+
+	if (!class'Help'.static.IsDynamicDeploymentUnlocked())
+		return;
+
+	ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment");
+	if (ExcludedMissions.Find(GeneratedMission.Mission.MissionName) != INDEX_NONE)
+	{
+		GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
+		return;
 	}
 }
 
@@ -274,28 +260,6 @@ exec function DDRemoveUnlockFromSelectedUnit(const name DDUnlock)
 
 	Armory.PopulateData();
 }
-
-// If we know for sure DD won't be available on a certain mission, add a sitrep for player information.
-// Sitrep has no gameplay effects.
-static function PostSitRepCreation(out GeneratedMissionData GeneratedMission, optional XComGameState_BaseObject SourceObject)
-{
-	local array<name> ExcludedMissions;
-
-	// Prevent affecting TQL / Multiplayer / Main Menu
-	If (`HQGAME  == none || `HQPC == None || `HQPRES == none)
-		return;
-
-	if (!`XCOMHQ.HasSoldierUnlockTemplate('IRI_DynamicDeployment_GTS_Unlock'))
-		return;
-
-	ExcludedMissions = `GetConfigArrayName("IRI_DD_MissionsDisallowDeployment");
-	if (ExcludedMissions.Find(GeneratedMission.Mission.MissionName) != INDEX_NONE)
-	{
-		GeneratedMission.SitReps.AddItem('IRI_DD_NoDeploymentSitRep');
-		return;
-	}
-}
-
 
 
 static function bool AbilityTagExpandHandler_CH(string InString, out string OutString, Object ParseObj, Object StrategyParseOb, XComGameState GameState)

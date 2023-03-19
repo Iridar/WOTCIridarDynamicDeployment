@@ -1,41 +1,45 @@
-class UIChooseUnits extends UIPersonnel abstract;
+class UIChooseUnits extends UIPersonnel;
 
-// Displayed in tactical when using Dynamic Select.
-// On the surface, identical to the similar screen in strategy.
+// Displayed in squad select when clicking the Launch Mission button. 
 // Click on the soldier to select them.
 
 // Thanks to RustyDios for the idea to use UIPersonnel.
 
-var protected XComGameState_HeadquartersXCom	XComHQ;
-var protected array<XComGameState_Unit>			UnitStates;
-var protected XComGameState_DynamicDeployment	DDObject;
+var private XComGameState_HeadquartersXCom	XComHQ;
+var private array<XComGameState_Unit>		UnitStates;
+var private XComGameState_DynamicDeployment	DDObject;
 
-var protected UILargeButton		ConfirmButton;
-var protected UITacticalHUD		TacticalHUD;
+var private UILargeButton					ConfirmButton;
+var private UITacticalHUD					TacticalHUD;
+
+var private XComGameStateHistory			History;
+var private X2EventManager					EventMgr;
+var private int								NumRepeatedClicks;
 
 // ================================= INIT DATA ==============================================
 
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
 {
-	DDObject = class'XComGameState_DynamicDeployment'.static.GetOrCreate();
-	DDObject.GetUnitStatesEligibleForDynamicDeployment(UnitStates);
+	local Object SelfObj;
 
-	TacticalHUD = UITacticalHUD(Movie.Pres.ScreenStack.GetScreen(class'UITacticalHUD'));
-
-	// There's no good time for us to deselect units at any point after deployment,
-	// so do it before entering screen instead.
-	DeselectAllUnits();
 	XComHQ = `XCOMHQ;
+	History = `XCOMHISTORY;
+	EventMgr = `XEVENTMGR;
 
-	//m_strButtonValues[ePersonnelSoldierSortType_Status] = class'UIUtilities_Text'.static.GetSizedText(class'UIChallengeMode_SquadSelect'.default.m_strLocationLabel, 12);
+	m_strButtonValues[ePersonnelSoldierSortType_Status] = "";
+	m_strButtonLabels[ePersonnelSoldierSortType_Status] = "DEPLOYMENT";
+
+	// Low priority to make sure we have the last word
+	SelfObj = self;
+	EventMgr.RegisterForEvent(SelfObj, 'OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate, 10, ,, );
 	
 	super.InitScreen(InitController, InitMovie, InitName);
 
-	SwitchTab(m_eListType);
-	
-	CreateConfirmButton();
+	//m_strButtonValues[ePersonnelSoldierSortType_Status] = class'UIUtilities_Text'.static.GetSizedText(class'UIChallengeMode_SquadSelect'.default.m_strLocationLabel, 12);
 
-	TacticalHUD.m_kAbilityHUD.Hide();	 // Hide soldier's ability bar, so the Confirm button doesn't look ugly on top of it.
+	SwitchTab(m_eListType);
+	SetScreenHeader(`CAPS(`GetLocalizedString("IRI_DynamicDeployment_ArmoryLabel")));
+	CreateConfirmButton();
 }
 
 // Big green button at the bottom.
@@ -67,7 +71,7 @@ protected function CreateConfirmButton()
 	}
 	else
 	{
-		ConfirmButton.InitLargeButton('IRI_DD_ConfirmButton', `CAPS(class'UIInventory'.default.m_strConfirmButtonLabel));
+		ConfirmButton.InitLargeButton('IRI_DD_ConfirmButton', class'UIMission'.default.m_strLaunchMission);
 	}
 	ConfirmButton.DisableNavigation();
 	ConfirmButton.AnchorBottomCenter();
@@ -75,8 +79,6 @@ protected function CreateConfirmButton()
 	ConfirmButton.OnClickedDelegate = OnConfirmButtonClicked;
 	ConfirmButton.Show();
 	ConfirmButton.ShowBG(true);
-
-	UpdateConfirmButtonVisibility();
 }
 
 // ================================= UPDATE DATA ==============================================
@@ -84,39 +86,21 @@ protected function CreateConfirmButton()
 simulated function UpdateData()
 {
 	local XComGameState_Unit UnitState;
-
+	local StateObjectReference UnitRef;
+	
 	// Destroy old data
 	UnitStates.Length = 0;
 	m_arrSoldiers.Length = 0;
 
-	DDObject.GetUnitStatesEligibleForDynamicDeployment(UnitStates);
-
-	// Fill the original data array so that base UIPersonnel functions can work properly.
-	foreach UnitStates(UnitState)
+	foreach XComHQ.Squad(UnitRef)
 	{
-		m_arrSoldiers.AddItem(UnitState.GetReference());
-	}
-}
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
 
-simulated function RefreshData()
-{
-	super.RefreshData();
-
-	UpdateConfirmButtonVisibility();
-
-	// Somehow sometimes the ability bar becomes visible again if you click fast, so just re-hide it every time.
-	TacticalHUD.m_kAbilityHUD.Hide();
-}
-
-protected function UpdateConfirmButtonVisibility()
-{
-	if (DDObject.IsAnyUnitSelected())
-	{
-		ConfirmButton.SetDisabled(false, "");
-	}
-	else
-	{
-		ConfirmButton.SetDisabled(true, "");  // Disabled reason doesn't seem to be working. Oh well.
+		if (class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
+		{
+			UnitStates.AddItem(UnitState);
+			m_arrSoldiers.AddItem(UnitRef);
+		}
 	}
 }
 
@@ -124,15 +108,27 @@ protected function UpdateConfirmButtonVisibility()
 
 protected function OnSoldierClicked(StateObjectReference UnitRef)
 {
-	local XComGameState NewGameState;
+	local XComGameState_Unit UnitState;
+	local bool bMarked;
+	
+	UnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
+	if (UnitState == none)
+		return;
 
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Clicked Unit for Dynamic Deployment");
+	bMarked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
 
-	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
-	DDObject.ToggleUnitSelection(UnitRef.ObjectID);
-	`GAMERULES.SubmitGameState(NewGameState);
+	// Don't allow marking the last unmarked unit
+	if (class'Help'.static.GetNumUnmarkedSquadMembers() == 1 && !bMarked)
+	{
+		Movie.Pres.PlayUISound(eSUISound_MenuClickNegative);
 
-	`XTACTICALSOUNDMGR.PlaySoundEvent("Play_MenuSelect");
+		ProcessRepeatedClicks();
+		return;
+	}
+
+	class'Help'.static.MarkUnitForDynamicDeployment(UnitState, !bMarked);
+
+	Movie.Pres.PlayUISound(eSUISound_MenuSelect);
 	RefreshData();
 }
 
@@ -140,39 +136,106 @@ protected function OnSoldierClicked(StateObjectReference UnitRef)
 
 protected function OnConfirmButtonClicked(UIButton Button)
 {	
+	local UILargeButton DummyButton;
+	local UISquadSelect SquadSelect;
+
 	CloseScreen();
+
+	SquadSelect = UISquadSelect(Button.Movie.Pres.ScreenStack.GetFirstInstanceOf(class'UISquadSelect'));
+	if (SquadSelect == none)
+	{
+		`LOG("CRITICAL ERROR :: FAILED TO FIND SQUAD SELECT! CANNOT LAUNCH MISSION!",, 'WOTCIridarDynamicDeployment');
+		`LOG("Disable this mod and try again.",, 'WOTCIridarDynamicDeployment');
+		return;
+	}
+	
+	DummyButton = UILargeButton(SquadSelect.LaunchButton.GetChildByName('IRI_DD_DummyLaunchButton', true));
+	if (DummyButton == none)
+	{
+		`LOG("CRITICAL ERROR :: FAILED TO FIND DUMMY BUTTON! CANNOT LAUNCH MISSION!",, 'WOTCIridarDynamicDeployment');
+		`LOG("Disable this mod and try again.",, 'WOTCIridarDynamicDeployment');
+		return;
+	}
+	DummyButton.OnClickedDelegate(Button);
 }
 
 // ================================= CANCEL ==============================================
 
 simulated function OnCancel()
 {
-	DeselectAllUnits();
 	CloseScreen();
-}
-
-private function DeselectAllUnits()
-{
-	local XComGameState NewGameState;
-
-	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Dynamic Deployment deselect all units");
-	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
-	DDObject.DeselectAllUnits();
-	`GAMERULES.SubmitGameState(NewGameState);
 }
 
 // ================================= CLEANUP ==============================================
 
 simulated function OnRemoved()
 {
-	TacticalHUD.m_kAbilityHUD.Show();
-	super.OnRemoved();
+	local Object SelfObj;
+
+	SelfObj = self;
+	EventMgr.UnRegisterFromEvent(SelfObj, 'OverridePersonnelStatus');
+
+	super(UIPersonnel).OnRemoved();
+}
+
+
+static private function EventListenerReturn OnOverridePersonnelStatus(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
+{
+	local XComLWTuple			OverrideTuple;
+	local XComGameState_Unit	UnitState;
+
+	UnitState = XComGameState_Unit(EventSource);
+	if (UnitState == none) 
+		return ELR_NoInterrupt;
+
+	OverrideTuple = XComLWTuple(EventData);
+
+	if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState))
+	{
+		OverrideTuple.Data[0].s = "DYNAMIC";
+		OverrideTuple.Data[4].i = eUIState_Warning;
+	}
+	else
+	{
+		OverrideTuple.Data[0].s = `CAPS(class'UIUtilities_Strategy'.default.m_strNormal);
+		OverrideTuple.Data[4].i = eUIState_Normal;
+	}
+
+	return ELR_NoInterrupt;
+}
+
+// If the player keeps clicking to try and DD the last soldier in squad who's not DD'd already, display a tutorial popup.
+private function ProcessRepeatedClicks()
+{
+	local TDialogueBoxData kDialogData;
+
+	if (NumRepeatedClicks == 0)
+	{
+		SetTimer(5.0, false, nameof(ResetRepeatedClicks), self);
+	}
+	NumRepeatedClicks++;
+	
+	if (NumRepeatedClicks > 5)
+	{
+		NumRepeatedClicks = 0;
+
+		kDialogData.strTitle = class'UIMission'.default.m_strChosenWarning2;
+		kDialogData.strText = `GetLocalizedString("IRI_DD_CannotDDEntireSquad_Text");
+		kDialogData.eType = eDialog_Warning;
+		kDialogData.strAccept = class'UIUtilities_Text'.default.m_strGenericOK;
+
+		Movie.Pres.UIRaiseDialog(kDialogData);
+	}
+}
+function ResetRepeatedClicks()
+{
+	NumRepeatedClicks = 0;
 }
 
 // --------------------------------------------------------------------------------------------------
 
 simulated function UpdateNavHelp() {} 
-simulated function SpawnNavHelpIcons() {} // No nav help in tactical
+simulated function SpawnNavHelpIcons() {} // No need for NavHelp for this screen
 
 defaultproperties
 {
