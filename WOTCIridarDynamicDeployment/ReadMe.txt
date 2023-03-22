@@ -25,8 +25,6 @@ Known Issues:
 For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
 If units are marked for Dynamic Deployment, but are never actually deployed, they will not have their HP from armor during Skyranger walkoff. Cosmetic issue only.
 
-TODO: Move camera to deployment location.
-
 Seismic beacon needs a better effect and projectile trail
 
 

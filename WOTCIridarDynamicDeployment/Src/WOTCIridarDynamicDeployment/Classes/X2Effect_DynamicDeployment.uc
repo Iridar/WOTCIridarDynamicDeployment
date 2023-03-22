@@ -269,12 +269,15 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 
 	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 
-
 	`AMLOG("Got this many units to visualize:" @ UnitStates.Length);
 
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
-	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	// Remove the two cameras once they've done their task of showing the midpoint location for the beacon throw.
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	RemoveCamera.CameraTagToRemove = 'Cinescript';
+
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
 
 	// Move camera to deployment location
@@ -453,9 +456,11 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	CastingUnit = XComGameState_Unit(ActionMetadata.StateObject_NewState);
 	AbilityContext = XComGameStateContext_Ability(VisualizeGameState.GetContext());
 
-	// Get rid of the normal ability framing camera that focuses on the midpoint between the shooter and target location.
-	// It's done its job at this point.
-	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext));
+	// Remove the two cameras once they've done their task of showing the midpoint location for the beacon throw.
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	RemoveCamera.CameraTagToRemove = 'Cinescript';
+
+	RemoveCamera = X2Action_CameraRemove(class'X2Action_CameraRemove'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	RemoveCamera.CameraTagToRemove = 'AbilityFraming';
 
 	// Move camera to deployment location

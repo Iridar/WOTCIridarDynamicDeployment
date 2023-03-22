@@ -338,23 +338,22 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 }
 
 
-static private function FakeDeployUnit(XComGameState_Unit Unit, XComGameState NewGameState)
-{
-	local XComGameStateHistory	History;
-	local StateObjectReference	ItemReference;
-	local XComGameState_Item	ItemState;
-
-	History = `XCOMHISTORY;
-	Unit.bSpawnedFromAvenger = true; 
-	Unit.ClearRemovedFromPlayFlag();
-
-	foreach Unit.InventoryItems(ItemReference)
-	{
-		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
-		ItemState.BeginTacticalPlay(NewGameState);
-	}
-
-	`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
-
-	Unit.BeginTacticalPlay(NewGameState); 
-}
+//static private function FakeDeployUnit(XComGameState_Unit Unit, XComGameState NewGameState)
+//{
+//	local XComGameStateHistory	History;
+//	local StateObjectReference	ItemReference;
+//	local XComGameState_Item	ItemState;
+//
+//	Unit.bSpawnedFromAvenger = true; 
+//	Unit.ClearRemovedFromPlayFlag();
+//
+//	foreach Unit.InventoryItems(ItemReference)
+//	{
+//		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
+//		ItemState.BeginTacticalPlay(NewGameState);
+//	}
+//
+//	`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
+//
+//	Unit.BeginTacticalPlay(NewGameState); 
+//}
