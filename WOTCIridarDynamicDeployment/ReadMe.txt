@@ -20,12 +20,12 @@ Adds the Dynamic Deployment unlock to Guerilla Tactics School that allows XCOM t
 
 By default, soldiers can be selected for Dynamic Deployment (DD) in three locations:[list]
 [*] In Squad Select, there will be a checkbox under each soldier. It will control if the soldier should use DD for this mission.
-[*] In the Armory screen for individual soldiers, there will be a Dynamic Deployment button with a checkbox. It will control if this soldier should use DD whenever possible. In practice, it means the mod will just try to enable the checkbox on Squad Select whenever this soldier is added to the squad.
+[*] In the Armory screen for individual soldiers, there will be a Dynamic Deployment button with a checkbox. It will control if this soldier should use DD whenever possible. In practice, it means the mod will just try to mark the checkbox on Squad Select whenever this soldier is added to the squad.
 [*] When you click Launch Mission in Squad Select, there will be a final Dynamic Deployment screen, which will let you control which units use DD on this mission.[/list]
 
 If you find any of these methods to be inconvenient or intrusive, you can disable them in Mod Config Menu.
 
-Once on the mission, any soldier can use the Dynamic Deployment ability to designate a deployment location. This will end the soldier's turn. 
+Once on the mission, any soldier can use the Dynamic Deployment ability to designate a deployment location, ending the soldier's turn and deploying the rest of the squad. 
 
 You are effectively paying with one soldier's actions to deploy a part of the squad in a potentially advantageous position.
 
@@ -59,14 +59,14 @@ The mod includes deployment animations for regular soldiers and SPARK-like units
 Other than that, the mod should be compatible with anything and everything, including infiltration mods like [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2683996590]Long War of the Chosen[/url][/b] or [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2567230730][WOTC] Covert Infiltration[/url][/b].
 
 [h1]REQUIREMENTS[/h1]
-[list][*][b]]url=https://steamcommunity.com/sharedfiles/filedetails/?id=1134256495]X2 WOTC Community Highlander[/url][/b] is required.
-[*][b]]url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446][WOTC] Iridar's Template Master - Core[/url][/b] is required.
-[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=667104300][WotC] Mod Config Menu[/url][/b] is supported, but not a hard requirement.
+[list][*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1134256495]X2 WOTC Community Highlander[/url][/b] is required.
+[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446][WOTC] Iridar's Template Master - Core[/url][/b] is required.
+[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=667104300][WotC] Mod Config Menu[/url][/b] is supported, but not a hard requirement.[/list]
 
 [h1]CONFIGURATION[/h1]
 
 The mod is highly configurable via Mod Config Menu and various configuration files in:
-[code]..\steamapps\workshop\content\268500\2849922249\Config\[/code]
+[code]..\steamapps\workshop\content\268500\2950736651\Config\[/code]
 
 [h1]KNOWN ISSUES[/h1][list]
 [*] For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
@@ -77,6 +77,7 @@ The mod is highly configurable via Mod Config Menu and various configuration fil
 
 [h1]CREDITS[/h1]
 
+Music in the video: Martin D'Alesio - Fortunate XCOM
+Voice acting in the video: Amphibibro 
+
 Please support me on [b][url=https://patreon.com/Iridar]Patreon[/url][/b] if you require tech support, have a suggestion for a feature, or simply wish to help me create more awesome mods.
-
-
