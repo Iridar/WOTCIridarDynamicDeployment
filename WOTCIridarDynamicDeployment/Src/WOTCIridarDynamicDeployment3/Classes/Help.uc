@@ -329,6 +329,25 @@ static final function name GetAbilityUnitValue(const name AbilityName)
 	return name("IRI_DD_Unlock_" $ AbilityName);
 }
 
+static final function XComGameState_HeadquartersXCom GetAndPrepXComHQ(XComGameState NewGameState)
+{
+    local XComGameState_HeadquartersXCom XComHQ;
+
+    foreach NewGameState.IterateByClassType(class'XComGameState_HeadquartersXCom', XComHQ)
+    {
+        break;
+    }
+
+    if (XComHQ == none)
+    {
+        XComHQ = XComGameState_HeadquartersXCom(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+        XComHQ = XComGameState_HeadquartersXCom(NewGameState.ModifyStateObject(class'XComGameState_HeadquartersXCom', XComHQ.ObjectID));
+    }
+
+    return XComHQ;
+}
+
+
 // Whether a unit has a DD Unlock is stored as a unit value,
 // ability itself is added to the unit in ModifyEarnedAbilities in X2DLCInfo.
 static final function bool IsDDAbilityUnlocked(const XComGameState_Unit UnitState, const name AbilityName)

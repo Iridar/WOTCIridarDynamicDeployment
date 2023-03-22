@@ -8,6 +8,8 @@ class UISL_DynamicDeployment extends UIScreenListener;
 `include(WOTCIridarDynamicDeployment\Src\ModConfigMenuAPI\MCM_API_CfgHelpers.uci)
 
 var private bool bRegistered;
+var private bool bRJSS;
+var private string PathToActor;
 
 event OnInit(UIScreen Screen)
 {
@@ -25,19 +27,34 @@ event OnInit(UIScreen Screen)
 	if (!class'Help'.static.IsDynamicDeploymentAllowed())
 		return;
 
+	bRegistered = true;
+
 	if (`GETMCMVAR(ENABLE_LAUNCH_MISSION_SCREEN))
 	{
 		PatchLaunchMissionButton(SquadSelect);
 	}
 
+	UpdateSquad();
+
 	if (`GETMCMVAR(ENABLE_SOLDIER_LIST_CHECKBOX))
 	{
-		// Insert checkboxes immedaite
-		OnSquadSelectUpdate(none, none, none, '', none);
+		// Insert checkboxes immedaitely.
+		UpdateSquadSelect();
 
-		SelfObj = self;
-		`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_OnStateSubmitted, 49);
-		bRegistered = true;
+		// If the player is using RJSS, we can just listen to its UpdateData event.
+		if (class'Help'.static.IsModActive('robojumperSquadSelect_WotC'))
+		{
+			bRJSS = true;
+			SelfObj = self;
+			`XEVENTMGR.RegisterForEvent(SelfObj, 'rjSquadSelect_UpdateData', OnSquadSelectUpdate, ELD_OnStateSubmitted, 49);
+		}
+		else
+		{
+			// When not using RJSS, have to use an Actor to run updates regularly 
+			// so that checkbox is removed when a soldier is removed from squad.
+			`AMLOG("Creating Actor");
+			GetOrCreateActor();
+		}
 	}
 }
 
@@ -48,9 +65,28 @@ event OnRemoved(UIScreen Screen)
 	if (!bRegistered || UISquadSelect(Screen) == none)
 		return;
 
-	SelfObj = self;
+	if (bRJSS)
+	{
+		SelfObj = self;
+		`XEVENTMGR.UnregisterFromEvent(SelfObj, 'rjSquadSelect_UpdateData');
+	}
+	else 
+	{	
+		`AMLOG("Destroying Actor");
+		GetOrCreateActor().Destroy();
+	}
+}
 
-	`XEVENTMGR.UnregisterFromEvent(SelfObj, 'rjSquadSelect_UpdateData');
+event OnLoseFocus(UIScreen Screen)
+{
+	if (!bRegistered || UISquadSelect(Screen) == none)
+		return;
+
+	if (!bRJSS)
+	{
+		`AMLOG("Pause Actor");
+		GetOrCreateActor().SetTickIsDisabled(true);
+	}
 }
 
 event OnReceiveFocus(UIScreen Screen)
@@ -58,31 +94,13 @@ event OnReceiveFocus(UIScreen Screen)
 	if (!bRegistered || UISquadSelect(Screen) == none)
 		return;
 
-	OnSquadSelectUpdate(none, none, none, '', none);
-}
+	UpdateSquad();
+	UpdateSquadSelect();
 
-static final function UnmarkOneSoldier()
-{
-	local XComGameState_HeadquartersXCom	XComHQ;
-	local StateObjectReference				UnitRef;
-	local XComGameState_Unit				UnitState;
-	local XComGameStateHistory				History;
-
-	`AMLOG("Running" @ class'Help'.static.GetNumUnmarkedSquadMembers());
-
-	History = `XCOMHISTORY;
-
-	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
-	foreach XComHQ.Squad(UnitRef)
+	if (!bRJSS)
 	{
-		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
-		if (UnitState == none)
-			continue;
-
-		`AMLOG("Unmarking" @ UnitState.GetFullName());
-
-		class'Help'.static.MarkUnitForDynamicDeployment(UnitState, false);
-		break;
+		`AMLOG("Resume Actor");
+		GetOrCreateActor().SetTickIsDisabled(false);
 	}
 }
 
@@ -90,6 +108,14 @@ static final function UnmarkOneSoldier()
 // and, when screen receives focus, updating their status (in case soldier's DD status is changed elsewhere) 
 // and position (in case soldier list item becomes taller e.g. due to unlocking more abilities and the ability panel becoming taller)
 static private function EventListenerReturn OnSquadSelectUpdate(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+{
+	UpdateSquad();
+	UpdateSquadSelect();
+
+	return ELR_NoInterrupt;
+}
+
+static final function UpdateSquadSelect()
 {
 	local UISquadSelect						  SquadSelect;
 	local UISquadSelect_ListItem			  ListItem;
@@ -103,16 +129,9 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 
 	SquadSelect = UISquadSelect(`HQPRES.ScreenStack.GetFirstInstanceOf(class'UISquadSelect'));
 	if (SquadSelect == none)
-		return ELR_NoInterrupt;
+		return;
 
-	`AMLOG("Running:" @ Event);
-
-	// When adding soldiers to squad select, ensure that at least one is not marked for DD.
-	// This also technically runs if there are no soldiers at all in squad select but eh
-	if (class'Help'.static.GetNumUnmarkedSquadMembers() == 0)
-	{
-		UnmarkOneSoldier();
-	}
+	`AMLOG("Running");
 
 	History = `XCOMHISTORY;
 
@@ -132,19 +151,7 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 			UnitState = XComGameState_Unit(History.GetGameStateForObjectID(ListItem.GetUnitRef().ObjectID));
 			if (UnitState != none && class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
 			{	
-				if (class'Help'.static.GetNumUnmarkedSquadMembers() > 0)
-				{
-					if (class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState))
-					{
-						class'Help'.static.MarkUnitForDynamicDeployment(UnitState, true);
-						bChecked = true;
-					}
-					else
-					{
-						bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
-					}
-				}
-
+				bChecked = class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState);
 				bShouldHaveCheckbox = true;
 
 				`AMLOG("Looking at soldier:" @ UnitState.GetFullName() @ class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState) @ `ShowVar(bChecked));
@@ -189,8 +196,65 @@ static private function EventListenerReturn OnSquadSelectUpdate(Object EventData
 		}
 	}
 	`AMLOG("Done");
+}
 
-	return ELR_NoInterrupt;
+static final function UpdateSquad()
+{
+	local XComGameState_Unit				UnitState;
+	local XComGameStateHistory				History;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
+
+	// When adding soldiers to squad select, ensure that at least one is not marked for DD.
+	// This also technically runs if there are no soldiers at all in squad select but eh
+	if (class'Help'.static.GetNumUnmarkedSquadMembers() == 0)
+	{
+		UnmarkOneSoldier();
+	}
+
+	// Handle DD mark for soldiers that have DD enabled on their Armory screen,
+	// which means DD should be used for them whenever possible.
+	History = `XCOMHISTORY;
+	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+	foreach XComHQ.Squad(UnitRef)
+	{	
+		if (class'Help'.static.GetNumUnmarkedSquadMembers() == 1)
+			break;
+
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (UnitState == none || !class'Help'.static.IsUnitEligibleForDDAbilities(UnitState))
+			continue;
+
+		if (class'Help'.static.IsUnitMarkedForDynamicDeploymentDefault(UnitState))
+		{
+			class'Help'.static.MarkUnitForDynamicDeployment(UnitState, true);
+		}
+	}
+}
+
+static final function UnmarkOneSoldier()
+{
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local StateObjectReference				UnitRef;
+	local XComGameState_Unit				UnitState;
+	local XComGameStateHistory				History;
+
+	`AMLOG("Running" @ class'Help'.static.GetNumUnmarkedSquadMembers());
+
+	History = `XCOMHISTORY;
+
+	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+	foreach XComHQ.Squad(UnitRef)
+	{
+		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
+		if (UnitState == none)
+			continue;
+
+		`AMLOG("Unmarking" @ UnitState.GetFullName());
+
+		class'Help'.static.MarkUnitForDynamicDeployment(UnitState, false);
+		break;
+	}
 }
 
 
@@ -217,4 +281,24 @@ static private function OnLaunchMissionClicked(UIButton Button)
 	Pres = Button.Movie.Pres;
 	ChooseUnits = Pres.Spawn(class'UIChooseUnits', Pres);
 	Pres.ScreenStack.Push(ChooseUnits);
+}
+
+
+private function SSUpdateActor GetOrCreateActor()
+{	
+	local SSUpdateActor TheActor;
+
+	if (PathToActor != "")
+	{
+		TheActor = SSUpdateActor(FindObject(PathToActor, class'SSUpdateActor'));
+		if (TheActor != none)
+		{
+			return TheActor;
+		}
+	}
+
+	TheActor = `XCOMGRI.Spawn(class'SSUpdateActor');
+	TheActor.UISL = self;
+	PathToActor = PathName(TheActor);
+	return TheActor;
 }

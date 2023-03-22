@@ -8,27 +8,26 @@ Created with Enhanced Mod Project Template v1.0
 Get news and updates here: 
 https://github.com/Iridar/EnhancedModProjectTemplate 
 
-Done:
+// Note: cooking maps breaks the SPARK deployment for some reason.
 
+Done:
 Test request evac interactions - DD abiliteis should be disabled. = works.
 BUG: Loading a save still deselects units that were selected for DD. = fixed
+test what happens if units are selected for DD but never deployed = addressed
 
-// Note: cooking maps breaks the SPARK deployment for some reason.
+-------
+
 
 // TODO: Mod description
 // TODO: Test everything with redscreens and check logs
 
 Known Issues: 
 For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
-
+If units are marked for Dynamic Deployment, but are never actually deployed, they will not have their HP from armor during Skyranger walkoff. Cosmetic issue only.
 
 TODO: Move camera to deployment location.
 
 Seismic beacon needs a better effect and projectile trail
-
-test what happens if units are selected for DD but never deployed
-might need to add them to squad in OnTacticalCleanup
-// TODO: Figure out how to update the checkboxes when soldier is removed from normal squad select.
 
 
 Bug:

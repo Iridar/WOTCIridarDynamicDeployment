@@ -123,6 +123,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\DeployLocationActor.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\SSUpdateActor.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIArmory_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>

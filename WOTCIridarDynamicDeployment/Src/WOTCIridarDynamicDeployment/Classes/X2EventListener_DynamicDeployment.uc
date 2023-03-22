@@ -153,6 +153,7 @@ static private function CHEventListenerTemplate Create_ListenerTemplate_Tactical
 	Template.AddCHEvent('EvacZonePlaced', OnSpawnEvacZoneComplete, ELD_OnStateSubmitted); 
 
 	Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted);
+	Template.AddCHEvent('UnitEvacuated', OnUnitEvacuated, ELD_OnStateSubmitted);
 	Template.AddCHEvent('CleanupTacticalMission', OnCleanupTacticalMission, ELD_Immediate);
 	Template.AddCHEvent('OverridePersonnelStatus', OnOverridePersonnelStatus, ELD_Immediate);
 	
@@ -245,19 +246,40 @@ static private function EventListenerReturn OnSpawnEvacZoneComplete(Object Event
 	class'XComGameState_BattleData'.static.SetGlobalAbilityEnabled('IRI_DynamicDeployment_Deploy_Uplink', true, NewGameState);
 
 	// Skyranger just arrived for evac, can't request DD for a turn.
-	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState, true);
+	class'Help'.static.PutSkyrangerOnCooldown(`GetConfigInt("IRI_DD_Skyranger_Shared_Cooldown"), NewGameState, true);
 
 	`GAMERULES.SubmitGameState(NewGameState);
 
 	return ELR_NoInterrupt;
 }
 
+static private function EventListenerReturn OnUnitEvacuated(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+{
+	local XComGameState_Unit UnitState;
+
+	UnitState = XComGameState_Unit(EventData);
+	if (UnitState == none)
+		return ELR_NoInterrupt;
+
+	if (UnitState.GetTeam() != eTeam_XCom)
+		return ELR_NoInterrupt;
+
+	// Evacuating a unit puts DD abilities on 1 turn cooldown - skyranger is busy recieving a unit and cannot be used for deployment.
+	class'Help'.static.PutSkyrangerOnCooldown(`GetConfigInt("IRI_DD_Skyranger_Shared_Cooldown"),, true);
+
+	return ELR_NoInterrupt;
+}
+
 static private function EventListenerReturn OnCleanupTacticalMission(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
-	//local XComGameState_Unit	UnitState;
-	//local XComGameState_Unit	NewUnitState;
-	local XComGameStateHistory	History;
-	local XComGameState_DynamicDeployment DDObject;
+	local array<XComGameState_Unit>			UnitStates;
+	local XComGameState_Unit				UnitState;
+	//local XComGameState_Unit				NewUnitState;
+	local XComGameState_HeadquartersXCom	XComHQ;
+	local XComGameStateHistory				History;
+	local XComGameState_DynamicDeployment	DDObject;
+	//local XComGameState_Ability				AbilityState;
+	//local StateObjectReference				AbilityRef;
 
 	History = `XCOMHISTORY;
 
@@ -274,6 +296,27 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 			DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 		}
 	}
+
+	// If units weren't deployed during the mission, readd them back to squad so they can participate in the Skyranger walkoff.
+	// Known issue: they don't have their HP from armor during the walkoff.
+	if (DDObject.bPendingDeployment)
+	{
+		XComHQ = class'Help'.static. GetAndPrepXComHQ(NewGameState);
+		UnitStates = DDObject.GetUnitsToDeploy();
+		foreach UnitStates(UnitState)
+		{
+			//`AMLOG(UnitState.GetFullName() @ UnitState.GetCurrentStat(eStat_HP) @ UnitState.GetMaxStat(eStat_HP));
+			
+			// Can't do that, because units might be DDing while wounded, and it doesn't work anyway.
+			//NewUnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+			//NewUnitState.SetCurrentStat(eStat_HP, UnitState.GetMaxStat(eStat_HP));
+			
+			XComHQ.Squad.AddItem(UnitState.GetReference());
+			//FakeDeployUnit(UnitState, NewGameState);
+			//UnitState.EvacuateUnit(NewGameState);
+		}
+	}
+
 	if (DDObject != none)
 	{
 		DDObject.DeselectAllUnits();
@@ -292,4 +335,26 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 	//}
 
 	return ELR_NoInterrupt;
+}
+
+
+static private function FakeDeployUnit(XComGameState_Unit Unit, XComGameState NewGameState)
+{
+	local XComGameStateHistory	History;
+	local StateObjectReference	ItemReference;
+	local XComGameState_Item	ItemState;
+
+	History = `XCOMHISTORY;
+	Unit.bSpawnedFromAvenger = true; 
+	Unit.ClearRemovedFromPlayFlag();
+
+	foreach Unit.InventoryItems(ItemReference)
+	{
+		ItemState = XComGameState_Item(NewGameState.ModifyStateObject(class'XComGameState_Item', ItemReference.ObjectID));
+		ItemState.BeginTacticalPlay(NewGameState);
+	}
+
+	`TACTICALRULES.InitializeUnitAbilities(NewGameState, Unit);
+
+	Unit.BeginTacticalPlay(NewGameState); 
 }

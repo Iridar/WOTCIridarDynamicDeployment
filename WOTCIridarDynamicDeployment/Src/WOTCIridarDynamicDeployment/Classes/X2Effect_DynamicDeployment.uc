@@ -86,7 +86,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 		EventMgr.TriggerEvent('UnitMoveFinished', NewUnitState, NewUnitState, NewGameState);
 	}
 
-	class'Help'.static.PutSkyrangerOnCooldown(1, NewGameState);
+	class'Help'.static.PutSkyrangerOnCooldown(`GetConfigInt("IRI_DD_Skyranger_Shared_Cooldown"), NewGameState);
 
 	EventMgr.TriggerEvent(class'Help'.default.DDEventName, PlayerState, PlayerState, NewGameState);
 
