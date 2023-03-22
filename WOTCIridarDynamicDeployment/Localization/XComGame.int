@@ -1,5 +1,5 @@
 ; ---------------------------------------------------------------
-;					SELECT AND DEPLOY
+;					DEPLOY
 
 
 [IRI_DynamicDeployment X2AbilityTemplate]
@@ -45,8 +45,8 @@ LocHelpText="This unit will be able to select a precise location for their Dynam
 
 [IRI_DDUnlock_AerialScout X2AbilityTemplate]
 LocFriendlyName="Aerial Scouting"
-LocLongDescription="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground deployment."
-LocHelpText="During Dynamic Deployment, this soldier reveals the terrain and units in an additional <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> tiles around the deployment area until the end of the turn. If multiple units with this ability are deployed, the revealed area increases. Has no effect during underground deployment."
+LocLongDescription="Soldier reveals terrain and nearby units in <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> additional tiles during Dynamic Deployment; area expands with multiple units. Doesn't work underground."
+LocHelpText="Soldier reveals terrain and nearby units in <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> additional tiles during Dynamic Deployment; area expands with multiple units. Doesn't work underground."
 
 [IRI_DDUnlock_TakeAndHold X2AbilityTemplate]
 LocFriendlyName="Take and Hold"

@@ -185,6 +185,7 @@ static final function UpdateSquadSelect()
 				// Checkbox should be there and is there, just update the value.
 				// Have to update position too in case player returns to squad select from armory where they unlocked more perks
 				// and soldier list item became taller
+				DDCheckbox.UnitState = UnitState; // reassign unit state in case squad has changed
 				DDCheckbox.UpdatePosition(ListItem);
 				DDCheckbox.Show();
 				DDCheckbox.Checkbox.SetChecked(bChecked, false);

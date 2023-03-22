@@ -166,10 +166,6 @@ static private function PutSkyrangerOnCooldownInternal(XComGameState_Player Play
 
 static final function int GetDeploymentType()
 {
-	if (class'X2DLCInfo_Debug'.default.DeployTypeOverride != 0)
-	{
-		return class'X2DLCInfo_Debug'.default.DeployTypeOverride - 1;
-	}
 	if (IsUndergroundPlot())
 	{
 		return `eDT_SeismicBeacon;

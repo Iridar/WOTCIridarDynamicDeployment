@@ -25,10 +25,6 @@ SQUAD_MUST_SEE_TILE_Tip = "If enabled, at least one soldier in the squad must ha
 DEPLOY_CAST_RANGE_TILES_Label = "Deploy range, tiles"
 DEPLOY_CAST_RANGE_TILES_Tip = "This setting determines the maximum throw range for the deployment flare or beacon. With Digital Uplink, the maximum range is always 18 tiles."
 
-DD_SOLDIER_SELECT_IS_FREE_ACTION_Label = "Selecting soldiers is a free action"
-DD_SOLDIER_SELECT_IS_FREE_ACTION_Tip = "If enabled, selecting soldiers for Dynamic Deployment will not consume any action points."
-DD_SOLDIER_SELECT_ENDS_TURN_Label = "Selecting soldiers ends turn"
-DD_SOLDIER_SELECT_ENDS_TURN_Tip = "If enabled, selecting soldiers for Dynamic Deployment will end the soldier's turn."
 DD_DEPLOY_IS_FREE_ACTION_Label = "Deployment is a free action"
 DD_DEPLOY_IS_FREE_ACTION_Tip = "If enabled, designating a deployment area for Dynamic Deployment will not consume any action points."
 
@@ -48,4 +44,4 @@ ENABLE_LAUNCH_MISSION_SCREEN_Label = "Enable Launch Mission Deployment Screen"
 ENABLE_LAUNCH_MISSION_SCREEN_Tip = "If enabled, launching a mission from Squad Select will first display a screen to select which units should use Dynamic Deployment. This method should work for controller users."
 
 ENABLE_ARMORY_CHECKBOX_Label = "Enable Armory Deployment Checkbox"
-ENABLE_ARMORY_CHECKBOX_Tip = "If enabled, the Dynamic Deployment button in the Armory will have a checkbox to control whether each unit should use Dynamic Deployment. This method should be used when other methods are not available due to mod conflicts."
+ENABLE_ARMORY_CHECKBOX_Tip = "If enabled, the Dynamic Deployment button in the Armory will have a checkbox to control whether this unit should always use Dynamic Deployment wnenever possible. This method is convenient if you want to have specific soldiers that always use Dynamic Deployment."

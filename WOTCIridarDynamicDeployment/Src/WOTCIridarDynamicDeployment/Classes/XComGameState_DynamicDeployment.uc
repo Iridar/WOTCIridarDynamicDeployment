@@ -284,5 +284,6 @@ DefaultProperties
 	//bTacticalTransient = true
 
 	// There can be only one. dramatic_backdrop.mp3
-	bSingletonStateType = true
+	// EDIT: Actually, I think it creates really weird interactions with History, so thanks, but no thanks.
+	//bSingletonStateType = true
 }

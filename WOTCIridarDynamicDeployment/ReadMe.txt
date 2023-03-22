@@ -1,45 +1,10 @@
-X2ModBuildCommon v1.2.1 successfully installed. 
-Edit .scripts\build.ps1 if you want to enable cooking. 
- 
-Enjoy making your mod, and may the odds be ever in your favor. 
- 
-Created with Enhanced Mod Project Template v1.0 
- 
-Get news and updates here: 
-https://github.com/Iridar/EnhancedModProjectTemplate 
+Created by Iridar
+
+More info here: https://www.patreon.com/Iridar
 
 // Note: cooking maps breaks the SPARK deployment for some reason.
 
-Done:
-Test request evac interactions - DD abiliteis should be disabled. = works.
-BUG: Loading a save still deselects units that were selected for DD. = fixed
-test what happens if units are selected for DD but never deployed = addressed
-
 -------
-
-
-// TODO: Mod description
-// TODO: Test everything with redscreens and check logs
-
-Known Issues: 
-For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
-If units are marked for Dynamic Deployment, but are never actually deployed, they will not have their HP from armor during Skyranger walkoff. Cosmetic issue only.
-
-
-
-
-#Evacuating a unit or spawning an evac zone should put DD on cooldown of 1 turn.
-#Deploying units should put call evac, evac and deployment itself on a cooldown for 1 turn
-#when using request evac, DD abilities should be global disabled until Skyranger arrives
-
-Three ways to designate which soldiers remain in Skyranger:
-
-1. Via DD unlock that can be toggled on and off.
-2. Via UIScreen that shows up when clicking "start mission"
-3. Via checkbox under each unit.
-
-2 and 3 must be togglable in MCM for compatibility.
-Also an MCM toggle to allow selecting different units for deployment (to control whether select units is visible when units are already selected)
 
 Sitreps:
 Airborne Insertion:  Begin the mission with a single Resistance Militia spotter. All XCOM units are deployed via Dynamic Deployment.
@@ -47,44 +12,43 @@ Extraction Team: After the objective is completed, XCOM may deploy up to two add
 All In: XCOM can drop reinforcements to replace lost soldiers until they have no units remaining. (Appears on Leviathan and Chosen Avenger Defence)
 Resistance Airfield - once per mission, call resistance paratroopers.
 
-
-
-[WOTC] Request Evac
-https://steamcommunity.com/sharedfiles/filedetails/?id=1823265096
-
+---
 
 [WOTC] Dynamic Deployment by Iridar
 
-Allows XCOM to select and deploy soldiers during tactical missions. You start the mission without a full squad, and then deploy the remaining soldiers after the mission starts.
+Adds the Dynamic Deployment unlock to Guerilla Tactics School that allows XCOM to deploy selected squad members after a mission has begun.
 
-Dynamic Deployment needs to be unlocked in Guerilla Tactics School. To do that, you will require a soldier of Sergeant rank or above, and only soldiers at Sergeant rank or above can call in Dynamic Deployment during the mission.
+By default, soldiers can be selected for Dynamic Deployment (DD) in three locations:[list]
+[*] In Squad Select, there will be a checkbox under each soldier. It will control if the soldier should use DD for this mission.
+[*] In the Armory screen for individual soldiers, there will be a Dynamic Deployment button with a checkbox. It will control if this soldier should use DD whenever possible. In practice, it means the mod will just try to enable the checkbox on Squad Select whenever this soldier is added to the squad.
+[*] When you click Launch Mission in Squad Select, there will be a final Dynamic Deployment screen, which will let you control which units use DD on this mission.[/list]
 
-First, you select which soldiers to deploy. Then, after several turns of delay, you can select the deployment area. Soldiers will then parachute into random locations inside the deployment area.
+If you find any of these methods to be inconvenient or intrusive, you can disable them in Mod Config Menu.
 
-As a balancing measure, the delay between selecting soldiers and being able to deploy them is equal to the number of soldiers you selected. 
+Once on the mission, any soldier can use the Dynamic Deployment ability to designate a deployment location. This will end the soldier's turn. 
 
-For example, if you select just one soldier, you will be able to deploy them on the next turn. 
-
-Also, you cannot call in Dynamic Deployment on the first turn of the mission or right after calling for Evac.
+You are effectively paying with one soldier's actions to deploy a part of the squad in a potentially advantageous position.
 
 [h1]DEPLOYMENT UPGRADES[/h1]
 
-The mod allows purchasing upgrades for Dynamic Deployment for individual soldiers on the new screen, which can be accessed in the Armory. These upgrades usually cost Ability Points. 
+The mentioned Dynamic Deployment button in the armory will take you to a screen where you can purchase Dynamic Deployment upgrade unlocks for each individual soldier for a modest price in Ability Points.
 
 For example, [b]Precision Drop[/b] upgrade allows picking the exact deployment location inside the deployment area for this soldier.
 
 Other mods can potentially add more upgrades through config.
 
 [h1]CONCEALMENT RULES[/h1]
-[list][*] If squad concealment has not been broken by the time Dynamic Deployment is called, then the deployed soldiers will also enter squad concealment, unless you deploy them within enemies' detection radius.
-[*] Soldiers with Phantom and other similar perks will enter concealment when deployed.
-[*] SPARKs, [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1452700934]MEC Troopers[/url][/b] and other similar units will forcibly break squad concealment when deployed, but you can purchase the "Whisper" Jets individual deployment upgrade for them to prevent that.[/list]
+Using Dynamic Deployment will break squad concelament, unless the soldier using the Deployment has the [b]Digital Uplink[/b] unlock, in which case the concealment will not be broken, unless the units are deployed into enemy field of vision.
 
-[h1]DYNAMIC REINFORCEMENTS[/h1]
+Soldiers with Phantom and other similar perks will enter concealment when deployed.
 
-Normally, Dynamic Deployment allows deploying soldiers only until you have a full squad. Unconscious, killed or captured units still count. 
+[h1]EVAC INTERACTIONS[/h1]
 
-You can toggle this behavior in Mod Config Menu, which will allow replacing lost soldiers with Dynamic Deplyoment.
+You cannot call for evac or evacuate soldiers on the same turn you used Dynamic Deployment.
+
+Similarly, you cannot use Dynamic Deployment on the same turn you placed an evac zone or evacuated a soldier.
+
+When using the [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1823265096][WOTC] Request Evac[/url][/b] mod, Dynamic Deployment will be unavailable while you're waiting for Skyranger to arrive for Evac.
 
 [h1]COMPATIBILITY[/h1]
 
@@ -92,12 +56,11 @@ The Dynamic Deployment in the [b][url=https://steamcommunity.com/sharedfiles/fil
 
 The mod includes deployment animations for regular soldiers and SPARK-like units, but not playable aliens or other exotic units.
 
-Other than that, the mod should be compatible with anything and everything. 
-
-However, there may be balancing concerns. For example, Dynamic Deployment lets you bypass infiltration time when using mods like [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2683996590]Long War of the Chosen[/url][/b] or [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2567230730][WOTC] Covert Infiltration[/url][/b]. I don't plan to address that.
+Other than that, the mod should be compatible with anything and everything, including infiltration mods like [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2683996590]Long War of the Chosen[/url][/b] or [b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2567230730][WOTC] Covert Infiltration[/url][/b].
 
 [h1]REQUIREMENTS[/h1]
 [list][*][b]]url=https://steamcommunity.com/sharedfiles/filedetails/?id=1134256495]X2 WOTC Community Highlander[/url][/b] is required.
+[*][b]]url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446][WOTC] Iridar's Template Master - Core[/url][/b] is required.
 [*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=667104300][WotC] Mod Config Menu[/url][/b] is supported, but not a hard requirement.
 
 [h1]CONFIGURATION[/h1]
@@ -105,11 +68,12 @@ However, there may be balancing concerns. For example, Dynamic Deployment lets y
 The mod is highly configurable via Mod Config Menu and various configuration files in:
 [code]..\steamapps\workshop\content\268500\2849922249\Config\[/code]
 
-[h1]COMPANION MODS[/h1]
-
-The screen for picking soldiers to deploy is compatible with these mods, and I recommend you pick them up, if you haven't already:[list]
-[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2832773856][WOTC] Detailed Soldier Lists Redux[/url][/b]
-[*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=1458945379][WOTC] Extended Personnel Info[/url][/b][/list]
+[h1]KNOWN ISSUES[/h1][list]
+[*] For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
+[*] If units are marked for Dynamic Deployment, but are never actually deployed, they will not have their HP from armor during Skyranger walkoff. Cosmetic issue only.
+[*] If any enemy pods are activated on the same turn you have used Dynamic Deployment, they will scamper without their cutscene intro.
+[*] When calling for DD in a cramped location in a city map, there's a chance the Skyranger will clip through a building.
+[*] If your squad is killed or otherwise incapacitated before you use Dynamic Deployment, the mission will end right then and there.[/list]
 
 [h1]CREDITS[/h1]
 

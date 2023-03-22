@@ -629,20 +629,22 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	// Unfortunate, but I don't know how else to handle this.
 	// For some reason X2Action_RevealAIBegin just times out in PlayMatinee(), which is native, so no good way to figure it out.
 	EventMgr.RegisterForEvent(EffectObj, 'ScamperBegin', OnScamperBegin, ELD_OnStateSubmitted,, ,, );	
+	EventMgr.RegisterForEvent(EffectObj, 'ScamperEnd', OnScamperBegin, ELD_OnStateSubmitted,, ,, );	
 }
 
 static private function EventListenerReturn OnScamperBegin(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_AIGroup GroupState;
-	local XComGameState_DynamicDeployment DDObject;
+	//local XComGameState_DynamicDeployment DDObject;
 
 	GroupState = XComGameState_AIGroup(EventSource);
 	if (GroupState == none)
 		return ELR_NoInterrupt;
 
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
-	if (DDObject == none || !DDObject.IsUnitSelected(GroupState.RevealInstigatorUnitObjectID))
-		return ELR_NoInterrupt;
+	// EDIT: Can't check this, because then the game would softlock if the pod is pulled by other squadmembers breaking concealment.
+	//DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
+	//if (DDObject == none || !DDObject.IsUnitSelected(GroupState.RevealInstigatorUnitObjectID))
+	//	return ELR_NoInterrupt;
 		
 	// If we're here, it means scamper was caused by a soldier dropped via DD. 
 	`AMLOG("Adding post build vis");

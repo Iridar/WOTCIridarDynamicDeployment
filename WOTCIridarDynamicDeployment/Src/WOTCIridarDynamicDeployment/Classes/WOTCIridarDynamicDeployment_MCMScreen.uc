@@ -16,8 +16,6 @@ var localized string EndLabel_Tip;
 
 `MCM_API_AutoSliderVars(DEPLOY_CAST_RANGE_TILES);
 `MCM_API_AutoCheckBoxVars(SQUAD_MUST_SEE_TILE);
-`MCM_API_AutoCheckBoxVars(DD_SOLDIER_SELECT_IS_FREE_ACTION);
-`MCM_API_AutoCheckBoxVars(DD_SOLDIER_SELECT_ENDS_TURN);
 `MCM_API_AutoCheckBoxVars(DD_DEPLOY_IS_FREE_ACTION);
 `MCM_API_AutoCheckBoxVars(DD_DEPLOY_ENDS_TURN);
 `MCM_API_AutoCheckBoxVars(DEBUG_LOGGING);
@@ -30,8 +28,6 @@ var localized string EndLabel_Tip;
 
 `MCM_API_AutoSliderFns(DEPLOY_CAST_RANGE_TILES,, 1);
 `MCM_API_AutoCheckBoxFns(SQUAD_MUST_SEE_TILE, 1);
-`MCM_API_AutoCheckBoxFns(DD_SOLDIER_SELECT_IS_FREE_ACTION, 1);
-`MCM_API_AutoCheckBoxFns(DD_SOLDIER_SELECT_ENDS_TURN, 1);
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_IS_FREE_ACTION, 1);
 `MCM_API_AutoCheckBoxFns(DD_DEPLOY_ENDS_TURN, 1);
 `MCM_API_AutoCheckBoxFns(DEBUG_LOGGING, 1);
@@ -75,10 +71,6 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	// Action Economy
 
 	Group = Page.AddGroup('Group2', GroupHeader2);
-
-	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_IS_FREE_ACTION, DD_SOLDIER_SELECT_IS_FREE_ACTION_ChangeHandler);	
-	`MCM_API_AutoAddCheckBox(Group, DD_SOLDIER_SELECT_ENDS_TURN);	
-	Group.GetSettingByName('DD_SOLDIER_SELECT_ENDS_TURN').SetEditable(!DD_SOLDIER_SELECT_IS_FREE_ACTION); 
 	
 	`MCM_API_AutoAddCheckBox(Group, DD_DEPLOY_IS_FREE_ACTION, DD_DEPLOY_IS_FREE_ACTION_ChangeHandler);	
 	`MCM_API_AutoAddCheckBox(Group, DD_DEPLOY_ENDS_TURN);	
@@ -94,11 +86,6 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	Page.ShowSettings();
 }
 
-simulated function DD_SOLDIER_SELECT_IS_FREE_ACTION_ChangeHandler(MCM_API_Setting _Setting, bool _SettingValue)
-{
-	DD_SOLDIER_SELECT_IS_FREE_ACTION = _SettingValue;
-	_Setting.GetParentGroup().GetSettingByName('DD_SOLDIER_SELECT_ENDS_TURN').SetEditable(!DD_SOLDIER_SELECT_IS_FREE_ACTION); 
-}
 simulated function DD_DEPLOY_IS_FREE_ACTION_ChangeHandler(MCM_API_Setting _Setting, bool _SettingValue)
 {
 	`AMLOG("Running");
@@ -115,8 +102,6 @@ simulated function LoadSavedSettings()
 {
 	DEPLOY_CAST_RANGE_TILES = `GETMCMVAR(DEPLOY_CAST_RANGE_TILES);
 	SQUAD_MUST_SEE_TILE = `GETMCMVAR(SQUAD_MUST_SEE_TILE);
-	DD_SOLDIER_SELECT_IS_FREE_ACTION = `GETMCMVAR(DD_SOLDIER_SELECT_IS_FREE_ACTION);
-	DD_SOLDIER_SELECT_ENDS_TURN = `GETMCMVAR(DD_SOLDIER_SELECT_ENDS_TURN);
 	DD_DEPLOY_IS_FREE_ACTION = `GETMCMVAR(DD_DEPLOY_IS_FREE_ACTION);
 	DD_DEPLOY_ENDS_TURN = `GETMCMVAR(DD_DEPLOY_ENDS_TURN);
 	DEBUG_LOGGING = `GETMCMVAR(DEBUG_LOGGING);
@@ -130,8 +115,6 @@ simulated function ResetButtonClicked(MCM_API_SettingsPage Page)
 {
 	`MCM_API_AutoReset(SQUAD_MUST_SEE_TILE);
 	`MCM_API_AutoReset(DEPLOY_CAST_RANGE_TILES);
-	`MCM_API_AutoReset(DD_SOLDIER_SELECT_IS_FREE_ACTION);
-	`MCM_API_AutoReset(DD_SOLDIER_SELECT_ENDS_TURN);
 	`MCM_API_AutoReset(DD_DEPLOY_IS_FREE_ACTION);
 	`MCM_API_AutoReset(DD_DEPLOY_ENDS_TURN);
 	`MCM_API_AutoReset(DEBUG_LOGGING);
