@@ -296,6 +296,8 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 			DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 		}
 	}
+	if (DDObject == none)
+		return ELR_NoInterrupt;
 
 	// If units weren't deployed during the mission, readd them back to squad so they can participate in the Skyranger walkoff.
 	// Known issue: they don't have their HP from armor during the walkoff.
@@ -316,11 +318,9 @@ static private function EventListenerReturn OnCleanupTacticalMission(Object Even
 			//UnitState.EvacuateUnit(NewGameState);
 		}
 	}
-
-	if (DDObject != none)
-	{
-		DDObject.DeselectAllUnits();
-	}
+	
+	DDObject.DeselectAllUnits();
+	
 
 	//foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
 	//{
