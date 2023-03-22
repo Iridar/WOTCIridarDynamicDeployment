@@ -281,6 +281,15 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+	//LookAtTargetAction.BlockUntilFinished = true;
+	LookAtTargetAction.BlockUntilActorOnScreen = true;
+
+	//LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
+	//LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
+	//LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+	//LookAtTargetAction.BlockUntilFinished = false;
+
+	`AMLOG("Camera looks at location:" @ LookAtTargetAction.LookAtLocation);
 
 	// Firebrand voiceline
 	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
@@ -453,6 +462,8 @@ private function SkyrangerDeploymentVisualization(XComGameState VisualizeGameSta
 	LookAtTargetAction = X2Action_CameraLookAt(class'X2Action_CameraLookAt'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded));
 	LookAtTargetAction.LookAtLocation = AbilityContext.InputContext.TargetLocations[0];
 	LookAtTargetAction.LookAtDuration = 2.0f + UnitStates.Length;
+
+	`AMLOG("Camera looks at location:" @ LookAtTargetAction.LookAtLocation);
 	
 	WaitForEffect = class'X2Action_WaitForAbilityEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded);
 

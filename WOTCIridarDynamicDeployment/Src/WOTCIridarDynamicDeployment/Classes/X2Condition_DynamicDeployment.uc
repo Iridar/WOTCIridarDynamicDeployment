@@ -9,7 +9,24 @@ event name CallMeetsCondition(XComGameState_BaseObject kTarget)
 
 	return 'AA_Success'; 
 }
+static private function bool IsAnyUnitSelected()
+{
+	local XComGameState_DynamicDeployment DDObject;
 
+	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
+
+	`AMLOG(DDObject != none @ DDObject.IsAnyUnitSelected());
+
+	return DDObject != none && DDObject.IsAnyUnitSelected();
+}
+
+// This runs after OnPreMission(), so if there are any units to be deployed, they will be selected already.
+function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
+{
+	`AMLOG(IsAnyUnitSelected());
+	return IsAnyUnitSelected();
+}
+/*
 static private function bool IsAnyUnitMarked()
 {
 	local XComGameState_HeadquartersXCom	XComHQ;
@@ -20,11 +37,15 @@ static private function bool IsAnyUnitMarked()
 	History = `XCOMHISTORY;
 
 	XComHQ = XComGameState_HeadquartersXCom(History.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersXCom'));
+
+	`AMLOG("Running:" @ XComHQ != none);
 	foreach XComHQ.Squad(UnitRef)
 	{
 		UnitState = XComGameState_Unit(History.GetGameStateForObjectID(UnitRef.ObjectID));
 		if (UnitState == none)
 			continue;
+
+		`AMLOG("Looking a 
 
 		// This will check if the unit can be deployed on the current mission.
 		if (class'Help'.static.IsUnitMarkedForDynamicDeployment(UnitState, XComHQ.MissionRef.ObjectID))
@@ -33,18 +54,4 @@ static private function bool IsAnyUnitMarked()
 		}
 	}
 	return false;
-}
-
-static private function bool IsAnyUnitSelected()
-{
-	local XComGameState_DynamicDeployment DDObject;
-
-	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment', true));
-
-	return DDObject != none && DDObject.IsAnyUnitSelected();
-}
-
-function bool CanEverBeValid(XComGameState_Unit SourceUnit, bool bStrategyCheck)
-{
-	return IsAnyUnitMarked() && SourceUnit.GetSoldierRank() >= `GetConfigInt("IRI_DD_MinRank");
-}
+}*/
