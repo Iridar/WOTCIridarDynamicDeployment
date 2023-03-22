@@ -6,6 +6,7 @@ static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
+	Templates.AddItem(IRI_DynamicDeployment());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Spark());
 	Templates.AddItem(IRI_DynamicDeployment_Deploy_Uplink());
@@ -19,6 +20,33 @@ static function array<X2DataTemplate> CreateTemplates()
 	Templates.AddItem(PurePassive('IRI_DDUnlock_HitGroundRunning_Passive', "img:///IRIDynamicDeployment_UI.UIPerk_HitGroundRunning",, 'eAbilitySource_Commander'));
 
 	return Templates;
+}
+
+static private function X2AbilityTemplate IRI_DynamicDeployment()
+{
+	local X2AbilityTemplate				Template;
+	local X2Effect_PersistentStatChange	StatChange;
+
+	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment');
+
+	// Icon Setup
+	Template.IconImage = "img:///IRIDynamicDeployment_UI.UIPerk_HitGroundRunning";
+	Template.AbilitySourceName = 'eAbilitySource_Commander';
+	SetHidden(Template);
+
+	Template.AbilityTriggers.AddItem(new class'X2AbilityTrigger_Placeholder');
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+
+	// State and Vis
+	Template.Hostility = eHostility_Neutral;
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy');
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
+	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Uplink');
+	
+	return Template;
 }
 
 static private function X2AbilityTemplate IRI_DDUnlock_HitGroundRunning()
@@ -238,9 +266,6 @@ static private function X2AbilityTemplate IRI_DynamicDeployment_Deploy()
 
 	Template.ConcealmentRule = eConceal_Never;
 	Template.SuperConcealmentLoss = 100;
-
-	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Spark');
-	Template.AdditionalAbilities.AddItem('IRI_DynamicDeployment_Deploy_Uplink');
 
 	return Template;
 }

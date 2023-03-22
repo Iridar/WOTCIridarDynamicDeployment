@@ -246,6 +246,7 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 	local XComGameState_Unit				UnitState;
 	local int								iNumUnit;
 	local X2Action_TimedWait				WaitAction;
+	local X2Action							WaitForEffect;	
 	local X2Action_TimedWait				GremlinWaitAction;
 	local vector							SpawnLocation;
 	local XComWorldData						World;
@@ -294,8 +295,14 @@ private function UndergroundDeploymentVisualization(XComGameState VisualizeGameS
 
 	`AMLOG("Camera looks at location:" @ LookAtTargetAction.LookAtLocation);
 
+	WaitForEffect = class'X2Action_WaitForAbilityEffect'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, ActionMetadata.LastActionAdded);
+
+	// Wait for the seismic beacon to do its thing
+	WaitAction = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitForEffect));
+	WaitAction.DelayTimeSec = 1.0f;
+
 	// Firebrand voiceline
-	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));
+	NarrativeAction = X2Action_PlayNarrative(class'X2Action_PlayNarrative'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, WaitAction));
 	NarrativeAction.Moment = XComNarrativeMoment(`CONTENT.RequestGameArchetype("X2NarrativeMoments.T_In_Drop_Position_Firebrande_O" $ Rand(5))); // [0;4]
 		
 	CameraArrive = X2Action_TimedWait(class'X2Action_TimedWait'.static.AddToVisualizationTree(ActionMetadata, AbilityContext, false, LookAtTargetAction));

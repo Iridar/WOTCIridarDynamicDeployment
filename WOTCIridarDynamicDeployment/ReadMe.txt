@@ -25,12 +25,8 @@ Known Issues:
 For the sake of compatibility with Infiltration mods, the mark that a soldier should by deployed Dynamically is tied to the specific mission ID they embark on, which means Dynamic Deployment will not be available on missions that have tactical-to-tactical transfers, such as Chosen Stronghold Assault.
 If units are marked for Dynamic Deployment, but are never actually deployed, they will not have their HP from armor during Skyranger walkoff. Cosmetic issue only.
 
-Seismic beacon needs a better effect and projectile trail
 
 
-Bug:
-Unable to find a perk weapon for IRI_DynamicDeploy_Deploy_Uplink redscreen when used by SPARK
-[0145.72] Warning: Warning, Material fx_cap_n_hold.M_Transmitter_Cyl missing bUsedWithParticleSprites=True!
 
 #Evacuating a unit or spawning an evac zone should put DD on cooldown of 1 turn.
 #Deploying units should put call evac, evac and deployment itself on a cooldown for 1 turn

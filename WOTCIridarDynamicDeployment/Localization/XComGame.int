@@ -1,6 +1,12 @@
 ; ---------------------------------------------------------------
 ;					SELECT AND DEPLOY
 
+
+[IRI_DynamicDeployment X2AbilityTemplate]
+LocFriendlyName="Dynamic Deployment"
+LocLongDescription="Designate a location to deploy the rest of the squad."
+LocHelpText="Designate a location to deploy the rest of the squad."
+
 [IRI_DynamicDeployment_Deploy X2AbilityTemplate]
 LocFriendlyName="Dynamic Deployment"
 LocLongDescriptionWhenConcealed = "Designate a location to deploy the rest of the squad. Will break squad concealment."

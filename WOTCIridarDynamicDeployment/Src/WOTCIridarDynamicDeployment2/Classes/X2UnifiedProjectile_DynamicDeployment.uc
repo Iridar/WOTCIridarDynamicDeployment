@@ -239,12 +239,15 @@ function FireProjectileInstance(int Index)
 		if (AbilityState.GetMyTemplate().bHideWeaponDuringFire)
 			SourceWeapon.Mesh.SetHidden(true);
 
-		tmpNode = XComAnimNodeBlendDynamic(CreateSkeletalMeshActor.SkeletalMeshComponent.Animations.FindAnimNode('BlendDynamic'));
-		if (tmpNode != none)
+		if (CreateSkeletalMeshActor.SkeletalMeshComponent.Animations != none)
 		{
-			AnimParams.AnimName = 'NO_Idle';
-			AnimParams.Looping = true;
-			tmpNode.PlayDynamicAnim(AnimParams);
+			tmpNode = XComAnimNodeBlendDynamic(CreateSkeletalMeshActor.SkeletalMeshComponent.Animations.FindAnimNode('BlendDynamic'));
+			if (tmpNode != none)
+			{
+				AnimParams.AnimName = 'NO_Idle';
+				AnimParams.Looping = true;
+				tmpNode.PlayDynamicAnim(AnimParams);
+			}
 		}
 	}
 

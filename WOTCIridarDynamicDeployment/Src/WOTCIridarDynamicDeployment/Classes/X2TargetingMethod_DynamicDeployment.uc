@@ -476,7 +476,10 @@ function Canceled()
 	AreaTiles.Length = 0;
 	DrawAOETiles(AreaTiles);
 	ReleaseAllPawns(); // In case some hotkey isn't caught by StagedCancel(), such as switching to another ability or something.
-	Pres.m_kTacticalHUD.Movie.Stack.UnsubscribeFromOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
+	if (Pres != none)
+	{
+		Pres.m_kTacticalHUD.Movie.Stack.UnsubscribeFromOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
+	}
 	if (LookatCamera != none)
 	{
 		`CAMERASTACK.RemoveCamera(LookatCamera);
