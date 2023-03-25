@@ -16,6 +16,10 @@ var private XComGameStateHistory			History;
 var private X2EventManager					EventMgr;
 var private int								NumRepeatedClicks;
 
+var delegate<OnClickedDelegate> OnLaunchMissionClickedOriginal;
+
+delegate OnClickedDelegate(UIButton Button);
+
 // ================================= INIT DATA ==============================================
 
 simulated function InitScreen(XComPlayerController InitController, UIMovie InitMovie, optional name InitName)
@@ -136,27 +140,11 @@ protected function OnSoldierClicked(StateObjectReference UnitRef)
 
 protected function OnConfirmButtonClicked(UIButton Button)
 {	
-	local UILargeButton DummyButton;
-	local UISquadSelect SquadSelect;
-
 	CloseScreen();
 
-	SquadSelect = UISquadSelect(Button.Movie.Pres.ScreenStack.GetFirstInstanceOf(class'UISquadSelect'));
-	if (SquadSelect == none)
-	{
-		`LOG("CRITICAL ERROR :: FAILED TO FIND SQUAD SELECT! CANNOT LAUNCH MISSION!",, 'WOTCIridarDynamicDeployment');
-		`LOG("Disable this mod and try again.",, 'WOTCIridarDynamicDeployment');
-		return;
-	}
-	
-	DummyButton = UILargeButton(SquadSelect.LaunchButton.GetChildByName('IRI_DD_DummyLaunchButton', true));
-	if (DummyButton == none)
-	{
-		`LOG("CRITICAL ERROR :: FAILED TO FIND DUMMY BUTTON! CANNOT LAUNCH MISSION!",, 'WOTCIridarDynamicDeployment');
-		`LOG("Disable this mod and try again.",, 'WOTCIridarDynamicDeployment');
-		return;
-	}
-	DummyButton.OnClickedDelegate(Button);
+	`AMLOG("Running:" @ string(OnLaunchMissionClickedOriginal));
+
+	OnLaunchMissionClickedOriginal(Button);
 }
 
 // ================================= CANCEL ==============================================

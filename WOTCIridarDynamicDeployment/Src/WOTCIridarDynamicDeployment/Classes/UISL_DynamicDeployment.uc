@@ -262,27 +262,22 @@ static final function UnmarkOneSoldier()
 // Add an intermediate step of showing a UIScreen with the squad so the player can select units that will remain in Skyranger for DD.
 static private function PatchLaunchMissionButton(UISquadSelect SquadSelect)
 {	
-	local UILargeButton DummyButton;
+	local UIPanel_DD_Dummy DummyPanel;
 
 	if (SquadSelect.LaunchButton.GetChildByName('IRI_DD_DummyLaunchButton', false) != none)
 		return;
-		
-	DummyButton = SquadSelect.LaunchButton.Spawn(class'UILargeButton', SquadSelect.LaunchButton);
-	DummyButton.InitPanel('IRI_DD_DummyLaunchButton');
-	DummyButton.OnClickedDelegate = SquadSelect.LaunchButton.OnClickedDelegate;
-	SquadSelect.LaunchButton.OnClickedDelegate = OnLaunchMissionClicked;
-	DummyButton.Hide();
-	DummyButton.SetPosition(-100, -100);
-}
-static private function OnLaunchMissionClicked(UIButton Button)
-{
-	local UIChooseUnits ChooseUnits;
-	local XComPresentationLayerBase Pres;
 
-	Pres = Button.Movie.Pres;
-	ChooseUnits = Pres.Spawn(class'UIChooseUnits', Pres);
-	Pres.ScreenStack.Push(ChooseUnits);
+	DummyPanel = SquadSelect.LaunchButton.Spawn(class'UIPanel_DD_Dummy', SquadSelect.LaunchButton);
+	DummyPanel.InitPanel('IRI_DD_DummyPanel');
+	DummyPanel.Hide();
+	DummyPanel.SetPosition(-100, -100);
+
+	`AMLOG("Replacing:" @ string(SquadSelect.LaunchButton.OnClickedDelegate) @ "with" @ string(DummyPanel.OnLaunchMissionClicked));
+
+	DummyPanel.OnClickedOriginal = SquadSelect.LaunchButton.OnClickedDelegate;
+	SquadSelect.LaunchButton.OnClickedDelegate = DummyPanel.OnLaunchMissionClicked;
 }
+
 
 
 private function SSUpdateActor GetOrCreateActor()

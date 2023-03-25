@@ -135,6 +135,9 @@
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIMechaListItem_ClickToggleCheckbox.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UIPanel_DD_Dummy.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarDynamicDeployment\Classes\UISL_DynamicDeployment.uc">
       <SubType>Content</SubType>
     </Content>
