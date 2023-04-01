@@ -1,0 +1,85 @@
+; ---------------------------------------------------------------
+;					DEPLOY
+
+
+[IRI_DynamicDeployment X2AbilityTemplate]
+LocFriendlyName="Быстрая высадка"
+LocLongDescription="Обозначьте место высадки остального отряда."
+LocHelpText="Обозначьте место высадки остального отряда."
+
+[IRI_DynamicDeployment_Deploy X2AbilityTemplate]
+LocFriendlyName="Быстрая высадка"
+LocLongDescriptionWhenConcealed = "Обозначьте место высадки остального отряда. Общая скрытность будет потеряна."
+LocLongDescription="Обозначьте место высадки остального отряда."
+LocHelpText="Обозначьте место высадки остального отряда."
+LocFlyOverText="Быстрая высадка"
+
+[IRI_DynamicDeployment_Deploy_Spark X2AbilityTemplate]
+LocFriendlyName="Быстрая высадка"
+LocLongDescriptionWhenConcealed = "Обозначьте место высадки остального отряда. Общая скрытность будет потеряна."
+LocLongDescription="Обозначьте место высадки остального отряда."
+LocHelpText="Обозначьте место высадки остального отряда."
+LocFlyOverText="Быстрая высадка"
+
+[IRI_DynamicDeployment_Deploy_Uplink X2AbilityTemplate]
+LocFriendlyName="Быстрая высадка"
+LocLongDescriptionWhenConcealed = "С помощью цифрового канала связи обозначьте место высадки остального отряда. Общая скрытность не будет потеряна."
+LocLongDescription="С помощью цифрового канала связи обозначьте место высадки остального отряда."
+LocHelpText="С помощью цифрового канала связи обозначьте место высадки остального отряда."
+LocFlyOverText="Быстрая высадка"
+
+; ---------------------------------------------------------------
+;					GTS UNLOCK
+
+[IRI_DynamicDeployment_GTS_Unlock X2SoldierAbilityUnlockTemplate]
+DisplayName = "Быстрая высадка"
+Summary = "Тренируйте группы своих бойцов, чтобы они освоили Быструю высадку - технику, позволяющую десантировать на поле боя часть отряда уже после того, как миссия началась."
+
+; ---------------------------------------------------------------
+;					DD UNLOCKS
+
+[IRI_DDUnlock_PrecisionDrop X2AbilityTemplate]
+LocFriendlyName="Направленная высадка"
+LocLongDescription="Этот боец сможет более точно выбрать место для Быстрой высадки в зоне десантирования."
+LocHelpText="Этот боец сможет более точно выбрать место для Быстрой высадки в зоне десантирования."
+
+[IRI_DDUnlock_AerialScout X2AbilityTemplate]
+LocFriendlyName="Разведка с воздуха"
+LocLongDescription="Боец дополнительно открывает <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> клеток неисследованной территории при Быстрой высадке; зона увеличивается, если бойцов с такой способностью несколько. Не работает в подземельях."
+LocHelpText="Боец дополнительно открывает <Ability:IRI_DD_AerialScout_PerUnitRadius_Tiles/> клеток неисследованной территории при Быстрой высадке; зона увеличивается, если бойцов с такой способностью несколько. Не работает в подземельях."
+
+[IRI_DDUnlock_TakeAndHold X2AbilityTemplate]
+LocFriendlyName="Занять позицию"
+LocLongDescription="После Быстрой высадки этот боец получает +<Ability:IRI_DD_TakeAndHold_AimBonus/> к меткости и +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> к защите на <Ability:IRI_DD_TakeAndHold_DurationTurns/> ход(а), или до того, как совершит рывок."
+LocHelpText="После Быстрой высадки этот боец получает +<Ability:IRI_DD_TakeAndHold_AimBonus/> к меткости и +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> к защите на <Ability:IRI_DD_TakeAndHold_DurationTurns/> ход(а), или до того, как совершит рывок."
+LocFlyOverText="Занять позицию"
+
+[IRI_DDUnlock_TakeAndHold_Passive X2AbilityTemplate]
+LocFriendlyName="Занять позицию"
+LocLongDescription="После Быстрой высадки этот боец получает +<Ability:IRI_DD_TakeAndHold_AimBonus/> к меткости и +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> к защите на <Ability:IRI_DD_TakeAndHold_DurationTurns/> ход(а), или до того, как совершит рывок."
+LocHelpText="После Быстрой высадки этот боец получает +<Ability:IRI_DD_TakeAndHold_AimBonus/> к меткости и +<Ability:IRI_DD_TakeAndHold_DefenseBonus/> к защите на <Ability:IRI_DD_TakeAndHold_DurationTurns/> ход(а), или до того, как совершит рывок."
+
+[IRI_DDUnlock_HitGroundRunning X2AbilityTemplate]
+LocFriendlyName="С ходу за дело"
+LocLongDescription="После Быстрой высадки это боец получает +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> к мобильности до конца хода."
+LocHelpText="AПосле Быстрой высадки это боец получает +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> к мобильности до конца хода."
+LocFlyOverText="С ходу за дело"
+
+[IRI_DDUnlock_HitGroundRunning_Passive X2AbilityTemplate]
+LocFriendlyName="С ходу за дело"
+LocLongDescription="После Быстрой высадки это боец получает +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> к мобильности до конца хода."
+LocHelpText="После Быстрой высадки это боец получает +<Ability:IRI_DD_HitGroundRunning_MobilityBonus/> к мобильности до конца хода."
+
+
+[IRI_DDUnlock_DigitalUplink X2AbilityTemplate]
+LocFriendlyName="Цифровой канал связи"
+LocLongDescription="Боец способен вызвать подкрепления для Быстрой высадки без нарушения скрытности и с большего расстояния."
+LocHelpText="Боец способен вызвать подкрепления для Быстрой высадки без нарушения скрытности и с большего расстояния."
+LocFlyOverText="Цифровой канал связи"
+
+; ---------------------------------------------------------------
+;					SITREPS
+
+[IRI_DD_NoDeploymentSitRep X2SitRepTemplate]
+FriendlyName = "Нет зоны Быстрой высадки"
+Description = "На этой миссии Быстрая высадка недоступна."

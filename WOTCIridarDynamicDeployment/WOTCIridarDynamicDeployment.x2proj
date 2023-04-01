@@ -53,6 +53,12 @@
     <Content Include="Content\DDCIN_SkyrangerIntros_Spark.umap">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Localization\WOTCIridarDynamicDeployment.rus">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\XComGame.rus">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ModPreview.jpg" />
     <Content Include="ContentOptions.json" />
     <Content Include="Config\Base\XComEditor.ini" />
@@ -63,6 +69,9 @@
     <Content Include="Localization\XComGame.int" />
     <Content Include="Localization\WOTCIridarDynamicDeployment.int" />
     <Content Include="ReadMe.txt">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe_rus.txt">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\extra_globals.uci" />

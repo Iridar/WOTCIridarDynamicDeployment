@@ -63,6 +63,8 @@ Other than that, the mod should be compatible with anything and everything, incl
 [*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=2363075446][WOTC] Iridar's Template Master - Core[/url][/b] is required.
 [*][b][url=https://steamcommunity.com/sharedfiles/filedetails/?id=667104300][WotC] Mod Config Menu[/url][/b] is supported, but not a hard requirement.[/list]
 
+Safe to add to a campaign in progress.
+
 [h1]CONFIGURATION[/h1]
 
 The mod is highly configurable via Mod Config Menu and various configuration files in:
@@ -79,5 +81,7 @@ The mod is highly configurable via Mod Config Menu and various configuration fil
 
 Music in the video: Martin D'Alesio - Fortunate XCOM
 Voice acting in the video: Amphibibro 
+[b][url=https://www.patreon.com/posts/dynamic-mod-80516435]Development history blogpost[/url][/b]
+[b][url=https://github.com/Iridar/WOTCIridarDynamicDeployment]GitHub Repo[/url][/b]
 
 Please support me on [b][url=https://patreon.com/Iridar]Patreon[/url][/b] if you require tech support, have a suggestion for a feature, or simply wish to help me create more awesome mods.
