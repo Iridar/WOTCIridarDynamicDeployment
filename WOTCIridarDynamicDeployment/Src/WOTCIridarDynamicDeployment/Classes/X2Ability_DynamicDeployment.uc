@@ -24,8 +24,7 @@ static function array<X2DataTemplate> CreateTemplates()
 
 static private function X2AbilityTemplate IRI_DynamicDeployment()
 {
-	local X2AbilityTemplate				Template;
-	local X2Effect_PersistentStatChange	StatChange;
+	local X2AbilityTemplate Template;
 
 	`CREATE_X2ABILITY_TEMPLATE(Template, 'IRI_DynamicDeployment');
 
