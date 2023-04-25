@@ -7,6 +7,7 @@ class Help extends Object abstract;
 
 // Event triggered after Deployment is complete. 
 var privatewrite name DDEventName;
+var privatewrite name DDEventNameUnitSpawned;
 var privatewrite name DynamicDeploymentValue;
 var privatewrite name DynamicDeploymentByDefaultValue;
 
@@ -395,6 +396,7 @@ static final function string GetLocalizedString(const coerce string StringName)
 defaultproperties
 {
 	DDEventName = "IRI_DD_Triggered_Event"
+	DDEventNameUnitSpawned = "IRI_DD_Triggered_Event_UnitSpawned"
 	DynamicDeploymentValue = "IRI_DD_UnitMark_Value"
 	DynamicDeploymentByDefaultValue = "IRI_DD_UnitMark_Default_Value"
 }

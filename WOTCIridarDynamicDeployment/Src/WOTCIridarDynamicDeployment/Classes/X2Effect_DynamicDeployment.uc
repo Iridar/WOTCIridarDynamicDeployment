@@ -84,6 +84,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	
 		EventMgr.TriggerEvent('ObjectMoved', NewUnitState, NewUnitState, NewGameState);
 		EventMgr.TriggerEvent('UnitMoveFinished', NewUnitState, NewUnitState, NewGameState);
+		EventMgr.TriggerEvent(class'Help'.default.DDEventNameUnitSpawned, NewUnitState, NewEffectState, NewGameState);
 	}
 
 	class'Help'.static.PutSkyrangerOnCooldown(`GetConfigInt("IRI_DD_Skyranger_Shared_Cooldown"), NewGameState);
@@ -630,8 +631,51 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 	// For some reason X2Action_RevealAIBegin just times out in PlayMatinee(), which is native, so no good way to figure it out.
 	EventMgr.RegisterForEvent(EffectObj, 'ScamperBegin', OnScamperBegin, ELD_OnStateSubmitted,, ,, );	
 	EventMgr.RegisterForEvent(EffectObj, 'ScamperEnd', OnScamperBegin, ELD_OnStateSubmitted,, ,, );	
+	EventMgr.RegisterForEvent(EffectObj, class'Help'.default.DDEventNameUnitSpawned, OnUnitSpawned, ELD_OnStateSubmitted,, EffectObj,, );	
+	
 }
 
+// It seems that Ability Charges that want to read inventory items get them from history, before the Ammo Merge has happened.
+// So we reinit abilities after unit deployment game state has been submitted, so that e.g. Field Medic that gives more Medikit ammo
+// can properly affect Medical Protocol so it gets charges equal to medikit ammo.
+static private function EventListenerReturn OnUnitSpawned(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
+{
+	local XComGameState_Unit UnitState;
+	local XComGameState NewGameState;
+	local XComGameState_Ability AbilityState;
+	local StateObjectReference AbilityRef;
+	local X2AbilityTemplate AbilityTemplate;
+	local XComGameStateHistory History;
+
+	UnitState = XComGameState_Unit(EventData);
+	if (UnitState == none)
+		return ELR_NoInterrupt;
+
+	History = `XCOMHISTORY;
+
+	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Init abilities for unit:" @ UnitState.GetFullName());
+	UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
+
+	foreach UnitState.Abilities(AbilityRef)
+	{
+		AbilityState = XComGameState_Ability(History.GetGameStateForObjectID(AbilityRef.ObjectID));
+		if (AbilityState == none)
+			continue;
+
+		AbilityTemplate = AbilityState.GetMyTemplate();
+		if (AbilityTemplate == none || AbilityTemplate.AbilityCharges == none)
+			continue;
+
+		AbilityState = XComGameState_Ability(NewGameState.ModifyStateObject(AbilityState.Class, AbilityState.ObjectID));
+		AbilityTemplate.InitAbilityForUnit(AbilityState, UnitState, NewGameState);
+
+		`AMLOG("Init ability for unit:" @ AbilityTemplate.DataName @ UnitState.GetFullName());
+	}
+
+	`GAMERULES.SubmitGameState(NewGameState);
+
+	return ELR_NoInterrupt;
+}
 static private function EventListenerReturn OnScamperBegin(Object EventData, Object EventSource, XComGameState GameState, Name EventID, Object CallbackData)
 {
 	local XComGameState_AIGroup GroupState;
