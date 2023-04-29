@@ -175,6 +175,7 @@ static final function SavePrecisionDropTiles_SubmitGameState(const out array<XCo
 	NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("SavePrecisionDropTiles:" @ NewTiles.Length);
 	DDObject = XComGameState_DynamicDeployment(NewGameState.ModifyStateObject(DDObject.Class, DDObject.ObjectID));
 
+	DDObject.PrecisionDropTileStorages.Length = 0;
 	foreach PrecisionDropUnits(PrecisionDropUnit, Index)
 	{
 		PrecisionDropTileStorage.UnitObjectID = PrecisionDropUnit.ObjectID;
