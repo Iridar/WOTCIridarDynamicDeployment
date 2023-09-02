@@ -276,6 +276,43 @@ static private function PatchLaunchMissionButton(UISquadSelect SquadSelect)
 
 	DummyPanel.OnClickedOriginal = SquadSelect.LaunchButton.OnClickedDelegate;
 	SquadSelect.LaunchButton.OnClickedDelegate = DummyPanel.OnLaunchMissionClicked;
+	
+	if (`ISCONTROLLERACTIVE)
+	{
+		SquadSelect.Movie.Stack.SubscribeToOnInputForScreen(SquadSelect, OnSquadSelectInput);
+	}
+}
+
+simulated protected function bool OnSquadSelectInput(UIScreen Screen, int iInput, int ActionMask)
+{
+	local UISquadSelect SquadSelect;
+
+    if (!Screen.CheckInputIsReleaseOrDirectionRepeat(iInput, ActionMask))
+    {
+        return false;
+    }
+
+	SquadSelect = UISquadSelect(Screen);
+	if (SquadSelect == none)
+		return false;
+
+    switch (iInput)
+    {
+		case class'UIUtilities_Input'.const.FXS_BUTTON_X:
+			if(`XCOMHQ.AllSquads.Length < (SquadSelect.SquadCount - 1))
+			{
+				SquadSelect.OnNextSquad(SquadSelect.LaunchButton);
+			}
+			else
+			{
+				SquadSelect.LaunchButton.OnClickedDelegate(SquadSelect.LaunchButton);
+			}
+			return true;
+		default:
+			break;
+    }
+
+    return false;
 }
 
 

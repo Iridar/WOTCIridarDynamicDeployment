@@ -85,6 +85,34 @@ protected function CreateConfirmButton()
 	ConfirmButton.ShowBG(true);
 }
 
+simulated function bool OnUnrealCommand(int cmd, int arg)
+{
+	local bool bHandled;
+
+	if (!`ISCONTROLLERACTIVE)
+		return super.OnUnrealCommand(cmd, arg);
+
+	switch( cmd )
+	{
+		case class'UIUtilities_Input'.const.FXS_BUTTON_B:
+		case class'UIUtilities_Input'.const.FXS_KEY_ESCAPE:
+		case class'UIUtilities_Input'.const.FXS_R_MOUSE_DOWN:
+				CloseScreen();
+				Movie.Pres.PlayUISound(eSUISound_MenuClose);
+				bHandled = true;
+			break;
+
+		case class'UIUtilities_Input'.const.FXS_BUTTON_X:
+			OnConfirmButtonClicked(ConfirmButton);
+			bHandled = true;
+			break;
+		default:
+			break;
+	}
+
+	return bHandled || super.OnUnrealCommand(cmd, arg);
+}
+
 // ================================= UPDATE DATA ==============================================
 
 simulated function UpdateData()
