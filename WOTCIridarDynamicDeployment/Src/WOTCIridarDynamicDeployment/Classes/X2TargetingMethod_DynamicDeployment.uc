@@ -44,6 +44,13 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 	local XComGameState_DynamicDeployment	DDObject;
 	local XComContentManager				ContentMgr;
 
+	local XComGameStateHistory				History;
+	local XComWeapon						WeaponEntity;
+	local PrecomputedPathData				WeaponPrecomputedPathData;
+	local float TargetingRange;
+	local X2AbilityTarget_Cursor CursorTarget;
+	local X2AbilityTemplate AbilityTemplate;
+
 	DDObject = XComGameState_DynamicDeployment(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_DynamicDeployment'));
 	if (DDObject == none || !DDObject.bPendingDeployment)
 	{
@@ -82,7 +89,45 @@ function Init(AvailableAction InAction, int NewTargetIndex)
 		Pres.m_kTacticalHUD.Movie.Stack.SubscribeToOnInputForScreen(Pres.m_kTacticalHUD, OnTacticalHUDInput);
 	}
 
-	super.Init(InAction, NewTargetIndex);
+	// Unforutnately have to copy paste the super.Init() to avoid a none-access log warning 
+	// when this method is used by IRI_DynamicDeployment_Deploy_Uplink, which doesn't have a perk, making WeaponEntity = none.
+	//super.Init(InAction, NewTargetIndex);
+	super(X2TargetingMethod).Init(InAction, NewTargetIndex);
+
+	History = `XCOMHISTORY;
+
+	AssociatedPlayerState = XComGameState_Player(History.GetGameStateForObjectID(UnitState.ControllingPlayer.ObjectID));
+	if (AssociatedPlayerState == none)
+		return;
+
+	// determine our targeting range
+	AbilityTemplate = Ability.GetMyTemplate();
+	TargetingRange = Ability.GetAbilityCursorRangeMeters();
+
+	// lock the cursor to that range
+	Cursor = `Cursor;
+	Cursor.m_fMaxChainedDistance = `METERSTOUNITS(TargetingRange);
+
+	// set the cursor location to itself to make sure the chain distance updates
+	Cursor.CursorSetLocation(Cursor.GetCursorFeetLocation(), false, true); 
+
+	CursorTarget = X2AbilityTarget_Cursor(Ability.GetMyTemplate().AbilityTargetStyle);
+	if (CursorTarget != none)
+		bRestrictToSquadsightRange = CursorTarget.bRestrictToSquadsightRange;
+
+	GetGrenadeWeaponInfo(WeaponEntity, WeaponPrecomputedPathData);
+
+	if (WeaponEntity == none || WeaponEntity.m_kPawn == none)
+	{
+		WeaponEntity.m_kPawn = FiringUnit.GetPawn();
+	}
+
+	if (UseGrenadePath())
+	{
+		GrenadePath = `PRECOMPUTEDPATH;
+		GrenadePath.ClearOverrideTargetLocation(); // Clear this flag in case the grenade target location was locked.
+		GrenadePath.ActivatePath(WeaponEntity, FiringUnit.GetTeam(), WeaponPrecomputedPathData);
+	}
 }
 
 // #1. This runs first
@@ -526,10 +571,11 @@ function GetGrenadeWeaponInfo(out XComWeapon WeaponEntity, out PrecomputedPathDa
 			break;
 		}
 	}	
-	if (WeaponEntity == none)
-	{
-		`RedScreen("Unable to find a perk weapon for" @ Ability.GetMyTemplateName());
-	}
+	// This will always fire for IRI_DynamicDeployment_Deploy_Uplink, which doesn't have a perk at all.
+	//if (WeaponEntity == none)
+	//{
+	//	`RedScreen("Unable to find a perk weapon for" @ Ability.GetMyTemplateName());
+	//}
 
 	// WeaponPrecomputedPathData kept to default values, common for all grenades.
 }
